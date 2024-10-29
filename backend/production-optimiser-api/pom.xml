@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>it.polimi</groupId>
+    <artifactId>production-optimiser-api</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>production-optimiser-api</name>
+    <description>Core services of Production Optimiser exposed through a REST API interface</description>
+    <url/>
+
+    <packaging>jar</packaging>
+    <properties>
+        <java.version>21</java.version>
+        <testcontainers.version>1.20.3</testcontainers.version>
+        <start-class>it.polimi.productionoptimiserapi.ProductionOptimiserApiApplication</start-class>
+    </properties>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>giovanni-orciuolo</id>
+            <name>Giovanni Orciuolo</name>
+            <email>giovanni.orciuolo@mail.polimi.it</email>
+            <url>https://giovanni.orciuolo.it</url>
+            <organization>POLIMI</organization>
+            <organizationUrl>https://polimi.it</organizationUrl>
+            <roles>
+                <role>Architect</role>
+                <role>Developer</role>
+            </roles>
+            <timezone>Europe/Rome</timezone>
+            <properties>
+                <picUrl>https://www.fer.unizg.hr/images/50050061/giovanni_orciuolo.jpg</picUrl>
+            </properties>
+        </developer>
+        <developer>
+            <id>paula-salkovic</id>
+            <name>Paula Šalković</name>
+            <email>paula.salkovic@fer.hr</email>
+            <organization>FER</organization>
+            <organizationUrl>https://www.fer.unizg.hr/en</organizationUrl>
+            <roles>
+                <role>Database Management</role>
+                <role>Developer</role>
+            </roles>
+            <timezone>Europe/Rome</timezone>
+            <properties>
+                <picUrl>https://www.fer.unizg.hr/images/50050061/WhatsApp%20Image%202024-10-14%20at%205.06.46%20PM.jpeg</picUrl>
+            </properties>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <!-- MAIN DEPENDENCIES -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
+            <version>3.7.1</version>
+        </dependency>
+        <!-- -->
+
+        <!-- TEST ONLY DEPENDENCIES -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <!-- -->
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
