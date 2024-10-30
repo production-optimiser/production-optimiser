@@ -31,7 +31,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend
-        npm install
+        npm ci
 
     - name: Check formatting with Biome
       run: npx biome check  # Use 'npx biome format' to format files
