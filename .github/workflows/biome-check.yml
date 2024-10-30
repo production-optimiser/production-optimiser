@@ -1,0 +1,38 @@
+name: Check JS Code Formatting
+
+on:
+  push:
+    paths:
+      - backend/**
+    branches:
+      - develop
+      - main
+      
+  pull_request:
+    paths:
+      - backend/**
+    branches:
+      - main
+      - develop
+
+jobs:
+  check-format:
+    runs-on: production-optimiser
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '22'
+
+    - name: Change directory to project folder
+      run: cd frontend
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Check formatting with Biome
+      run: npx biome check  # Use 'npx biome format' to format files

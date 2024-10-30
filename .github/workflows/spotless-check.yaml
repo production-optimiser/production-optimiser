@@ -1,0 +1,35 @@
+name: Check Java Code Formatting
+
+on:
+  push:
+    paths:
+      - frontend/**
+    branches:
+      - develop
+      
+  pull_request:
+    paths:
+      - frontend/**
+    branches:
+      - main
+      - develop
+
+jobs:
+  check-format:
+    runs-on: production-optimiser
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Change directory to project folder
+      run: cd backend/production-optimiser-api  # Replace with your project's folder name
+
+    - name: Build and check formatting
+      run: mvn spotless:check
