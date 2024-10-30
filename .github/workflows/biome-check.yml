@@ -2,6 +2,7 @@ name: Check JS Code Formatting
 
 on:
   push:
+<<<<<<< HEAD
     paths:
       - backend/**
     branches:
@@ -14,6 +15,14 @@ on:
     branches:
       - main
       - develop
+=======
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - main
+>>>>>>> 14cb595 (Add code formattin checks and Frontend Dockerfile)
 
 jobs:
   check-format:
