@@ -31,8 +31,6 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend
-        ls -la
-        whoami
         npm install
 
     - name: Check formatting with Biome
