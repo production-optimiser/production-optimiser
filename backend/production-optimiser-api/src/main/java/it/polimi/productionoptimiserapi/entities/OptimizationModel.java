@@ -32,7 +32,7 @@ public class OptimizationModel extends BaseEntity {
 
     @Column
     @NotNull
-    private String api_url;
+    private String apiUrl;
 
     @ManyToMany(mappedBy = "availableOptimizationModels")
     @JsonBackReference
