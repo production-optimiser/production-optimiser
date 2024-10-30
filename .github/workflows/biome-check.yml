@@ -17,7 +17,7 @@ on:
 
 jobs:
   check-format:
-    runs-on: production-optimiser
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
