@@ -3,7 +3,8 @@ import ThemeProvider from './components/ThemeProvider'
 import LoginPage from './Pages/loginPage'
 
 import './App.css'
-import Layout from './app/Layout.tsx'
+
+import Layout from './Layouts/DashboardLayout.tsx'
 
 function App(): JSX.Element {
   return (
