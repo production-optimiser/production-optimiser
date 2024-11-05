@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import static it.polimi.productionoptimiserapi.config.Constants.DATETIME_FORMAT;
-//test check
+//test check 2
 @MappedSuperclass
 @AllArgsConstructor
 @NoArgsConstructor
