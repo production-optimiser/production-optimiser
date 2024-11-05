@@ -16,7 +16,7 @@ on:
       - develop
 
 jobs:
-  check-format:
+  check-js-format:
     runs-on: ubuntu-latest
     defaults:
       run:

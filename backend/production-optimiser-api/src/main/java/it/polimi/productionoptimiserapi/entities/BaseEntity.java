@@ -11,7 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-//test actions
+
 import static it.polimi.productionoptimiserapi.config.Constants.DATETIME_FORMAT;
 @MappedSuperclass
 @AllArgsConstructor
