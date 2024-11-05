@@ -44,7 +44,7 @@ const items = [
 
 export function AppSidebar() {
   return (
-     <Sidebar>
+     <Sidebar collapsible="offcanvas">
   <SidebarHeader>
     <SidebarMenu>
       <SidebarMenuItem>
