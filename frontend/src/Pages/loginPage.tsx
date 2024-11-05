@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TbBoxModel } from 'react-icons/tb';
-import ThemeToggle from '../components/ThemeToggle'; // Assuming you have this component
+import ThemeToggle from '../components/ThemeToggle'
+; // Assuming you have this component
 
 const LoginPage = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
