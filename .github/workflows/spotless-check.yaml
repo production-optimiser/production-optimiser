@@ -2,7 +2,6 @@ name: Check Java Code Formatting
 
 on:
   push:
-<<<<<<< HEAD
     paths:
       - frontend/**
     branches:
@@ -11,18 +10,13 @@ on:
   pull_request:
     paths:
       - frontend/**
-=======
-    branches:
-      - develop
-  pull_request:
->>>>>>> 14cb595 (Add code formattin checks and Frontend Dockerfile)
     branches:
       - main
       - develop
 
 jobs:
   check-format:
-    runs-on: production-optimiser
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code

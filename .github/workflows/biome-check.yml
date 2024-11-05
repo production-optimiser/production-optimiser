@@ -2,7 +2,6 @@ name: Check JS Code Formatting
 
 on:
   push:
-<<<<<<< HEAD
     paths:
       - backend/**
     branches:
@@ -15,18 +14,10 @@ on:
     branches:
       - main
       - develop
-=======
-    branches:
-      - develop
-      - main
-  pull_request:
-    branches:
-      - main
->>>>>>> 14cb595 (Add code formattin checks and Frontend Dockerfile)
 
 jobs:
   check-format:
-    runs-on: production-optimiser
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
@@ -37,11 +28,10 @@ jobs:
       with:
         node-version: '22'
 
-    - name: Change directory to project folder
-      run: cd frontend
-
     - name: Install dependencies
-      run: npm install
+      run: |
+        cd frontend
+        npm ci
 
     - name: Check formatting with Biome
       run: npx biome check  # Use 'npx biome format' to format files
