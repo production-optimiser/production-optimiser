@@ -1,4 +1,4 @@
-name: Check Java Code Formatting
+name: Java Unit Tests
 
 on:
   push:
@@ -30,5 +30,5 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    - name: Build and check formatting
+    - name: Run unit tests
       run: mvn test
