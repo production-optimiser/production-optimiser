@@ -72,6 +72,8 @@ jobs:
 
     - name: Maven package
       run: mvn package -DskipTests
+
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: production-optimiser-api-jar
