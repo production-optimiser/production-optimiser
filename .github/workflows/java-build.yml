@@ -139,7 +139,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: production-optimiser-api-jar
-          path: ./backend/production-optimiser-api/target
+          path: ./backend/production-optimiser-api
 
 #logic to bypass dockerhub one image rule - carefull
       - name: Extract repository name
@@ -160,12 +160,6 @@ jobs:
           echo "::set-output name=tags::${modified_tags[*]}"
         shell: bash
 #
-
-      - name: Debug
-        run: |
-          ls -la
-          ls -la ./backend/production-optimiser-api
-          ls -la ./backend/production-optimiser-api/target
 
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
