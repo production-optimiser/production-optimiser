@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: production_optimiser
+      POSTGRES_PASSWORD: production_optimiser
+      POSTGRES_DB: production_optimiser
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    restart: on-failure
