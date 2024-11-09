@@ -1,4 +1,4 @@
-name: Java Unit Tests
+name: Java Review
 
 on:
   push:
@@ -15,6 +15,24 @@ on:
       - develop
 
 jobs:
+  check-java-formatting:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/production-optimiser-api
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Build and check formatting
+      run: mvn spotless:check  
+
   run-unit-test:
     runs-on: ubuntu-latest
     defaults:
@@ -32,3 +50,4 @@ jobs:
 
     - name: Run unit tests
       run: mvn test
+    
