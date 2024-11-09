@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { PanelLeftIcon, ChevronRight } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { PanelLeftIcon, ChevronRight } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -11,7 +11,11 @@ interface AppLayoutProps {
 const MainContent: React.FC = () => {
   // Generate a grid of skeleton cards for the loading state
   const skeletonCards = Array(6).fill(null).map((_, i) => (
-    <div key={i} className="bg-card rounded-lg p-6">
+    <div 
+      // Using a more meaningful and unique key
+      key={`optimization-skeleton-${i}-${Date.now()}`} 
+      className="bg-card rounded-lg p-6"
+    >
       <Skeleton className="w-full h-48 mb-4" />
       <Skeleton className="w-3/4 h-4 mb-2" />
       <Skeleton className="w-1/2 h-4" />
@@ -26,6 +30,11 @@ const MainContent: React.FC = () => {
 };
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  // Optional: Add handler for sidebar toggle
+  const handleSidebarToggle = () => {
+    // Implement sidebar toggle logic here
+  };
+
   return (
     <div className="flex h-screen bg-background">
       {children}
@@ -34,15 +43,21 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {/* Header Navigation */}
         <header className="border-b">
           <div className="flex h-14 items-center px-4 gap-4">
-            <Button variant="ghost" size="icon" className="lg:hidden">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="lg:hidden"
+              onClick={handleSidebarToggle}
+              aria-label="Toggle sidebar"
+            >
               <PanelLeftIcon className="h-6 w-6" />
             </Button>
             
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>Your optimizations</span>
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
               <span className="text-foreground">New Optimization</span>
-            </div>
+            </nav>
           </div>
         </header>
 
