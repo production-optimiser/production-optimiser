@@ -1,9 +1,21 @@
 name: Java Build
 
 on:
-    push:
-        paths:
-        - backend/production-optimiser-api/**
+  push:
+    branches:
+      - main  # Trigger only on pushes to the main branch
+      - develop  # Also trigger on pushes to the develop branch
+    tags:
+      - '**'  # Trigger for any tag push
+    paths:
+      - backend/production-optimiser-api/**  # Trigger only if changes are made to files in this directory
+  pull_request:
+    branches:
+      - main  # Only trigger for pull requests targeting the main branch
+      - develop  # Also trigger for pull requests targeting the develop branch
+    paths:
+      - backend/production-optimiser-api/**  # Trigger only if files in this directory are changed
+
 
 jobs:
   check-java-formatting:
@@ -99,7 +111,6 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          draft: false
           files: "*.jar"
 
   push-to-docker-registry:
