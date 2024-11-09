@@ -44,5 +44,5 @@ jobs:
           context: .
           file: ./backend/production-optimiser-api/Dockerfile
           push: true
-          tags: "production-optimiser-api"
-          labels: "latest"
+          tags: "production-optimiser"
+          labels: "spring-api"
