@@ -1,4 +1,4 @@
-name: Check JS Code Formatting
+name: React Review
 
 on:
   push:
@@ -6,7 +6,6 @@ on:
       - frontend/**
     branches:
       - develop
-      - main
       
   pull_request:
     paths:
