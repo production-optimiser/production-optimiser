@@ -2,12 +2,13 @@
 
 This is the backend layer of Production Optimiser, which exposes a REST API interface to interact with internal services.
 
+
 ## Getting Started
 
 ### Prerequisites
 
 - [JDK 21](https://adoptium.net/temurin/releases/?version=21) installed on the system.
-    - Ensure that the `JAVA_HOME` environment variable points to the correct JDK version.
+  - Ensure that the `JAVA_HOME` environment variable points to the correct JDK version.
 - [PostgreSQL](https://www.postgresql.org/download/) installed and running on the system.
 
 Run the following SQL command on your PostgreSQL instance to create the database:
