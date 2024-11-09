@@ -77,7 +77,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: production-optimiser-api-jar
-        path: ./target/*.jar
+        path: ./backend/production-optimiser-api/target/*.jar
         retention-days: 1
         overwrite: true
 
