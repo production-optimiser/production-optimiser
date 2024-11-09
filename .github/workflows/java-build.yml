@@ -139,6 +139,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: production-optimiser-api-jar
+          path: ./backend/production-optimiser-api/target
 
 #logic to bypass dockerhub one image rule - carefull
       - name: Extract repository name
