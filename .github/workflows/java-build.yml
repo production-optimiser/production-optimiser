@@ -98,6 +98,7 @@ jobs:
 #todo include python api
   github-release:
     name: "Create GitHub Release"
+    permissions: write-all
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     needs: package
