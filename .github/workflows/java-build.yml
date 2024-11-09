@@ -80,6 +80,8 @@ jobs:
         path: ./backend/production-optimiser-api/target/*.jar
         retention-days: 1
         overwrite: true
+        if-no-files-found: error
+
 
 #todo include python api
   github-release:
