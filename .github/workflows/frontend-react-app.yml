@@ -1,4 +1,4 @@
-name: React Review
+name: Frontend React App
 
 on:
   push:

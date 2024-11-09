@@ -1,4 +1,4 @@
-name: Java Build
+name: Backend Spring Api
 
 on:
   push:
