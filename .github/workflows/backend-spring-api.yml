@@ -1,0 +1,171 @@
+name: Backend Spring Api
+
+on:
+  push:
+    branches:
+      - main  # Trigger only on pushes to the main branch
+      - develop  # Also trigger on pushes to the develop branch
+    tags:
+      - '**'  # Trigger for any tag push
+    paths:
+      - backend/production-optimiser-api/**  # Trigger only if changes are made to files in this directory
+  pull_request:
+    branches:
+      - main  # Only trigger for pull requests targeting the main branch
+      - develop  # Also trigger for pull requests targeting the develop branch
+    paths:
+      - backend/production-optimiser-api/**  # Trigger only if files in this directory are changed
+
+
+jobs:
+  check-java-formatting:
+    name: "Check Java formatting"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/production-optimiser-api
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and check formatting
+        run: mvn spotless:check
+
+  build-test:
+    name: "Build and test maven api"
+    runs-on: ubuntu-latest
+    needs: check-java-formatting
+    defaults:
+      run:
+        working-directory: ./backend/production-optimiser-api
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Maven build
+      run: mvn install -DskipTests
+
+    - name: Maven test
+      run: mvn surefire:test
+
+#todo include python api
+  package:
+    name: "Package maven api"
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build-test
+    defaults:
+      run:
+        working-directory: ./backend/production-optimiser-api
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Maven package
+      run: mvn package -DskipTests
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: production-optimiser-api-jar
+        path: ./backend/production-optimiser-api/target/*.jar
+        retention-days: 1
+        overwrite: true
+        if-no-files-found: error
+
+
+#todo include python api
+  github-release:
+    name: "Create GitHub Release"
+    permissions: write-all
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: package
+    steps:
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-optimiser-api-jar
+      - run: ls -la
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: "*.jar"
+
+  push-to-docker-registry:
+    name: "Push to Docker Registry"
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: github-release
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: theanko1412/home-server
+
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-optimiser-api-jar
+          path: ./backend/production-optimiser-api
+
+#logic to bypass dockerhub one image rule - carefull
+      - name: Extract repository name
+        id: repo
+        run: echo "::set-output name=repo::$(echo ${{ github.repository }} | cut -d'/' -f2)"
+        shell: bash
+
+      - name: Modify tags
+        id: modify-tags
+        run: |
+          IFS=',' read -ra tags <<< "${{ steps.meta.outputs.tags }}"
+          modified_tags=()
+          for tag in "${tags[@]}"; do
+            prefix=$(echo "$tag" | awk -F: '{print $1}')
+            version=$(echo "$tag" | awk -F: '{print $NF}')
+            modified_tags+=("$prefix:${{ steps.repo.outputs.repo }}-$version")
+          done
+          echo "::set-output name=tags::${modified_tags[*]}"
+        shell: bash
+#
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./backend/production-optimiser-api
+          file: ./backend/production-optimiser-api/Dockerfile
+          push: true
+          tags: ${{ steps.modify-tags.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

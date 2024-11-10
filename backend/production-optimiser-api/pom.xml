@@ -169,6 +169,7 @@
     </dependencies>
 
     <build>
+        <finalName>production-optimiser-api</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

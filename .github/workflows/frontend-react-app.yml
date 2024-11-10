@@ -1,10 +1,11 @@
-name: React Review
+name: Frontend React App
 
 on:
   push:
     paths:
       - frontend/**
     branches:
+      - main
       - develop
       
   pull_request:
@@ -22,16 +23,16 @@ jobs:
         working-directory: ./frontend
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: '22'
 
     - name: Install dependencies
       run: 
-        npm install
+        npm ci
 
     - name: Check formatting with Biome
-      run: npm run check  # Use 'npx biome format' to format files
+      run: npx biome ci
