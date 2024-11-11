@@ -4,29 +4,45 @@ import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        log.debug("Loading user details for email: {}", email);
+        
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        List<UserRole> roles = user.getRole() == UserRole.ADMIN ?
-                List.of(UserRole.ADMIN, UserRole.CUSTOMER) :
-                List.of(UserRole.CUSTOMER);
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        
+        // Add ROLE_ prefix to roles
+        if (user.getRole() == UserRole.ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+        }
 
-        return new org.springframework.security.core.userdetails
-                .User(email, user.getPassword(), roles.stream().map(userRole -> new SimpleGrantedAuthority(userRole.name())).toList());
+        log.debug("User found with roles: {}", authorities);
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                authorities
+        );
     }
 }
