@@ -10,7 +10,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: { //or whatever port you prefer
+  server: { // or whatever port you prefer
     hmr: {
       overlay: false
     }
