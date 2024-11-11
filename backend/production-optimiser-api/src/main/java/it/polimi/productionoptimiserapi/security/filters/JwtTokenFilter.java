@@ -26,55 +26,50 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
-    private final UserDetailsService userDetailsService;
-    private final JwtUtil jwtUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+  private final UserDetailsService userDetailsService;
+  private final JwtUtil jwtUtil;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
+    try {
+      String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-            if (header == null || !header.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+      if (header == null || !header.startsWith("Bearer ")) {
+        filterChain.doFilter(request, response);
+        return;
+      }
 
-            String token = header.substring(7);
+      String token = header.substring(7);
 
-            if (!jwtUtil.validate(token)) {
-                handleInvalidToken(response, "Invalid token");
-                return;
-            }
+      if (!jwtUtil.validate(token)) {
+        handleInvalidToken(response, "Invalid token");
+        return;
+      }
 
-            String email = jwtUtil.getEmail(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-            
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+      String email = jwtUtil.getEmail(token);
+      UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            log.error("Cannot set user authentication", e);
-            handleInvalidToken(response, e.getMessage());
-        }
+      UsernamePasswordAuthenticationToken authentication =
+          new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      filterChain.doFilter(request, response);
+    } catch (Exception e) {
+      log.error("Cannot set user authentication", e);
+      handleInvalidToken(response, e.getMessage());
     }
+  }
 
-    private void handleInvalidToken(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        
-        Map<String, String> error = Map.of(
-            "error", "Invalid token",
-            "message", message
-        );
-        
-        objectMapper.writeValue(response.getWriter(), error);
-    }
+  private void handleInvalidToken(HttpServletResponse response, String message) throws IOException {
+    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+    Map<String, String> error = Map.of("error", "Invalid token", "message", message);
+
+    objectMapper.writeValue(response.getWriter(), error);
+  }
 }
-

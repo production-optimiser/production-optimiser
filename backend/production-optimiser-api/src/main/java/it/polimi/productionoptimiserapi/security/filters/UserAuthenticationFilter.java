@@ -23,58 +23,57 @@ import java.util.Map;
 
 @Slf4j
 public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private final JwtUtil jwtUtil;
-    private final DaoAuthenticationProvider authenticationProvider;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+  private final JwtUtil jwtUtil;
+  private final DaoAuthenticationProvider authenticationProvider;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public UserAuthenticationFilter(JwtUtil jwtUtil, DaoAuthenticationProvider authenticationProvider) {
-        this.jwtUtil = jwtUtil;
-        this.authenticationProvider = authenticationProvider;
-    }
+  public UserAuthenticationFilter(
+      JwtUtil jwtUtil, DaoAuthenticationProvider authenticationProvider) {
+    this.jwtUtil = jwtUtil;
+    this.authenticationProvider = authenticationProvider;
+  }
 
-    @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) 
-            throws AuthenticationException {
-        try {
-            UserLoginDto loginDto = objectMapper.readValue(request.getReader(), UserLoginDto.class);
-            
-            UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
-                    loginDto.getEmail(),
-                    loginDto.getPassword()
-            );
-            
-            return authenticationProvider.authenticate(authRequest);
-        } catch (IOException e) {
-            throw new AuthenticationServiceException("Failed to parse authentication request", e);
-        }
-    }
+  @Override
+  public Authentication attemptAuthentication(
+      HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    try {
+      UserLoginDto loginDto = objectMapper.readValue(request.getReader(), UserLoginDto.class);
 
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, 
-                                          HttpServletResponse response, 
-                                          FilterChain chain, 
-                                          Authentication authResult) throws IOException {
-        String token = jwtUtil.generateToken(authResult);
-        
-        AuthenticationResponseDto responseDto = new AuthenticationResponseDto(token);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-        
-        objectMapper.writeValue(response.getWriter(), responseDto);
-    }
+      UsernamePasswordAuthenticationToken authRequest =
+          new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
 
-    @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, 
-                                            HttpServletResponse response, 
-                                            AuthenticationException failed) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        
-        Map<String, String> error = Map.of(
-            "error", "Authentication failed",
-            "message", failed.getMessage()
-        );
-        
-        objectMapper.writeValue(response.getWriter(), error);
+      return authenticationProvider.authenticate(authRequest);
+    } catch (IOException e) {
+      throw new AuthenticationServiceException("Failed to parse authentication request", e);
     }
+  }
+
+  @Override
+  protected void successfulAuthentication(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain chain,
+      Authentication authResult)
+      throws IOException {
+    String token = jwtUtil.generateToken(authResult);
+
+    AuthenticationResponseDto responseDto = new AuthenticationResponseDto(token);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+
+    objectMapper.writeValue(response.getWriter(), responseDto);
+  }
+
+  @Override
+  protected void unsuccessfulAuthentication(
+      HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
+      throws IOException {
+    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+    Map<String, String> error =
+        Map.of("error", "Authentication failed", "message", failed.getMessage());
+
+    objectMapper.writeValue(response.getWriter(), error);
+  }
 }

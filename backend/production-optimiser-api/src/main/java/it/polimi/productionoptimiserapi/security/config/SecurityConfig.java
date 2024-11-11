@@ -25,49 +25,52 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
-    private final JwtTokenFilter jwtTokenFilter;
+  private final JwtUtil jwtUtil;
+  private final UserDetailsService userDetailsService;
+  private final JwtTokenFilter jwtTokenFilter;
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public BCryptPasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder());
-        provider.setUserDetailsService(userDetailsService);
-        return provider;
-    }
+  @Bean
+  public DaoAuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setPasswordEncoder(passwordEncoder());
+    provider.setUserDetailsService(userDetailsService);
+    return provider;
+  }
 
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .authenticationProvider(authenticationProvider())
-                .build();
-    }
+  @Bean
+  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+    return http.getSharedObject(AuthenticationManagerBuilder.class)
+        .authenticationProvider(authenticationProvider())
+        .build();
+  }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        UserAuthenticationFilter userAuthenticationFilter = new UserAuthenticationFilter(
-                jwtUtil,
-                authenticationProvider()
-        );
-        userAuthenticationFilter.setFilterProcessesUrl(UrlConstants.LOGIN_URL);
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    UserAuthenticationFilter userAuthenticationFilter =
+        new UserAuthenticationFilter(jwtUtil, authenticationProvider());
+    userAuthenticationFilter.setFilterProcessesUrl(UrlConstants.LOGIN_URL);
 
-        http.cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(UrlConstants.LOGIN_URL).permitAll()
-                        .requestMatchers(UrlConstants.REGISTER_USER_URL).hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .addFilter(userAuthenticationFilter)
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+    http.cors(Customizer.withDefaults())
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers(UrlConstants.LOGIN_URL)
+                    .permitAll()
+                    .requestMatchers(UrlConstants.REGISTER_USER_URL)
+                    .hasRole("ADMIN")
+                    .anyRequest()
+                    .authenticated())
+        .addFilter(userAuthenticationFilter)
+        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+  }
 }
