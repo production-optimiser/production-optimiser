@@ -39,11 +39,12 @@ jobs:
           node-version: 22
           cache: 'npm'
       - name: Install dependencies
-        run: |
-          ls -la
+        run:
           npm ci
       - name: Build
         run: npm run build
+      - name: Check folder
+        run: ls -la
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
