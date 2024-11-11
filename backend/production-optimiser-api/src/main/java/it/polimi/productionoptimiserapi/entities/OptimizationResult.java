@@ -18,17 +18,17 @@ import org.hibernate.validator.constraints.Length;
 @Setter
 public class OptimizationResult extends BaseEntity {
 
-    @Column @Lob
-    @Basic(fetch = FetchType.EAGER)
-    private byte[] pltData;
+  @Column
+  @Lob
+  @Basic(fetch = FetchType.EAGER)
+  private byte[] pltData;
 
-    @Column(columnDefinition = "text")
-    @Length(max = 500)
-    private String notes;
+  @Column(columnDefinition = "text")
+  @Length(max = 500)
+  private String notes;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
-    private User user;
-
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  @JsonBackReference
+  private User user;
 }
