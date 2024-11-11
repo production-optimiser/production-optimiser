@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,24 +53,27 @@ public class RSAKeyUtil {
             keyPairGenerator.initialize(2048);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-            Path privateKeyFile = Paths.get(privateKeyPath);
-            Files.write(privateKeyFile, Base64.getEncoder().encode(keyPair.getPrivate().getEncoded()));
+            try (OutputStream privateOut = new FileOutputStream(getClass().getClassLoader()
+                    .getResource(privateKeyPath).getFile())) {
+                privateOut.write(Base64.getEncoder().encode(keyPair.getPrivate().getEncoded()));
+            }
 
-            Path publicKeyFile = Paths.get(publicKeyPath);
-            Files.write(publicKeyFile, Base64.getEncoder().encode(keyPair.getPublic().getEncoded()));
+            try (OutputStream publicOut = new FileOutputStream(getClass().getClassLoader()
+                    .getResource(publicKeyPath).getFile())) {
+                publicOut.write(Base64.getEncoder().encode(keyPair.getPublic().getEncoded()));
+            }
         } catch (NoSuchAlgorithmException e) {
-            // TODO handle exception 2
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to generate RSA keys: " + e.getMessage(), e);
         } catch (IOException e) {
-            // TODO handle exception 1
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to save keys: " + e.getMessage(), e);
         }
     }
 
     private RSAPrivateKey loadPrivateKey() {
-        Path path = Paths.get(privateKeyPath);
         try {
-            String key = new String(Files.readAllBytes(path));
+            String key = new String(getClass().getClassLoader()
+                    .getResourceAsStream(privateKeyPath)
+                    .readAllBytes());
             key = key.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "").replaceAll("\\s", "");
 
             byte[] keyBytes = Base64.getDecoder().decode(key);
@@ -77,35 +82,32 @@ public class RSAKeyUtil {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return (RSAPrivateKey) keyFactory.generatePrivate(spec);
         } catch (IOException e) {
-            // TODO handle exception 1
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to load private key: " + e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
-            // TODO handle exception 2
             throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
-            // TODO handle exception 3
             throw new RuntimeException(e);
         }
     }
 
     private RSAPublicKey loadPublicKey() {
-        Path path = Paths.get(publicKeyPath);
         try {
-            String key = new String(Files.readAllBytes(path));
+            String key = new String(getClass().getClassLoader()
+                    .getResourceAsStream(publicKeyPath)
+                    .readAllBytes());
             key = key.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replaceAll("\\s", "");
             byte[] keyBytes = Base64.getDecoder().decode(key);
             X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return (RSAPublicKey) keyFactory.generatePublic(spec);
         } catch (IOException e) {
-            // TODO handle exception 1
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to load public key: " + e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
-            // TODO handle exception 2
             throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
-            // TODO handle exception 3
             throw new RuntimeException(e);
         }
     }
+
+    //TODO fix exception handling
 }

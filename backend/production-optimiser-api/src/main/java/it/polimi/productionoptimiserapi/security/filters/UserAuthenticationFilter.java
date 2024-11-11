@@ -4,10 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDto;
 import it.polimi.productionoptimiserapi.security.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,10 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.BufferedReader;
 import java.io.IOException;
 
-@RequiredArgsConstructor
 public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final DaoAuthenticationProvider daoAuthenticationProvider;
+
+    public UserAuthenticationFilter(JwtUtil jwtUtil, DaoAuthenticationProvider daoAuthenticationProvider) {
+        this.jwtUtil = jwtUtil;
+        this.daoAuthenticationProvider = daoAuthenticationProvider;
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -39,7 +41,7 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult){
         String token = jwtUtil.generateToken(authResult);
         response.setHeader(HttpHeaders.AUTHORIZATION, token);
     }
