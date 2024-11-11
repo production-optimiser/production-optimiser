@@ -35,4 +35,4 @@ jobs:
         npm ci
 
     - name: Check formatting with Biome
-      run: npm biomeCI
+      run: npm run biomeCI
