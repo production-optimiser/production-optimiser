@@ -32,7 +32,7 @@ jobs:
 
     - name: Install dependencies
       run: 
-        npm i
+        npm ci
 
     - name: Check formatting with Biome
-      run: npx biome i
+      run: npx biome ci
