@@ -18,31 +18,31 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        log.debug("Loading user details for email: {}", email);
-        
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    log.debug("Loading user details for email: {}", email);
 
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        
-        // Add ROLE_ prefix to roles
-        if (user.getRole() == UserRole.ADMIN) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
-        } else {
-            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
-        }
+    User user =
+        userRepository
+            .findByEmail(email)
+            .orElseThrow(
+                () -> new UsernameNotFoundException("User not found with email: " + email));
 
-        log.debug("User found with roles: {}", authorities);
+    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                authorities
-        );
+    // Add ROLE_ prefix to roles
+    if (user.getRole() == UserRole.ADMIN) {
+      authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+      authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+    } else {
+      authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
     }
+
+    log.debug("User found with roles: {}", authorities);
+
+    return new org.springframework.security.core.userdetails.User(
+        user.getEmail(), user.getPassword(), authorities);
+  }
 }

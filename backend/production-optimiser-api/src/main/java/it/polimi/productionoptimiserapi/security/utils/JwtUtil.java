@@ -21,66 +21,61 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class JwtUtil {
-    private final RSAPrivateKey privateKey;
-    private final RSAPublicKey publicKey;
-    private Algorithm algorithm;
+  private final RSAPrivateKey privateKey;
+  private final RSAPublicKey publicKey;
+  private Algorithm algorithm;
 
-    @Value("${jwt.token-expiration}")
-    private Long tokenExpirationTime;
+  @Value("${jwt.token-expiration}")
+  private Long tokenExpirationTime;
 
-    @PostConstruct
-    public void init() {
-        this.algorithm = Algorithm.RSA256(publicKey, privateKey);
-        log.info("JWT algorithm initialized with RSA keys");
+  @PostConstruct
+  public void init() {
+    this.algorithm = Algorithm.RSA256(publicKey, privateKey);
+    log.info("JWT algorithm initialized with RSA keys");
+  }
+
+  public String generateToken(final Authentication authentication) {
+    String username = authentication.getName();
+    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+    List<String> roles = authorities.stream().map(GrantedAuthority::getAuthority).toList();
+
+    log.debug("Generating token for user: {} with roles: {}", username, roles);
+
+    return JWT.create()
+        .withSubject(username)
+        .withIssuer("production-optimiser")
+        .withIssuedAt(new Date())
+        .withExpiresAt(new Date(System.currentTimeMillis() + tokenExpirationTime))
+        .withClaim("roles", roles)
+        .sign(algorithm);
+  }
+
+  public boolean validate(String token) {
+    try {
+      JWT.require(algorithm).withIssuer("production-optimiser").build().verify(token);
+      log.debug("Token validation successful");
+      return true;
+    } catch (JWTVerificationException e) {
+      log.error("Token validation failed: {}", e.getMessage());
+      return false;
     }
+  }
 
-    public String generateToken(final Authentication authentication) {
-        String username = authentication.getName();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        
-        List<String> roles = authorities.stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-        
-        log.debug("Generating token for user: {} with roles: {}", username, roles);
+  public String getEmail(String token) {
+    return JWT.require(algorithm)
+        .withIssuer("production-optimiser")
+        .build()
+        .verify(token)
+        .getSubject();
+  }
 
-        return JWT.create()
-                .withSubject(username)
-                .withIssuer("production-optimiser")
-                .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + tokenExpirationTime))
-                .withClaim("roles", roles)
-                .sign(algorithm);
-    }
-
-    public boolean validate(String token) {
-        try {
-            JWT.require(algorithm)
-                .withIssuer("production-optimiser")
-                .build()
-                .verify(token);
-            log.debug("Token validation successful");
-            return true;
-        } catch (JWTVerificationException e) {
-            log.error("Token validation failed: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    public String getEmail(String token) {
-        return JWT.require(algorithm)
-                .withIssuer("production-optimiser")
-                .build()
-                .verify(token)
-                .getSubject();
-    }
-
-    public List<String> getRoles(String token) {
-        return JWT.require(algorithm)
-                .withIssuer("production-optimiser")
-                .build()
-                .verify(token)
-                .getClaim("roles")
-                .asList(String.class);
-    }
+  public List<String> getRoles(String token) {
+    return JWT.require(algorithm)
+        .withIssuer("production-optimiser")
+        .build()
+        .verify(token)
+        .getClaim("roles")
+        .asList(String.class);
+  }
 }

@@ -13,27 +13,27 @@ import java.security.interfaces.RSAPublicKey;
 @Configuration
 @Slf4j
 public class RSAKeyUtil {
-    private KeyPair keyPair;
+  private KeyPair keyPair;
 
-    public RSAKeyUtil() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            this.keyPair = keyPairGenerator.generateKeyPair();
-            log.info("RSA key pair generated successfully");
-        } catch (NoSuchAlgorithmException e) {
-            log.error("Failed to generate RSA key pair", e);
-            throw new RuntimeException("Failed to generate RSA key pair", e);
-        }
+  public RSAKeyUtil() {
+    try {
+      KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+      keyPairGenerator.initialize(2048);
+      this.keyPair = keyPairGenerator.generateKeyPair();
+      log.info("RSA key pair generated successfully");
+    } catch (NoSuchAlgorithmException e) {
+      log.error("Failed to generate RSA key pair", e);
+      throw new RuntimeException("Failed to generate RSA key pair", e);
     }
+  }
 
-    @Bean
-    public RSAPrivateKey getPrivateKey() {
-        return (RSAPrivateKey) keyPair.getPrivate();
-    }
+  @Bean
+  public RSAPrivateKey getPrivateKey() {
+    return (RSAPrivateKey) keyPair.getPrivate();
+  }
 
-    @Bean
-    public RSAPublicKey getPublicKey() {
-        return (RSAPublicKey) keyPair.getPublic();
-    }
+  @Bean
+  public RSAPublicKey getPublicKey() {
+    return (RSAPublicKey) keyPair.getPublic();
+  }
 }
