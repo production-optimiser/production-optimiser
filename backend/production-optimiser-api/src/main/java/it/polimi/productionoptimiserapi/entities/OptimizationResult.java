@@ -6,14 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 @Entity
 @Table(name = "optimization_results")
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 @Getter
 @Setter
 public class OptimizationResult extends BaseEntity {

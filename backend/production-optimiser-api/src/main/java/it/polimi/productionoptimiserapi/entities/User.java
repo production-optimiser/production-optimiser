@@ -10,14 +10,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @Entity
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 @Getter
 @Setter
 public class User extends BaseEntity {
@@ -33,7 +31,7 @@ public class User extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private UserRole role = UserRole.CUSTOMER;
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinTable(
       name = "users_optimization_models",
       joinColumns = @JoinColumn(name = "user_id"),
