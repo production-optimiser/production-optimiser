@@ -11,11 +11,11 @@ VALUES
 
 INSERT INTO optimization_models (id, name, created_at, updated_at, api_url)
 VALUES
-    ('550e8400-e29b-41d4-a716-446655440004', 'Model 1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/v1/optimization-models/550e8400-e29b-41d4-a716-446655440004'),
-    ('550e8400-e29b-41d4-a716-446655440005', 'Model 2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/v1/optimization-models/550e8400-e29b-41d4-a716-446655440005'),
-    ('550e8400-e29b-41d4-a716-446655440006', 'Model 3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/v1/optimization-models/550e8400-e29b-41d4-a716-446655440006'),
-    ('550e8400-e29b-41d4-a716-446655440007', 'Model 4', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/v1/optimization-models/550e8400-e29b-41d4-a716-446655440007'),
-    ('550e8400-e29b-41d4-a716-446655440008', 'Model 5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/v1/optimization-models/550e8400-e29b-41d4-a716-446655440008');
+    ('550e8400-e29b-41d4-a716-446655440004', 'Model 1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440004'),
+    ('550e8400-e29b-41d4-a716-446655440005', 'Model 2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440005'),
+    ('550e8400-e29b-41d4-a716-446655440006', 'Model 3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440006'),
+    ('550e8400-e29b-41d4-a716-446655440007', 'Model 4', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440007'),
+    ('550e8400-e29b-41d4-a716-446655440008', 'Model 5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440008');
 
 INSERT INTO optimization_results (id, created_at, updated_at, notes, plt_data, user_id)
 VALUES
