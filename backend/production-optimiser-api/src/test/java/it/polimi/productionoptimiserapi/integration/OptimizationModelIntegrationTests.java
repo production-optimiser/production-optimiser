@@ -17,7 +17,6 @@ import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
-
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
@@ -132,7 +131,8 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
     om = optimizationModelService.retireOptimizationModel(om.getId());
     assertEquals(om.getStatus(), OptimizationModelStatus.RETIRED);
 
-    Optional<OptimizationModel> oom = optimizationModelService.findOptimizationModelById(om.getId());
+    Optional<OptimizationModel> oom =
+        optimizationModelService.findOptimizationModelById(om.getId());
     assertTrue(oom.isEmpty());
 
     System.out.println(accessToken);

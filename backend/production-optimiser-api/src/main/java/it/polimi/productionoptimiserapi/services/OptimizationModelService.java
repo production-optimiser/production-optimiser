@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.services;
 
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
-
 import java.util.Optional;
 
 public interface OptimizationModelService {
