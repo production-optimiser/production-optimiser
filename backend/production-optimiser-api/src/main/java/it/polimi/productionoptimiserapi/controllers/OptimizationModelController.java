@@ -16,17 +16,23 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequestMapping("/api/models")
 public class OptimizationModelController {
 
-    private final OptimizationModelService optimizationModelService;
+  private final OptimizationModelService optimizationModelService;
 
-    public OptimizationModelController(OptimizationModelService optimizationModelService) {
-        this.optimizationModelService = optimizationModelService;
-    }
+  public OptimizationModelController(OptimizationModelService optimizationModelService) {
+    this.optimizationModelService = optimizationModelService;
+  }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<OptimizationModel> create(@Valid @RequestBody OptimizationModelDTO optimizationModelDTO) {
-        OptimizationModel om = this.optimizationModelService.saveOptimizationModel(optimizationModelDTO);
-        return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(om.getId()).toUri()).build();
-    }
-
+  @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<OptimizationModel> create(
+      @Valid @RequestBody OptimizationModelDTO optimizationModelDTO) {
+    OptimizationModel om =
+        this.optimizationModelService.saveOptimizationModel(optimizationModelDTO);
+    return ResponseEntity.created(
+            ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(om.getId())
+                .toUri())
+        .body(om);
+  }
 }
