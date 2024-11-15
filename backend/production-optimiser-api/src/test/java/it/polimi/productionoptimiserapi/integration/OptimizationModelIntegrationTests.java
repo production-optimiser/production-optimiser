@@ -117,6 +117,64 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
   }
 
   @Test
+  void givenCreatedModel_shouldGetById() {
+    OptimizationModelDTO optimizationModelDTO =
+        OptimizationModelDTO.builder()
+            .name("Test Model")
+            .apiUrl("http://localhost:5000/optimizer-tool")
+            .userIds(Set.of())
+            .build();
+
+    OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
+
+    given()
+        .headers("Authorization", "Bearer " + accessToken)
+        .when()
+        .get("/api/models/" + om.getId())
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body("name", equalTo(optimizationModelDTO.getName()));
+  }
+
+  @Test
+  void givenCreatedModel_customerShouldGetForbidden() {
+    OptimizationModelDTO optimizationModelDTO =
+        OptimizationModelDTO.builder()
+            .name("Test Model")
+            .apiUrl("http://localhost:5000/optimizer-tool")
+            .userIds(Set.of())
+            .build();
+
+    OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
+
+    userService.createUser(
+        UserDTO.builder()
+            .email("customer@potest.it")
+            .password("password!")
+            .role(UserRole.CUSTOMER)
+            .build());
+
+    UserLoginDTO userLoginDTO =
+        UserLoginDTO.builder().email("customer@potest.it").password("password!").build();
+
+    String customerAccessToken =
+        given()
+            .contentType(ContentType.JSON)
+            .body(userLoginDTO)
+            .when()
+            .post("/api/auth/login")
+            .jsonPath()
+            .getString("token");
+
+    given()
+        .headers("Authorization", "Bearer " + customerAccessToken)
+        .when()
+        .get("/api/models/" + om.getId())
+        .then()
+        .statusCode(HttpStatus.FORBIDDEN.value());
+  }
+
+  @Test
   void givenCreatedModel_shouldRetire() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
