@@ -15,35 +15,35 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class RestControllerExceptionHandler {
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorDetails handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
-        return new ErrorDetails(ex);
-    }
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorDetails handleMissingServletRequestParameterException(
+      MissingServletRequestParameterException ex) {
+    return new ErrorDetails(ex);
+  }
 
-    @ExceptionHandler(ForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorDetails handleOAuthException(ForbiddenException ex) {
-        return new ErrorDetails(ex);
-    }
+  @ExceptionHandler(ForbiddenException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ErrorDetails handleOAuthException(ForbiddenException ex) {
+    return new ErrorDetails(ex);
+  }
 
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorDetails handleValidationException(ValidationException ex) {
-        return new ErrorDetails(ex);
-    }
+  @ExceptionHandler(ValidationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorDetails handleValidationException(ValidationException ex) {
+    return new ErrorDetails(ex);
+  }
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorDetails handleEntityNotFoundException(EntityNotFoundException ex) {
-        return new ErrorDetails(ex);
-    }
+  @ExceptionHandler(EntityNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ErrorDetails handleEntityNotFoundException(EntityNotFoundException ex) {
+    return new ErrorDetails(ex);
+  }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public final ErrorDetails handleAllExceptions(Exception ex) {
-        log.error(ex.getMessage());
-        return new ErrorDetails(ex);
-    }
-
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public final ErrorDetails handleAllExceptions(Exception ex) {
+    log.error(ex.getMessage());
+    return new ErrorDetails(ex);
+  }
 }
