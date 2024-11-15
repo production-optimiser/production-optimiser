@@ -5,7 +5,7 @@ on:
     branches:
       - main  # Trigger only on pushes to the main branch
       - develop  # Also trigger on pushes to the develop branch
-      - *  # Trigger on pushes to any branch
+      - debuging-pipeline
     tags:
       - '**'  # Trigger for any tag push
     paths:
