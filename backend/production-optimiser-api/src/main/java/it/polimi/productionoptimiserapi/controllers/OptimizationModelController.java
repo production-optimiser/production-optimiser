@@ -7,13 +7,12 @@ import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import java.util.Objects;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/models")
@@ -41,10 +40,15 @@ public class OptimizationModelController {
 
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-  public ResponseEntity<OptimizationModel> getById(@PathVariable String id, @AuthenticationPrincipal User loggedUser) throws ForbiddenException {
-    OptimizationModel om = this.optimizationModelService.findOptimizationModelById(id).orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+  public ResponseEntity<OptimizationModel> getById(
+      @PathVariable String id, @AuthenticationPrincipal User loggedUser) throws ForbiddenException {
+    OptimizationModel om =
+        this.optimizationModelService
+            .findOptimizationModelById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
 
-    if (loggedUser.isCustomer() && om.getUsers().stream().noneMatch(u -> Objects.equals(u.getId(), loggedUser.getId()))) {
+    if (loggedUser.isCustomer()
+        && om.getUsers().stream().noneMatch(u -> Objects.equals(u.getId(), loggedUser.getId()))) {
       // User is a customer and this optimization model does not belong to them
       throw new ForbiddenException("This optimization model does not belong to you!");
     }
