@@ -5,12 +5,16 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @Entity
@@ -19,7 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
 
   @Column(unique = true)
   @NotNull
@@ -53,5 +57,48 @@ public class User extends BaseEntity {
 
   private void hashPassword() {
     this.password = BCrypt.hashpw(this.password, BCrypt.gensalt(12));
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+    // Add ROLE_ prefix to roles
+    if (role == UserRole.ADMIN) {
+      authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    } else {
+      authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+    }
+
+    return authorities;
+  }
+
+  @Override
+  public String getUsername() {
+    return email;
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return UserDetails.super.isAccountNonExpired();
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return UserDetails.super.isAccountNonLocked();
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return UserDetails.super.isCredentialsNonExpired();
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return UserDetails.super.isEnabled();
+  }
+
+  public boolean isCustomer() {
+    return role == UserRole.CUSTOMER;
   }
 }
