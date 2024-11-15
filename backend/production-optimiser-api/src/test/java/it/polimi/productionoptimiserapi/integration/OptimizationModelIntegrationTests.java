@@ -2,18 +2,27 @@ package it.polimi.productionoptimiserapi.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.http.ContentType;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
+import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
+import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
+import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
+import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
+
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,18 +36,6 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
-  @BeforeAll
-  static void beforeAll() {
-    postgres.start();
-  }
-
-  @AfterAll
-  static void afterAll() {
-    postgres.stop();
-  }
-
-  @Autowired private UserService userService;
-
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
@@ -50,8 +47,19 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
     super(repository);
   }
 
-  @Test
-  void shouldCreateOptimizationModel() {
+  @Autowired private UserRepository userRepository;
+
+  String accessToken;
+
+  @BeforeAll
+  static void beforeAll() {
+    postgres.start();
+  }
+
+  @BeforeEach
+  void beforeEach() {
+    userRepository.deleteAll();
+
     userService.createUser(
         UserDTO.builder()
             .email("admin@potest.it")
@@ -62,7 +70,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
     UserLoginDTO userLoginDTO =
         UserLoginDTO.builder().email("admin@potest.it").password("password!").build();
 
-    String accessToken =
+    accessToken =
         given()
             .contentType(ContentType.JSON)
             .body(userLoginDTO)
@@ -70,7 +78,19 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
             .post("/api/auth/login")
             .jsonPath()
             .getString("token");
+  }
 
+  @AfterAll
+  static void afterAll() {
+    postgres.stop();
+  }
+
+  @Autowired private UserService userService;
+
+  @Autowired private OptimizationModelService optimizationModelService;
+
+  @Test
+  void shouldCreateOptimizationModel() {
     User customer =
         userService.createUser(
             UserDTO.builder()
@@ -95,5 +115,33 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .then()
         .statusCode(HttpStatus.CREATED.value())
         .body("name", equalTo(optimizationModelDTO.getName()));
+  }
+
+  @Test
+  void givenCreatedModel_shouldRetire() {
+    OptimizationModelDTO optimizationModelDTO =
+        OptimizationModelDTO.builder()
+            .name("Test Model")
+            .apiUrl("http://localhost:5000/optimizer-tool")
+            .userIds(Set.of())
+            .build();
+
+    OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
+    assertEquals(om.getStatus(), OptimizationModelStatus.ACTIVE);
+
+    om = optimizationModelService.retireOptimizationModel(om.getId());
+    assertEquals(om.getStatus(), OptimizationModelStatus.RETIRED);
+
+    Optional<OptimizationModel> oom = optimizationModelService.findOptimizationModelById(om.getId());
+    assertTrue(oom.isEmpty());
+
+    System.out.println(accessToken);
+
+    given()
+        .headers("Authorization", "Bearer " + accessToken)
+        .when()
+        .get("/api/models/" + om.getId())
+        .then()
+        .statusCode(HttpStatus.NOT_FOUND.value());
   }
 }
