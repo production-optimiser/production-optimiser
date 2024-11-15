@@ -1,5 +1,6 @@
 package it.polimi.productionoptimiserapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import jakarta.persistence.*;
@@ -24,14 +25,15 @@ public class User extends BaseEntity {
   @NotNull
   private String email;
 
-  @Column @NotNull private String password;
+  @Column @NotNull @JsonIgnore private String password;
 
   @Column
   @NotNull
   @Enumerated(EnumType.STRING)
   private UserRole role = UserRole.CUSTOMER;
 
-  @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @ManyToMany(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinTable(
       name = "users_optimization_models",
       joinColumns = @JoinColumn(name = "user_id"),

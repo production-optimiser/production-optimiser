@@ -5,6 +5,5 @@ import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 
 public interface OptimizationModelService {
 
-    OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO);
-
+  OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO);
 }

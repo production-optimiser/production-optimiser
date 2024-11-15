@@ -34,7 +34,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     // Add ROLE_ prefix to roles
     if (user.getRole() == UserRole.ADMIN) {
       authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-      authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
     } else {
       authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
     }
