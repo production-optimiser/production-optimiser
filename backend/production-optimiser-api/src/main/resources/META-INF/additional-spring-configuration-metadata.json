@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "environment.test",
+      "type": "java.lang.String",
+      "description": "True if we are in a test environment."
+    }
+  ]
+}

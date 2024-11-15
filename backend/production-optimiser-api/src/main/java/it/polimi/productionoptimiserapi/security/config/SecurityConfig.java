@@ -62,7 +62,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers(UrlConstants.LOGIN_URL)
+                    .requestMatchers(
+                        UrlConstants.LOGIN_URL, UrlConstants.DOCS_URL, UrlConstants.SWAGGER_URL)
                     .permitAll()
                     .requestMatchers(UrlConstants.REGISTER_USER_URL)
                     .hasRole("ADMIN")
