@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class OptimisationResultDto {
+public class OptimizationResultDto {
 
   private String id;
-  private byte[] pltData;
+  private String base64PltData;
   private String notes;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;

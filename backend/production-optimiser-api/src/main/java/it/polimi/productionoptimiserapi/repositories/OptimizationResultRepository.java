@@ -1,15 +1,17 @@
 package it.polimi.productionoptimiserapi.repositories;
 
 import it.polimi.productionoptimiserapi.entities.OptimizationResult;
-import it.polimi.productionoptimiserapi.entities.User;
+
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-public interface OptimisationResultRepository extends JpaRepository<OptimizationResult, String> {
+@Repository
+public interface OptimizationResultRepository extends JpaRepository<OptimizationResult, String> {
 
   @Query("""
-            SELECT r from OptimisationResult r WHERE r.User = ?1
+            SELECT r from OptimizationResult r WHERE r.user.id = ?1
             """)
-  List<OptimizationResult> findByUser(User user);
+  List<OptimizationResult> findByUser(String user);
 }
