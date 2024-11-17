@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class OptimizationResultServiceImpl implements OptimizationResultService {
 
-  private final UserRepository userRepository;
   private final OptimizationResultRepository resultRepository;
 
   public List<OptimizationResultDto> getAllResults(String userId) {
