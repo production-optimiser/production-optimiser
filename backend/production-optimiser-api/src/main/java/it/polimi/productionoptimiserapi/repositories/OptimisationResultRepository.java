@@ -4,13 +4,11 @@ import it.polimi.productionoptimiserapi.entities.OptimizationResult;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public interface OptimizationResultRepository extends JpaRepository<OptimizationResult, String> {
+public interface OptimisationResultRepository extends JpaRepository<OptimizationResult, String> {
 
   @Query("""
-            SELECT r from OptimizationResult r WHERE r.user.id = ?1
+            SELECT r from OptimisationResult r WHERE r.User.id = ?1
             """)
-  List<OptimizationResult> findByUser(String user);
+  List<OptimizationResult> findByUser(String userId);
 }

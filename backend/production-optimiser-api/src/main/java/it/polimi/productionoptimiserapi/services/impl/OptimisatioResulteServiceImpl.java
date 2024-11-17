@@ -1,28 +1,24 @@
 package it.polimi.productionoptimiserapi.services.impl;
 
-import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
-import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
+import it.polimi.productionoptimiserapi.dto.OptimisationResultDto;
+import it.polimi.productionoptimiserapi.repositories.OptimisationResultRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
-import it.polimi.productionoptimiserapi.services.OptimizationResultService;
+import it.polimi.productionoptimiserapi.services.OptimisationResultService;
 import java.util.Base64;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
-@Service
-@Slf4j
-public class OptimizationResultServiceImpl implements OptimizationResultService {
+public class OptimisatioResulteServiceImpl implements OptimisationResultService {
 
   private final UserRepository userRepository;
-  private final OptimizationResultRepository resultRepository;
+  private final OptimisationResultRepository resultRepository;
 
-  public List<OptimizationResultDto> getAllResults(String userId) {
+  public List<OptimisationResultDto> getAllResults(String userId) {
     return resultRepository.findByUser(userId).stream()
         .map(
             result ->
-                new OptimizationResultDto(
+                new OptimisationResultDto(
                     result.getId(),
                     Base64.getEncoder().encodeToString(result.getPltData()),
                     result.getNotes(),
