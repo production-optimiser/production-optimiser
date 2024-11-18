@@ -8,9 +8,9 @@ interface ProtectedRouteProps {
   requiredRole?: Role;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requiredRole 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requiredRole,
 }) => {
   const { isAuthenticated, hasRole } = useAuth();
 

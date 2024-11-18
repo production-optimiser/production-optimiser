@@ -7,7 +7,10 @@ interface ProtectedRouteProps {
   requiredRole: Role;
 }
 
-export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+  children,
+  requiredRole,
+}: ProtectedRouteProps) => {
   const { isAuthenticated, hasRole } = useAuth();
 
   if (!isAuthenticated) {

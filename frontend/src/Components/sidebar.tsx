@@ -23,7 +23,7 @@ interface SidebarNavProps {
 }
 
 // Helper function to generate unique IDs
-const generateId = (prefix: string, value: string) => 
+const generateId = (prefix: string, value: string) =>
   `${prefix}-${value.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
 
 const defaultSections: TimeSection[] = [
@@ -31,39 +31,43 @@ const defaultSections: TimeSection[] = [
     id: 'today-section',
     title: 'Today',
     items: [
-      { 
+      {
         id: generateId('opt', 'Candy Optimization'),
-        title: 'Candy Optimization' 
+        title: 'Candy Optimization',
       },
-      { 
+      {
         id: generateId('opt', 'Plane engine optimization'),
-        title: 'Plane engine optimization' 
-      }
-    ]
+        title: 'Plane engine optimization',
+      },
+    ],
   },
   {
     id: 'last-7-days',
     title: 'Last 7 days',
-    items: Array(10).fill(null).map((_, index) => ({ 
-      id: generateId('opt', `Test optimization ${index}`),
-      title: 'Test optimization'
-    }))
+    items: Array(10)
+      .fill(null)
+      .map((_, index) => ({
+        id: generateId('opt', `Test optimization ${index}`),
+        title: 'Test optimization',
+      })),
   },
   {
     id: 'last-30-days',
     title: 'Last 30 days',
-    items: Array(5).fill(null).map((_, index) => ({ 
-      id: generateId('opt', `Older optimization ${index}`),
-      title: 'Older optimization',
-      isDisabled: true
-    }))
-  }
+    items: Array(5)
+      .fill(null)
+      .map((_, index) => ({
+        id: generateId('opt', `Older optimization ${index}`),
+        title: 'Older optimization',
+        isDisabled: true,
+      })),
+  },
 ];
 
 const SidebarNav: React.FC<SidebarNavProps> = ({
   modelName = 'Python 1',
   modelVersion = 'v3.4.2',
-  sections = defaultSections
+  sections = defaultSections,
 }) => {
   const handleModelSelect = () => {
     // Implement model selection logic here
@@ -72,8 +76,8 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   return (
     <Card className="w-64 h-screen">
       <div className="p-4 border-b">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="w-full justify-between"
           onClick={handleModelSelect}
           aria-label="Select model"
@@ -90,7 +94,7 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
           <ChevronDown className="w-4 h-4" aria-hidden="true" />
         </Button>
       </div>
-      
+
       <ScrollArea className="h-[calc(100vh-5rem)]">
         <nav aria-label="Optimization history" className="p-4">
           <div className="space-y-4">

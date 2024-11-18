@@ -15,11 +15,20 @@ export const DEMO_CREDENTIALS = {
 };
 
 // Helper function to validate demo credentials
-const isDemoCredential = (email: string, password: string): { role: string } | null => {
-  if (email === DEMO_CREDENTIALS.admin.email && password === DEMO_CREDENTIALS.admin.password) {
+const isDemoCredential = (
+  email: string,
+  password: string
+): { role: string } | null => {
+  if (
+    email === DEMO_CREDENTIALS.admin.email &&
+    password === DEMO_CREDENTIALS.admin.password
+  ) {
     return { role: 'ADMIN' };
   }
-  if (email === DEMO_CREDENTIALS.customer.email && password === DEMO_CREDENTIALS.customer.password) {
+  if (
+    email === DEMO_CREDENTIALS.customer.email &&
+    password === DEMO_CREDENTIALS.customer.password
+  ) {
     return { role: 'CUSTOMER' };
   }
   return null;
@@ -30,7 +39,9 @@ export const authService = {
     const demoRole = isDemoCredential(email, password);
 
     if (demoRole) {
-      console.log(`Logging in with demo credentials for role: ${demoRole.role}`);
+      console.log(
+        `Logging in with demo credentials for role: ${demoRole.role}`
+      );
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
@@ -44,7 +55,10 @@ export const authService = {
 
     try {
       console.log(`Attempting API login for: ${email}`);
-      const response = await axios.post(`${API_URL}/login`, { email, password });
+      const response = await axios.post(`${API_URL}/login`, {
+        email,
+        password,
+      });
       if (response.data?.token) {
         localStorage.setItem('token', response.data.token);
       }
@@ -63,4 +77,3 @@ export const authService = {
     localStorage.removeItem('token');
   },
 };
-
