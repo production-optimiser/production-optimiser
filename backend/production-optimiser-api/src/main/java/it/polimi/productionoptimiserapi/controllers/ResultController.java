@@ -13,16 +13,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/api/results")
 @RequiredArgsConstructor
 public class ResultController {
   private final OptimizationResultService resultService;
 
-  @GetMapping("/api/results")
+  @GetMapping
   public List<OptimizationResultDto> getAllResults(@RequestParam String userId) {
     return resultService.getAllResults(userId);
   }
 
-  @GetMapping("/api/results/dummy")
+  @GetMapping("/dummy")
   public ResponseEntity<String> getDummyResult() {
     try {
       // Path to the JSON file, e.g., in src/main/resources or any other path
