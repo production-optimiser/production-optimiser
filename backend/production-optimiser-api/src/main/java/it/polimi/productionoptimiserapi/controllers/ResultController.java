@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.controllers;
 
 import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,7 +26,8 @@ public class ResultController {
   public ResponseEntity<String> getDummyResult() {
     try {
       // Path to the JSON file, e.g., in src/main/resources or any other path
-      String filePath = "src/main/resources/dummy_results/result.json"; // Adjust this path as needed
+      String filePath =
+          "src/main/resources/dummy_results/result.json"; // Adjust this path as needed
 
       // Read the file content as a String
       String jsonContent = new String(Files.readAllBytes(Paths.get(filePath)));
