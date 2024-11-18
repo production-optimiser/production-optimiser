@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import ThemeProvider from './Components/ThemeProvider'
+import ThemeProvider from './components/ThemeProvider'
 import LoginPage from './Pages/loginPage'
 import './App.css'
 import Layout from './Layouts/DashboardLayout'
