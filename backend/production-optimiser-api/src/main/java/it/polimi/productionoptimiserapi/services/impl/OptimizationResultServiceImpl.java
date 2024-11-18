@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.services.impl;
 
 import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
-import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
 import java.util.Base64;
 import java.util.List;
