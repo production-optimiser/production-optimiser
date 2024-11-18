@@ -5,3 +5,11 @@ export interface User {
   email: string;
   roles: Role[];
 }
+
+export interface LoginPageProps {
+  onContactClick: () => void;
+}
+
+export interface ContactFormProps {
+  onBackClick: () => void;
+}
