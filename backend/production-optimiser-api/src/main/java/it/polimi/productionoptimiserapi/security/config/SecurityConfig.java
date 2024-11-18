@@ -67,7 +67,7 @@ public class SecurityConfig {
                     .requestMatchers(UrlConstants.REGISTER_USER_URL)
                     .hasRole("ADMIN")
                     .anyRequest()
-                    .authenticated())
+                    .permitAll())
         .addFilter(userAuthenticationFilter)
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
