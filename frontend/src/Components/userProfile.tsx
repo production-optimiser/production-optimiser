@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 
 interface UserProfileProps {
   name: string;
@@ -7,7 +7,11 @@ interface UserProfileProps {
   imageUrl?: string;
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({ name, email, imageUrl }) => {
+export const UserProfile: React.FC<UserProfileProps> = ({
+  name,
+  email,
+  imageUrl,
+}) => {
   return (
     <div className="flex items-center gap-3 p-4 hover:bg-gray-100 rounded-lg cursor-pointer">
       <Avatar>

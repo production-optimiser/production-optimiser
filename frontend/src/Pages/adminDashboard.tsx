@@ -6,16 +6,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/Components/ui/table";
+} from '@/Components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/Components/ui/dialog";
-import { Button } from "@/Components/ui/button";
-import { Input } from "@/Components/ui/input";
-import { Checkbox } from "@/Components/ui/checkbox";
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Checkbox } from '@/Components/ui/checkbox';
 import SidebarNav from '../Components/sidebar';
 import { UserProfile } from '../components/UserProfile';
 
@@ -34,17 +34,17 @@ const AdminSidebarContent = () => {
       items: [
         {
           id: 'manage-users',
-          title: 'Manage Current Users'
+          title: 'Manage Current Users',
         },
         {
           id: 'model-assignment',
-          title: 'Model Assignment'
+          title: 'Model Assignment',
         },
         {
           id: 'account-requests',
-          title: 'Account Requests'
-        }
-      ]
+          title: 'Account Requests',
+        },
+      ],
     },
     {
       id: 'model-management',
@@ -52,27 +52,21 @@ const AdminSidebarContent = () => {
       items: [
         {
           id: 'manage-models',
-          title: 'Manage Models'
-        }
-      ]
-    }
+          title: 'Manage Models',
+        },
+      ],
+    },
   ];
 
   return (
     <div className="h-screen border-r flex flex-col">
       {/* Sidebar Navigation */}
       <div className="flex-grow">
-        <SidebarNav 
-          modelName="Admin Panel" 
-          sections={sections} 
-        />
+        <SidebarNav modelName="Admin Panel" sections={sections} />
       </div>
       {/* User Profile at the bottom */}
       <div className="border-t mt-auto">
-        <UserProfile
-          name="Admin1"
-          email="m@example.com"
-        />
+        <UserProfile name="Admin1" email="m@example.com" />
       </div>
     </div>
   );
@@ -82,23 +76,23 @@ const AdminDashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [models] = useState<Model[]>([
     {
-      id: "851be781-5493-4ea4-95a5-62e87bd5c7f0",
-      name: "Model 1",
-      url: "model1-python-docker.com",
-      createdAt: "11/11/2024 10:54"
+      id: '851be781-5493-4ea4-95a5-62e87bd5c7f0',
+      name: 'Model 1',
+      url: 'model1-python-docker.com',
+      createdAt: '11/11/2024 10:54',
     },
     {
-      id: "852be781-5493-4ea4-95a5-62e87bd5c7f0",
-      name: "Model 2",
-      url: "model2-python-docker.com",
-      createdAt: "11/11/2024 10:54"
+      id: '852be781-5493-4ea4-95a5-62e87bd5c7f0',
+      name: 'Model 2',
+      url: 'model2-python-docker.com',
+      createdAt: '11/11/2024 10:54',
     },
     {
-      id: "853be781-5493-4ea4-95a5-62e87bd5c7f0",
-      name: "Model 3",
-      url: "model3-python-docker.com",
-      createdAt: "11/11/2024 10:54"
-    }
+      id: '853be781-5493-4ea4-95a5-62e87bd5c7f0',
+      name: 'Model 3',
+      url: 'model3-python-docker.com',
+      createdAt: '11/11/2024 10:54',
+    },
   ]);
 
   return (
@@ -111,10 +105,7 @@ const AdminDashboard = () => {
           <h1 className="text-2xl font-bold">Manage Models</h1>
         </div>
 
-        <Input 
-          className="max-w-sm mb-6" 
-          placeholder="Filter names..."
-        />
+        <Input className="max-w-sm mb-6" placeholder="Filter names..." />
 
         <Table>
           <TableHeader>
@@ -150,7 +141,7 @@ const AdminDashboard = () => {
         </Table>
 
         <div className="mt-4 flex justify-between">
-          <Button 
+          <Button
             onClick={() => setIsDialogOpen(true)}
             className="bg-amber-600 hover:bg-amber-700"
           >
@@ -176,9 +167,7 @@ const AdminDashboard = () => {
                 <label className="text-sm font-medium">Url</label>
                 <Input />
               </div>
-              <Button 
-                className="w-full bg-amber-600 hover:bg-amber-700"
-              >
+              <Button className="w-full bg-amber-600 hover:bg-amber-700">
                 Link
               </Button>
             </div>
