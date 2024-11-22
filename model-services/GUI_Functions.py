@@ -489,7 +489,7 @@ def is_in_tolerance(target, value, tolerance_percent):
     return (target * (1 - tolerance_percent / 100)) <= value <= (target * (1 + tolerance_percent / 100))
 
 # Function to find the minimum value
-def find_minimal_pallet_amount(best_solution, best_fitness, tolerance_percent, setup_times_dict):
+def find_minimal_pallet_amount(best_solution, best_fitness, tolerance_percent,  pallet_amount, setup_times_dict):
     # Starts palettes with high values
     local_pallet_amount = copy.deepcopy(pallet_amount)  
     #for i in local_pallet_amount: #This is necessary IF the values ​​in excel are odef/inf
