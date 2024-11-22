@@ -2,13 +2,12 @@ package it.polimi.productionoptimiserapi.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @Entity
 @Table(name = "optimization_results")
@@ -33,10 +32,8 @@ public class OptimizationResult extends BaseEntity {
   @OneToMany(cascade = CascadeType.ALL)
   private List<MaximumPalletsUsed> maximumPalletsUsed;
 
-
   private Double totalTimeWithOptimizedPallets;
   private Double totalTimeWithExcelPallets;
-
 
   private String bestSequenceOfProducts;
 

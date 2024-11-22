@@ -2,11 +2,6 @@ package it.polimi.productionoptimiserapi.dto;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
-
-import it.polimi.productionoptimiserapi.entities.ExcelDefinedPallets;
-import it.polimi.productionoptimiserapi.entities.Graph;
-import it.polimi.productionoptimiserapi.entities.MaximumPalletsUsed;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

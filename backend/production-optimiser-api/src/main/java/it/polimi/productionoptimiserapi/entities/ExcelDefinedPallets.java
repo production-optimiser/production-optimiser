@@ -1,6 +1,5 @@
 package it.polimi.productionoptimiserapi.entities;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,10 +13,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 @Setter
-public class ExcelDefinedPallets extends BaseEntity{
+public class ExcelDefinedPallets extends BaseEntity {
 
-    @Column
-    private String definedPallets;
-    @Column(name = "pallets_count")
-    private Integer count;
+  @Column private String definedPallets;
+
+  @Column(name = "pallets_count")
+  private Integer count;
 }
