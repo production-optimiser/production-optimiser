@@ -12,5 +12,5 @@ public interface OptimizationResultRepository extends JpaRepository<Optimization
   @Query("""
             SELECT r from OptimizationResult r WHERE r.user.id = ?1
             """)
-  List<OptimizationResult> findByUser(String user);
+  List<OptimizationResult> findByUserId(String userID);
 }

@@ -7,7 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.validator.constraints.Length;
+
+import java.util.List;
 
 @Entity
 @Table(name = "optimization_results")
@@ -18,14 +19,29 @@ import org.hibernate.validator.constraints.Length;
 @Setter
 public class OptimizationResult extends BaseEntity {
 
-  @Column
-  @Lob
-  @Basic(fetch = FetchType.EAGER)
-  private byte[] pltData;
+  private Double initialTotalProductionTime;
+  private Double optimizedTotalProductionTime;
+  private Double timeImprovement;
+  private Double percentageImprovement;
+  private Double averageInitialTotalMachineUtilization;
+  private Double averageOptimizedTotalMachineUtilization;
+  private Double utilizationImprovement;
 
-  @Column(columnDefinition = "text")
-  @Length(max = 500)
-  private String notes;
+  @OneToMany(cascade = CascadeType.ALL)
+  private List<ExcelDefinedPallets> palletsDefinedInExcel;
+
+  @OneToMany(cascade = CascadeType.ALL)
+  private List<MaximumPalletsUsed> maximumPalletsUsed;
+
+
+  private Double totalTimeWithOptimizedPallets;
+  private Double totalTimeWithExcelPallets;
+
+
+  private String bestSequenceOfProducts;
+
+  @OneToMany(mappedBy = "result", fetch = FetchType.LAZY)
+  private List<Graph> graphs;
 
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
