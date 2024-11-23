@@ -3,6 +3,7 @@ package it.polimi.productionoptimiserapi.security.config;
 import it.polimi.productionoptimiserapi.security.filters.JwtTokenFilter;
 import it.polimi.productionoptimiserapi.security.filters.UserAuthenticationFilter;
 import it.polimi.productionoptimiserapi.security.utils.JwtUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -32,6 +35,25 @@ public class SecurityConfig {
   @Bean
   public BCryptPasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    return request -> {
+      var cors = new CorsConfiguration();
+      cors.setAllowedOrigins(
+          List.of(
+              "http://localhost:3000",
+              "http://localhost:5173",
+              "https://production-optimiser.github.io",
+              "https://production-optimiser.github.io/production-optimiser",
+              "https://production-optimiser.github.io/production-optimiser/"));
+      cors.setAllowedMethods(List.of("*"));
+      cors.setAllowedHeaders(List.of("*"));
+      cors.setExposedHeaders(List.of("Authorization"));
+      cors.setAllowCredentials(true);
+      return cors;
+    };
   }
 
   @Bean
