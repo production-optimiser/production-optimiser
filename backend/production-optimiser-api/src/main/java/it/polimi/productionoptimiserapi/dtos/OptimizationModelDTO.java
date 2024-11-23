@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.dtos;
 
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +18,6 @@ public class OptimizationModelDTO {
   @URL(message = "apiUrl must be a valid URL")
   public String apiUrl;
 
-  @NotEmpty(message = "Optimization model must be associated to at least one user")
   public Set<String> userIds;
 
   public OptimizationModel toEntity() {
