@@ -1,0 +1,24 @@
+{
+  "initial_total_production_time": 816.00,
+  "optimized_total_production_time": 513.50,
+  "time_improvement": {
+    "value": 302.50,
+    "percentage": 37.07
+  },
+  "average_initial_machine_utilization": 31.34,
+  "average_optimized_machine_utilization": 49.81,
+  "utilization_improvement": 18.46,
+  "maximum_pallets_used": {
+    "skibidi,b,c": 10,
+    "d,e,f": 3,
+    "g,h,i": 6
+  },
+  "pallets_defined_in_excel": {
+    "skibidi,b,c": 10,
+    "d,e,f": 10,
+    "g,h,i": 10
+  },
+  "total_time_with_optimized_pallets": 513.50,
+  "total_time_with_excel_pallets": 513.50,
+  "best_sequence_of_products": "skibidi skibidi skibidi h h b g c c d i c c c c c h d f d d d b b d c d i h d e b i h e e b e e i skibidi f f h f c skibidi h skibidi b f skibidi f f b g b f i skibidi f g g i e g e g skibidi e g skibidi g g b g d h h h c b d f e e i i i i"
+}

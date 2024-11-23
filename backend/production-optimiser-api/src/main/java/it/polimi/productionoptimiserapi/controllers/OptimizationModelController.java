@@ -38,6 +38,12 @@ public class OptimizationModelController {
         .body(om);
   }
 
+  @GetMapping
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  public ResponseEntity<Iterable<OptimizationModel>> getAll() {
+    return ResponseEntity.ok(this.optimizationModelService.findAllOptimizationModels());
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
   public ResponseEntity<OptimizationModel> getById(
@@ -60,6 +66,15 @@ public class OptimizationModelController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<OptimizationModel> retire(@PathVariable String id) {
     OptimizationModel om = this.optimizationModelService.retireOptimizationModel(id);
+    return ResponseEntity.ok(om);
+  }
+
+  @PatchMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<OptimizationModel> update(
+      @PathVariable String id, @Valid @RequestBody OptimizationModelDTO optimizationModelDTO) {
+    OptimizationModel om =
+        this.optimizationModelService.updateOptimizationModel(id, optimizationModelDTO);
     return ResponseEntity.ok(om);
   }
 }
