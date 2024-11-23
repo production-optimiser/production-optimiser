@@ -22,7 +22,6 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -88,7 +87,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private OptimizationModelService optimizationModelService;
 
-  //@Test
+  // @Test
   void shouldCreateOptimizationModel() {
     User customer =
         userService.createUser(
@@ -116,7 +115,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  //@Test
+  // @Test
   void givenCreatedModel_shouldGetById() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -136,7 +135,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  //@Test
+  // @Test
   void givenCreatedModel_customerShouldGetForbidden() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -174,7 +173,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .statusCode(HttpStatus.FORBIDDEN.value());
   }
 
-  //@Test
+  // @Test
   void givenCreatedModel_shouldRetire() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
