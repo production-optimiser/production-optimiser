@@ -1,12 +1,14 @@
-import React from 'react'
-import { useTheme } from '../Contexts/ThemeContext'
+import React from 'react';
+import { useTheme } from '../Contexts/ThemeContext';
 
 interface ThemeToggleProps {
-  className?: string
+  className?: string;
 }
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ className }): JSX.Element => {
-  const { theme, toggleTheme } = useTheme()
+const ThemeToggle: React.FC<ThemeToggleProps> = ({
+  className,
+}): JSX.Element => {
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <button
@@ -17,7 +19,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className }): JSX.Element => 
     >
       {theme === 'light' ? '🌙 Switch to Dark Mode' : '☀️ Switch to Light Mode'}
     </button>
-  )
-}
+  );
+};
 
-export default ThemeToggle
+export default ThemeToggle;

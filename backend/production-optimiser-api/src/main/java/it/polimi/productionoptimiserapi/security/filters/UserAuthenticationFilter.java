@@ -1,8 +1,8 @@
 package it.polimi.productionoptimiserapi.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.productionoptimiserapi.security.dtos.AuthenticationResponseDto;
-import it.polimi.productionoptimiserapi.security.dtos.UserLoginDto;
+import it.polimi.productionoptimiserapi.security.dtos.AuthenticationResponseDTO;
+import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.security.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +36,7 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
   public Authentication attemptAuthentication(
       HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
     try {
-      UserLoginDto loginDto = objectMapper.readValue(request.getReader(), UserLoginDto.class);
+      UserLoginDTO loginDto = objectMapper.readValue(request.getReader(), UserLoginDTO.class);
 
       UsernamePasswordAuthenticationToken authRequest =
           new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
@@ -56,7 +56,7 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
       throws IOException {
     String token = jwtUtil.generateToken(authResult);
 
-    AuthenticationResponseDto responseDto = new AuthenticationResponseDto(token);
+    AuthenticationResponseDTO responseDto = new AuthenticationResponseDTO(token);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
