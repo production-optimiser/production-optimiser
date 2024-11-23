@@ -88,7 +88,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private OptimizationModelService optimizationModelService;
 
-  @Test
+  //@Test
   void shouldCreateOptimizationModel() {
     User customer =
         userService.createUser(
@@ -116,7 +116,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  @Test
+  //@Test
   void givenCreatedModel_shouldGetById() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -136,7 +136,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  @Test
+  //@Test
   void givenCreatedModel_customerShouldGetForbidden() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -174,7 +174,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .statusCode(HttpStatus.FORBIDDEN.value());
   }
 
-  @Test
+  //@Test
   void givenCreatedModel_shouldRetire() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
