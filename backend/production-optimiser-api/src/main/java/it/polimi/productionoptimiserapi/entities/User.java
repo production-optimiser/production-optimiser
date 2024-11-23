@@ -52,7 +52,8 @@ public class User extends BaseEntity implements UserDetails {
   @PrePersist
   @PreUpdate
   public void onPersistAndUpdate() {
-    //added this to prevent double password hashing on every field update, if password is updated it will hash
+    // added this to prevent double password hashing on every field update, if password is updated
+    // it will hash
     if (!isPasswordHashed(this.password)) {
       this.hashPassword();
     }
