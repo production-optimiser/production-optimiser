@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,15 @@ public class ResultController {
   @GetMapping
   public List<OptimizationResultDto> getAllResults(@RequestParam String userId) {
     return resultService.getAllResults(userId);
+  }
+
+  @GetMapping("/{id}")
+  public OptimizationResultDto getResultById(@RequestParam String userId, @PathVariable String id) {
+    // TODO refactor this, it's not efficient
+    return resultService.getAllResults(userId).stream()
+        .filter(result -> result.getId().equals(id))
+        .findFirst()
+        .orElse(null);
   }
 
   @GetMapping("/dummy")

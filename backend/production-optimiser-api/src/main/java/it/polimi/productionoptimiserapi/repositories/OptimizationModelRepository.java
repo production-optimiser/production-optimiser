@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface OptimizationModelRepository extends JpaRepository<OptimizationModel, String> {
   @Override
-  @Query("SELECT om from OptimizationModel om WHERE om.status <> 'RETIRED'")
+  @Query("SELECT om from OptimizationModel om WHERE om.status <> 'RETIRED' and om.id = :id")
   Optional<OptimizationModel> findById(@NonNull String id);
 }

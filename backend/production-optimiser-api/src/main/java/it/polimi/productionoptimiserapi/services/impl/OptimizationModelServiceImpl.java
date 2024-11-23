@@ -8,6 +8,7 @@ import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,6 +59,23 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
             .findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
     model.setStatus(OptimizationModelStatus.RETIRED);
+    return this.optimizationModelRepository.save(model);
+  }
+
+  @Override
+  public List<OptimizationModel> findAllOptimizationModels() {
+    return this.optimizationModelRepository.findAll();
+  }
+
+  @Override
+  public OptimizationModel updateOptimizationModel(
+      String id, OptimizationModelDTO optimizationModelDTO) {
+    OptimizationModel model =
+        this.optimizationModelRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+    model.setName(optimizationModelDTO.getName());
+    model.setApiUrl(optimizationModelDTO.getApiUrl());
     return this.optimizationModelRepository.save(model);
   }
 }
