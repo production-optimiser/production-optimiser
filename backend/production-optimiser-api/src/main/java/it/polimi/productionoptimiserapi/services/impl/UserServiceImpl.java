@@ -4,6 +4,7 @@ import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.enums.UserStatus;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
@@ -102,6 +103,21 @@ public class UserServiceImpl implements UserService {
     if (optimizationModelIds != null) {
       user.setAvailableOptimizationModels(this.mapModelIdsToModels(optimizationModelIds));
     }
+
+    return UserMapper.toDto(userRepository.save(user));
+  }
+
+  @Override
+  public UserDTO deleteUser(String id) {
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("User not found by id " + id));
+
+    if (user.getRole() == UserRole.ADMIN) {
+      throw new IllegalArgumentException("Cannot delete an admin user");
+    }
+    user.setStatus(UserStatus.DELETED);
 
     return UserMapper.toDto(userRepository.save(user));
   }

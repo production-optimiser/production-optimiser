@@ -3,6 +3,7 @@ package it.polimi.productionoptimiserapi.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
@@ -48,6 +49,11 @@ public class User extends BaseEntity implements UserDetails {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @JsonManagedReference
   private Set<OptimizationResult> optimizationResults = new HashSet<>();
+
+  @Column
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private UserStatus status = UserStatus.ACTIVE;
 
   @PrePersist
   @PreUpdate
@@ -104,7 +110,7 @@ public class User extends BaseEntity implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return UserDetails.super.isEnabled();
+    return status == UserStatus.ACTIVE;
   }
 
   public boolean isCustomer() {

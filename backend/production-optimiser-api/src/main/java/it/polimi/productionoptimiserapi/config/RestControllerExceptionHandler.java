@@ -29,7 +29,7 @@ public class RestControllerExceptionHandler {
     return new ErrorDetails(ex);
   }
 
-  @ExceptionHandler(ValidationException.class)
+  @ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorDetails handleValidationException(ValidationException ex) {
     return new ErrorDetails(ex);

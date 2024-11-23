@@ -16,4 +16,6 @@ public interface UserService {
 
   UserDTO updateUser(
       String id, String email, String password, UserRole role, Set<String> optimizationModelIds);
+
+  UserDTO deleteUser(String id);
 }
