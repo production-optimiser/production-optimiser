@@ -13,6 +13,8 @@ import lombok.Data;
 @Builder
 public class UserDTO {
 
+  private String id;
+
   @NotNull
   @Size(min = 1, max = 50)
   @Email

@@ -3,11 +3,16 @@ package it.polimi.productionoptimiserapi.controllers;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
+import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
+import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,13 +21,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/models")
+@RequiredArgsConstructor
 public class OptimizationModelController {
 
   private final OptimizationModelService optimizationModelService;
-
-  public OptimizationModelController(OptimizationModelService optimizationModelService) {
-    this.optimizationModelService = optimizationModelService;
-  }
+  private final UserService userService;
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
@@ -30,6 +33,18 @@ public class OptimizationModelController {
       @Valid @RequestBody OptimizationModelDTO optimizationModelDTO) {
     OptimizationModel om =
         this.optimizationModelService.saveOptimizationModel(optimizationModelDTO);
+
+    // Add the new optimization model to all admins
+    userService.getUsers().stream()
+        .filter(user -> user.getRole().equals(UserRole.ADMIN))
+        .forEach(
+            user -> {
+              Set<String> updatedModelIds = new HashSet<>(user.getOptimizationModelIds());
+              updatedModelIds.add(om.getId());
+
+              userService.updateUser(user.getId(), null, null, null, updatedModelIds);
+            });
+
     return ResponseEntity.created(
             ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

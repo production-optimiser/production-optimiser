@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.util.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 public class User extends BaseEntity implements UserDetails {
 
   @Column(unique = true)
@@ -50,11 +52,19 @@ public class User extends BaseEntity implements UserDetails {
   @PrePersist
   @PreUpdate
   public void onPersistAndUpdate() {
-    this.hashPassword();
+    //added this to prevent double password hashing on every field update, if password is updated it will hash
+    if (!isPasswordHashed(this.password)) {
+      this.hashPassword();
+    }
   }
 
   private void hashPassword() {
+
     this.password = BCrypt.hashpw(this.password, BCrypt.gensalt(12));
+  }
+
+  private boolean isPasswordHashed(String password) {
+    return password.matches("^\\$2[aby]\\$\\d{1,2}\\$[./0-9A-Za-z]{53}$");
   }
 
   @Override
