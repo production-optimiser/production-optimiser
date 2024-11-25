@@ -2,6 +2,7 @@ package it.polimi.productionoptimiserapi.services.impl;
 
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
+import it.polimi.productionoptimiserapi.entities.OptimizationResult;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class OptimizationModelServiceImpl implements OptimizationModelService {
@@ -54,12 +56,17 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
   }
 
   public OptimizationModel retireOptimizationModel(String id) throws EntityNotFoundException {
-    OptimizationModel model =
+    OptimizationModel om =
         this.optimizationModelRepository
             .findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
-    model.setStatus(OptimizationModelStatus.RETIRED);
-    return this.optimizationModelRepository.save(model);
+    om.setStatus(OptimizationModelStatus.RETIRED);
+    return this.optimizationModelRepository.save(om);
+  }
+
+  public OptimizationResult invokeOptimizationModel(OptimizationModel model, MultipartFile inputFile) {
+    OptimizationResult or = new OptimizationResult();
+    return or;
   }
 
   @Override
