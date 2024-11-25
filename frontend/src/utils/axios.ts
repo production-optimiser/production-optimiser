@@ -27,10 +27,11 @@ export interface ApiError {
 
 const instance = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
   },
 });
 
