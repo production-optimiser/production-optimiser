@@ -1,5 +1,6 @@
 package it.polimi.productionoptimiserapi.config;
 
+import it.polimi.productionoptimiserapi.exceptions.BadRequestException;
 import it.polimi.productionoptimiserapi.exceptions.ErrorDetails;
 import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +39,18 @@ public class RestControllerExceptionHandler {
   @ExceptionHandler(EntityNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorDetails handleEntityNotFoundException(EntityNotFoundException ex) {
+    return new ErrorDetails(ex);
+  }
+
+  @ExceptionHandler(BadRequestException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorDetails handleOAuthException(BadRequestException ex) {
+    return new ErrorDetails(ex);
+  }
+
+  @ExceptionHandler(RuntimeException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ErrorDetails handleRuntimeException(RuntimeException ex) {
     return new ErrorDetails(ex);
   }
 
