@@ -6,13 +6,13 @@ import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.enums.UserStatus;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
-import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +23,6 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
-
-  private final OptimizationModelRepository optimizationModelRepository;
 
   private final OptimizationModelService optimizationModelService;
 
@@ -37,8 +35,8 @@ public class UserServiceImpl implements UserService {
     return modelIds.stream()
         .map(
             modelId ->
-                this.optimizationModelRepository
-                    .findById(modelId)
+                this.optimizationModelService
+                    .findOptimizationModelById(modelId)
                     .orElseThrow(
                         () -> new EntityNotFoundException("Model not found by id " + modelId)))
         .collect(Collectors.toSet());
@@ -64,8 +62,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserDTO getUser(String id) {
-    return userRepository.findById(id).map(UserMapper::toDto).orElse(null);
+  public Optional<UserDTO> getUser(String id) {
+    return userRepository.findById(id).map(UserMapper::toDto);
   }
 
   @Override

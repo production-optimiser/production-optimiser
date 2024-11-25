@@ -4,6 +4,7 @@ import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.services.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,9 @@ public class UserController {
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
   public UserDTO getUser(@PathVariable String id) {
-    return userService.getUser(id);
+    return userService
+        .getUser(id)
+        .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
   }
 
   @PostMapping
