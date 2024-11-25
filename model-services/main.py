@@ -5,6 +5,7 @@ import time
 from GUI_Functions import is_in_tolerance, occupancy_graph, pallet_graph, calculate_occupancy_no_setup_time, calculate_utilization, fitness_no_setup_time, calculate_occupancy, machine_utilization, product_flow
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 from typing import Dict, Any
 import json
@@ -27,7 +28,20 @@ pallets = None
 best_pallet_config = None
 val_list = None
 
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+]
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 #Here is the function to run the entire program, i.e. when you have selected all the files and if you want rerun or not, you click on the "Run" button.
