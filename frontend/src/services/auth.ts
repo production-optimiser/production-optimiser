@@ -1,79 +1,110 @@
-import axios from 'axios';
-import { User } from '../types/auth';
+import { AxiosError } from 'axios';
+import axiosInstance, { handleApiError } from '../utils/axios';
+import { User, Role } from '../types/auth';
+import { jwtDecode } from 'jwt-decode';
 
-const API_URL = 'http://localhost:8080/api';
+interface AuthenticationResponseDTO {
+  token: string;
+}
 
-export const DEMO_CREDENTIALS = {
-  admin: {
-    email: 'admin1',
-    password: 'password123',
-  },
-  customer: {
-    email: 'customer1',
-    password: 'password123',
-  },
-};
+interface LoginRequest {
+  email: string;
+  password: string;
+}
 
-// Helper function to validate demo credentials
-const isDemoCredential = (
-  email: string,
-  password: string
-): { role: string } | null => {
-  if (
-    email === DEMO_CREDENTIALS.admin.email &&
-    password === DEMO_CREDENTIALS.admin.password
-  ) {
-    return { role: 'ADMIN' };
-  }
-  if (
-    email === DEMO_CREDENTIALS.customer.email &&
-    password === DEMO_CREDENTIALS.customer.password
-  ) {
-    return { role: 'CUSTOMER' };
-  }
-  return null;
+// Interface for decoded JWT token
+interface DecodedToken {
+  sub: string; // subject (email)
+  roles: string[]; // user roles
+  iss: string; // issuer
+  exp: number; // expiration time
+  iat: number; // issued at time
+}
+
+// Map email to roles
+const EMAIL_ROLE_MAP: Record<string, Role> = {
+  'admin1': 'ADMIN',
+  'customer1': 'CUSTOMER',
 };
 
 export const authService = {
   async login(email: string, password: string): Promise<User> {
-    const demoRole = isDemoCredential(email, password);
-
-    if (demoRole) {
-      console.log(
-        `Logging in with demo credentials for role: ${demoRole.role}`
-      );
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            id: email === DEMO_CREDENTIALS.admin.email ? '1' : '2',
-            email,
-            roles: [demoRole.role],
-          });
-        }, 500); // Simulate API delay
-      });
-    }
-
     try {
-      console.log(`Attempting API login for: ${email}`);
-      const response = await axios.post(`${API_URL}/login`, {
+      console.log('Attempting login with:', { email, password });
+
+      const response = await axiosInstance.post<AuthenticationResponseDTO>('/auth/login', {
         email,
         password,
-      });
-      if (response.data?.token) {
-        localStorage.setItem('token', response.data.token);
+      } as LoginRequest);
+
+      const { token } = response.data;
+      console.log('Login successful, received token:', token);
+
+      if (token) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('userEmail', email);
+
+        const role: Role = EMAIL_ROLE_MAP[email] || 'CUSTOMER';
+
+        return {
+          id: email,
+          email: email,
+          roles: [role],
+        };
       }
-      return {
-        id: response.data.id,
-        email: response.data.email,
-        roles: [response.data.role],
-      };
+
+      throw new Error('No token received');
     } catch (error) {
-      console.error('API login error:', error);
-      throw new Error('Invalid credentials');
+      console.error('Login error:', error);
+      const apiError = handleApiError(error as AxiosError);
+      throw new Error(apiError.message || 'Invalid credentials');
     }
   },
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('token');
   },
+
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      const currentTime = Date.now() / 1000;
+      return decoded.exp > currentTime;
+    } catch {
+      return false;
+    }
+  },
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  },
+
+  getCurrentUser(): User | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      return {
+        id: decoded.sub,
+        email: decoded.sub,
+        roles: decoded.roles.map(role => role.replace('ROLE_', '') as Role),
+      };
+    } catch {
+      return null;
+    }
+  },
+
+  isAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user?.roles.includes('ADMIN') || false;
+  },
+
+  isCustomer(): boolean {
+    const user = this.getCurrentUser();
+    return user?.roles.includes('CUSTOMER') || false;
+  }
 };

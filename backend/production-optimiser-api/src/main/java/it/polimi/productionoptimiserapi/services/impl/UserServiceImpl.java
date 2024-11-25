@@ -44,6 +44,7 @@ public class UserServiceImpl implements UserService {
 
   public User createUser(UserDTO userDTO) {
     User user = userDTO.toEntity();
+    user.setStatus(UserStatus.ACTIVE);
 
     HashSet<OptimizationModel> updatedModels =
         new HashSet<>(this.mapModelIdsToModels(userDTO.getOptimizationModelIds()));
