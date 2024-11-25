@@ -17,7 +17,7 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Checkbox } from '@/Components/ui/checkbox';
 import SidebarNav from '../Components/sidebar';
-import { UserProfile } from '../Components/UserProfile';
+import { UserProfile } from '../components/UserProfile';
 
 interface Model {
   id: string;
