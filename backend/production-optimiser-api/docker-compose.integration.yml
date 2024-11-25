@@ -1,5 +1,7 @@
 version: '3.9'
 
+# docker-compose -f docker-compose.service-tool.yml up -d
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -36,4 +38,15 @@ services:
       - SPRING_DATASOURCE_PASSWORD=production_optimiser
     ports:
       - "8080:8080"
+    restart: on-failure
+
+  production-optimiser-service-tool:
+    container_name: production-optimiser-service-tool
+    image: production-optimiser-service-tool:latest
+    pull_policy: build
+    build:
+      context: ../../model-services
+      dockerfile: Dockerfile
+    ports:
+      - "9080:9080"
     restart: on-failure

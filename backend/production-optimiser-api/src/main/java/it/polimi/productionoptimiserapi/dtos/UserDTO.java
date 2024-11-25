@@ -2,6 +2,7 @@ package it.polimi.productionoptimiserapi.dtos;
 
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.enums.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,6 +13,10 @@ import lombok.Data;
 @Data
 @Builder
 public class UserDTO {
+
+  private String id;
+
+  private UserStatus status;
 
   @NotNull
   @Size(min = 1, max = 50)
@@ -31,6 +36,7 @@ public class UserDTO {
     user.setEmail(email);
     user.setPassword(password);
     user.setRole(role);
+    user.setStatus(status);
     return user;
   }
 }

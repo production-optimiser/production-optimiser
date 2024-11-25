@@ -16,6 +16,11 @@ import lombok.Setter;
 @Setter
 public class OptimizationResult extends BaseEntity {
 
+  @Column
+  @Lob
+  @Basic(fetch = FetchType.EAGER)
+  private byte[] inputFile;
+
   private Double initialTotalProductionTime;
   private Double optimizedTotalProductionTime;
   private Double timeImprovement;
