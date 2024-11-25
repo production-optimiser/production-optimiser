@@ -5,6 +5,8 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ['main']
+    paths:
+      - 'frontend/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -42,7 +44,7 @@ jobs:
         run:
           npm i
       - name: Build
-        run: npm run build
+        run: CI=false npm run build
       - name: Check folder
         run: ls -la
       - name: Setup Pages

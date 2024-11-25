@@ -547,3 +547,10 @@ async def optimize(file: UploadFile = File(...)) -> JSONResponse:
             content={"error": str(e)},
             status_code=500
         )
+    
+@app.get("/actuator/health")
+async def health_check() -> JSONResponse:
+    """
+    Health check endpoint.
+    """
+    return JSONResponse(content={"status": "UP"})

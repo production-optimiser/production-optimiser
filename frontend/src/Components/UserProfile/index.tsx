@@ -4,8 +4,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+} from "@/Components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/Components/ui/avatar";
 import { Clock, LogOut, ChevronDown } from 'lucide-react';
 
 export interface UserProfileProps {
