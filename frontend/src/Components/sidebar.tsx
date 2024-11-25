@@ -1,7 +1,7 @@
 import React from 'react';
-import { ScrollArea } from '@/Components/ui/scroll-area';
-import { Button } from '@/Components/ui/button';
-import { Card } from '@/Components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ChevronDown, Copy } from 'lucide-react';
 
 interface OptimizationItem {
