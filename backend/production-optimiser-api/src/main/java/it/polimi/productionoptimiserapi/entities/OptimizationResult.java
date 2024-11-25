@@ -26,6 +26,7 @@ public class OptimizationResult extends BaseEntity {
   @Basic(fetch = FetchType.EAGER)
   private byte[] pltData;
 
+  // TODO: All of this can be made into a singular JSONB to store freely on Postgres...
   private Double initialTotalProductionTime;
   private Double optimizedTotalProductionTime;
   private Double timeImprovement;

@@ -6,6 +6,7 @@ import it.polimi.productionoptimiserapi.entities.OptimizationResult;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public interface OptimizationModelService {
   OptimizationModel retireOptimizationModel(String id) throws EntityNotFoundException;
 
   OptimizationResult invokeOptimizationModel(OptimizationModel model, MultipartFile inputFile)
-      throws EntityNotFoundException;
+      throws EntityNotFoundException, IOException;
 
   List<OptimizationModel> findAllOptimizationModels();
 

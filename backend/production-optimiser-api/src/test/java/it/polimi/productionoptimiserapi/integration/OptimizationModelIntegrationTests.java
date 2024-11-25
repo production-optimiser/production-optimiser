@@ -12,18 +12,22 @@ import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
-import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -39,10 +43,6 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
-  }
-
-  public OptimizationModelIntegrationTests(@Autowired OptimizationModelRepository repository) {
-    super(repository);
   }
 
   @Autowired private UserRepository userRepository;
@@ -192,13 +192,33 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         optimizationModelService.findOptimizationModelById(om.getId());
     assertTrue(oom.isEmpty());
 
-    System.out.println(accessToken);
-
     given()
         .headers("Authorization", "Bearer " + accessToken)
         .when()
         .get("/api/models/" + om.getId())
         .then()
         .statusCode(HttpStatus.NOT_FOUND.value());
+  }
+
+  // @Test
+  void givenCreatedModel_shouldInvoke() throws IOException {
+    OptimizationModelDTO optimizationModelDTO =
+        OptimizationModelDTO.builder()
+            .name("Test Model")
+            .apiUrl("http://localhost:8000/optimize")
+            .userIds(Set.of())
+            .build();
+
+    OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
+
+    File testInputFile = new ClassPathResource("test_input.xlsx").getFile();
+
+    given()
+        .headers("Authorization", "Bearer " + accessToken)
+        .multiPart(testInputFile)
+        .when()
+        .post("/api/models/" + om.getId() + "/invoke")
+        .then()
+        .statusCode(HttpStatus.OK.value());
   }
 }

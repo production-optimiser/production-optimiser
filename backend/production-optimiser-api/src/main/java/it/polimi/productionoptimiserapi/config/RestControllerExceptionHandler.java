@@ -47,6 +47,12 @@ public class RestControllerExceptionHandler {
     return new ErrorDetails(ex);
   }
 
+  @ExceptionHandler(RuntimeException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ErrorDetails handleEntityNotFoundException(RuntimeException ex) {
+    return new ErrorDetails(ex);
+  }
+
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public final ErrorDetails handleAllExceptions(Exception ex) {

@@ -9,6 +9,7 @@ import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.Objects;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,15 +82,13 @@ public class OptimizationModelController {
     return ResponseEntity.ok(om);
   }
 
-
-
   @PostMapping("/{id}/invoke")
   @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
   public ResponseEntity<OptimizationResult> invoke(
       @PathVariable String id,
       @RequestParam("input") MultipartFile inputFile,
       @AuthenticationPrincipal User loggedUser)
-      throws BadRequestException, ForbiddenException {
+      throws BadRequestException, ForbiddenException, IOException {
     if (!Objects.equals(
         inputFile.getContentType(),
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {

@@ -11,8 +11,6 @@ public class BaseIntegrationTestSetup {
 
   @LocalServerPort private Integer port;
 
-  private final JpaRepository<?, ?> repository;
-
   @DynamicPropertySource
   static void setDynamicProperties(DynamicPropertyRegistry registry) {
     registry.add("environment.test", () -> true);
@@ -21,10 +19,5 @@ public class BaseIntegrationTestSetup {
   @BeforeEach
   void setup() {
     RestAssured.baseURI = "http://localhost:" + port;
-    this.repository.deleteAll();
-  }
-
-  public BaseIntegrationTestSetup(JpaRepository<?, ?> repository) {
-    this.repository = repository;
   }
 }
