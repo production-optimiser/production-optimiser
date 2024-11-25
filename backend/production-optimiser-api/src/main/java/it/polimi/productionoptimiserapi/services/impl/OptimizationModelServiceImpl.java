@@ -64,7 +64,8 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     return this.optimizationModelRepository.save(om);
   }
 
-  public OptimizationResult invokeOptimizationModel(OptimizationModel model, MultipartFile inputFile) {
+  public OptimizationResult invokeOptimizationModel(
+      OptimizationModel model, MultipartFile inputFile) {
     OptimizationResult or = new OptimizationResult();
     return or;
   }

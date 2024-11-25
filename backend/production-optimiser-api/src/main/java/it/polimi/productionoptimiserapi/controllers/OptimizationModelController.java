@@ -85,8 +85,14 @@ public class OptimizationModelController {
 
   @PostMapping("/{id}/invoke")
   @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
-  public ResponseEntity<OptimizationResult> invoke(@PathVariable String id, @RequestParam("input") MultipartFile inputFile, @AuthenticationPrincipal User loggedUser) throws BadRequestException, ForbiddenException {
-    if (!Objects.equals(inputFile.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+  public ResponseEntity<OptimizationResult> invoke(
+      @PathVariable String id,
+      @RequestParam("input") MultipartFile inputFile,
+      @AuthenticationPrincipal User loggedUser)
+      throws BadRequestException, ForbiddenException {
+    if (!Objects.equals(
+        inputFile.getContentType(),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
       throw new BadRequestException("Invalid file type. Please upload an XLSX file.");
     }
 

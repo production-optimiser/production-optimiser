@@ -11,13 +11,15 @@ import java.util.Optional;
 
 public interface OptimizationModelService {
 
-  OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO) throws EntityNotFoundException;
+  OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO)
+      throws EntityNotFoundException;
 
   Optional<OptimizationModel> findOptimizationModelById(String id);
 
   OptimizationModel retireOptimizationModel(String id) throws EntityNotFoundException;
 
-  OptimizationResult invokeOptimizationModel(OptimizationModel model, MultipartFile inputFile) throws EntityNotFoundException;
+  OptimizationResult invokeOptimizationModel(OptimizationModel model, MultipartFile inputFile)
+      throws EntityNotFoundException;
 
   List<OptimizationModel> findAllOptimizationModels();
 
