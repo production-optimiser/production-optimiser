@@ -16,7 +16,6 @@ import lombok.Setter;
 @Setter
 public class OptimizationResult extends BaseEntity {
 
-
   @Column
   @Lob
   @Basic(fetch = FetchType.EAGER)

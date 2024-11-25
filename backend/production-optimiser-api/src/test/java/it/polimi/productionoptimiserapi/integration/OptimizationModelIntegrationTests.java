@@ -202,6 +202,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .then()
         .statusCode(HttpStatus.NOT_FOUND.value());
   }
+
   // @Test
   void givenCreatedModel_shouldInvoke() throws IOException {
     OptimizationModelDTO optimizationModelDTO =

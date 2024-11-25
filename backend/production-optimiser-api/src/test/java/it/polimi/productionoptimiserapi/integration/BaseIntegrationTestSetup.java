@@ -12,6 +12,7 @@ public class BaseIntegrationTestSetup {
   @LocalServerPort private Integer port;
 
   private final JpaRepository<?, ?> repository;
+
   @DynamicPropertySource
   static void setDynamicProperties(DynamicPropertyRegistry registry) {
     registry.add("environment.test", () -> true);

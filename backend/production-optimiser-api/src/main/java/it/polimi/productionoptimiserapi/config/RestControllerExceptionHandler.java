@@ -1,7 +1,6 @@
 package it.polimi.productionoptimiserapi.config;
 
 import it.polimi.productionoptimiserapi.exceptions.BadRequestException;
-
 import it.polimi.productionoptimiserapi.exceptions.ErrorDetails;
 import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,7 +22,6 @@ public class RestControllerExceptionHandler {
       MissingServletRequestParameterException ex) {
     return new ErrorDetails(ex);
   }
-
 
   @ExceptionHandler(BadRequestException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
