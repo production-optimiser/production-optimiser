@@ -4,13 +4,11 @@ import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.OptimizationResult;
 import it.polimi.productionoptimiserapi.entities.User;
-import it.polimi.productionoptimiserapi.exceptions.BadRequestException;
 import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-
 import java.io.IOException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -88,7 +86,11 @@ public class OptimizationModelController {
 
   @PostMapping("/{id}/invoke")
   @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
-  public ResponseEntity<OptimizationResult> invoke(@PathVariable String id, @RequestParam("input") MultipartFile inputFile, @AuthenticationPrincipal User loggedUser) throws ForbiddenException, IOException {
+  public ResponseEntity<OptimizationResult> invoke(
+      @PathVariable String id,
+      @RequestParam("input") MultipartFile inputFile,
+      @AuthenticationPrincipal User loggedUser)
+      throws ForbiddenException, IOException {
     OptimizationModel om =
         this.optimizationModelService
             .findOptimizationModelById(id)
@@ -100,7 +102,8 @@ public class OptimizationModelController {
       throw new ForbiddenException("Can't invoke a model which does not belong to you.");
     }
 
-    OptimizationResult or = this.optimizationModelService.invokeOptimizationModel(om, inputFile, loggedUser);
+    OptimizationResult or =
+        this.optimizationModelService.invokeOptimizationModel(om, inputFile, loggedUser);
     return ResponseEntity.ok(or);
   }
 }

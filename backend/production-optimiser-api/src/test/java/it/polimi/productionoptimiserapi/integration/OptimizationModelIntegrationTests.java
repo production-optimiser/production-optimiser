@@ -16,7 +16,6 @@ import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -207,22 +206,22 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
   // @Test
   void givenCreatedModel_shouldInvoke() throws IOException {
     OptimizationModelDTO optimizationModelDTO =
-      OptimizationModelDTO.builder()
-        .name("Test Model")
-        .apiUrl("http://127.0.0.1:5000/optimize")
-        .userIds(Set.of())
-        .build();
+        OptimizationModelDTO.builder()
+            .name("Test Model")
+            .apiUrl("http://127.0.0.1:5000/optimize")
+            .userIds(Set.of())
+            .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
 
     File testInputFile = new ClassPathResource("test_input.xlsx").getFile();
 
     given()
-      .headers("Authorization", "Bearer " + accessToken)
-      .multiPart("input", testInputFile)
-      .when()
-      .post("/api/models/" + om.getId() + "/invoke")
-      .then()
-      .statusCode(HttpStatus.OK.value());
+        .headers("Authorization", "Bearer " + accessToken)
+        .multiPart("input", testInputFile)
+        .when()
+        .post("/api/models/" + om.getId() + "/invoke")
+        .then()
+        .statusCode(HttpStatus.OK.value());
   }
 }
