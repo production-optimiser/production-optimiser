@@ -7,4 +7,5 @@ public class UrlConstants {
   public static final String REGISTER_USER_URL = BASE_URL + "/users/register";
   public static final String DOCS_URL = "/docs/**";
   public static final String SWAGGER_URL = "/swagger-ui/**";
+  public static final String ACTUATOR_URL = "/actuator/**";
 }

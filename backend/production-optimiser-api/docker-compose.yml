@@ -9,8 +9,9 @@ services:
       POSTGRES_USER: production_optimiser
       POSTGRES_PASSWORD: production_optimiser
       POSTGRES_DB: production_optimiser
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+#    uncomment the following lines to persist the data with jpa=update
+#    volumes:
+#      - ./postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U production_optimiser -d production_optimiser && psql -U production_optimiser -d production_optimiser -c 'SELECT 1' || grep -q 'database system is ready to accept connections'"]
       interval: 5s
@@ -20,6 +21,9 @@ services:
     restart: on-failure
 
   production-optimiser:
+    container_name: production-optimiser-api
+    image: production-optimiser-api:latest
+    pull_policy: build
     build:
       context: .
       dockerfile: ./Dockerfile.local

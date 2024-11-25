@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -22,13 +23,13 @@ public class RestControllerExceptionHandler {
     return new ErrorDetails(ex);
   }
 
-  @ExceptionHandler(ForbiddenException.class)
+  @ExceptionHandler({ForbiddenException.class, AuthorizationDeniedException.class})
   @ResponseStatus(HttpStatus.FORBIDDEN)
   public ErrorDetails handleOAuthException(ForbiddenException ex) {
     return new ErrorDetails(ex);
   }
 
-  @ExceptionHandler(ValidationException.class)
+  @ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorDetails handleValidationException(ValidationException ex) {
     return new ErrorDetails(ex);
