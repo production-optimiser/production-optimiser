@@ -16,6 +16,7 @@ import lombok.Setter;
 @Setter
 public class OptimizationResult extends BaseEntity {
 
+
   @Column
   @Lob
   @Basic(fetch = FetchType.EAGER)
@@ -27,6 +28,20 @@ public class OptimizationResult extends BaseEntity {
   private byte[] pltData;
 
   // TODO: All of this can be made into a singular JSONB to store freely on Postgres...
+  private Double initialTotalProductionTime;
+  private Double optimizedTotalProductionTime;
+  private Double timeImprovement;
+  private Double percentageImprovement;
+  private Double averageInitialTotalMachineUtilization;
+  private Double averageOptimizedTotalMachineUtilization;
+  private Double utilizationImprovement;
+
+  @OneToMany(cascade = CascadeType.ALL)
+  private List<ExcelDefinedPallets> palletsDefinedInExcel;
+
+  @OneToMany(cascade = CascadeType.ALL)
+  private List<MaximumPalletsUsed> maximumPalletsUsed;
+
   private Double initialTotalProductionTime;
   private Double optimizedTotalProductionTime;
   private Double timeImprovement;

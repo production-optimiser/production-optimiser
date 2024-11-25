@@ -18,6 +18,7 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
 
   public List<OptimizationResultDto> getAllResults(String userId) {
     // TODO: All of this can be made into a singular JSONB to store freely on Postgres...
+
     return resultRepository.findByUserId(userId).stream()
         .map(
             (result) -> {

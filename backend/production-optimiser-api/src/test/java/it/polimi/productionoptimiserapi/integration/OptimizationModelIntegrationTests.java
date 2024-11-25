@@ -12,6 +12,7 @@ import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
@@ -41,6 +42,10 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
+  }
+
+  public OptimizationModelIntegrationTests(@Autowired OptimizationModelRepository repository) {
+    super(repository);
   }
 
   @Autowired private UserRepository userRepository;
@@ -189,7 +194,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
     Optional<OptimizationModel> oom =
         optimizationModelService.findOptimizationModelById(om.getId());
     assertTrue(oom.isEmpty());
-
+    System.out.println(accessToken);
     given()
         .headers("Authorization", "Bearer " + accessToken)
         .when()
@@ -197,7 +202,6 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .then()
         .statusCode(HttpStatus.NOT_FOUND.value());
   }
-
   // @Test
   void givenCreatedModel_shouldInvoke() throws IOException {
     OptimizationModelDTO optimizationModelDTO =

@@ -2,6 +2,7 @@ package it.polimi.productionoptimiserapi.controllers;
 
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
+
 import it.polimi.productionoptimiserapi.entities.OptimizationResult;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.exceptions.BadRequestException;
@@ -61,6 +62,7 @@ public class OptimizationModelController {
         && om.getUsers().stream().noneMatch(u -> Objects.equals(u.getId(), loggedUser.getId()))) {
       // User is a customer and this optimization model does not belong to them
       throw new ForbiddenException("This model does not belong to you!");
+
     }
 
     return ResponseEntity.ok(om);
@@ -81,6 +83,7 @@ public class OptimizationModelController {
         this.optimizationModelService.updateOptimizationModel(id, optimizationModelDTO);
     return ResponseEntity.ok(om);
   }
+
 
   @PostMapping("/{id}/invoke")
   @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")

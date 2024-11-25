@@ -3,6 +3,7 @@ package it.polimi.productionoptimiserapi.integration;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -10,6 +11,7 @@ public class BaseIntegrationTestSetup {
 
   @LocalServerPort private Integer port;
 
+  private final JpaRepository<?, ?> repository;
   @DynamicPropertySource
   static void setDynamicProperties(DynamicPropertyRegistry registry) {
     registry.add("environment.test", () -> true);
@@ -18,5 +20,10 @@ public class BaseIntegrationTestSetup {
   @BeforeEach
   void setup() {
     RestAssured.baseURI = "http://localhost:" + port;
+    this.repository.deleteAll();
+  }
+
+  public BaseIntegrationTestSetup(JpaRepository<?, ?> repository) {
+    this.repository = repository;
   }
 }
