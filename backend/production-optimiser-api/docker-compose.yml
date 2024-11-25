@@ -21,6 +21,9 @@ services:
     restart: on-failure
 
   production-optimiser:
+    container_name: production-optimiser-api
+    image: production-optimiser-api:latest
+    pull_policy: build
     build:
       context: .
       dockerfile: ./Dockerfile.local
