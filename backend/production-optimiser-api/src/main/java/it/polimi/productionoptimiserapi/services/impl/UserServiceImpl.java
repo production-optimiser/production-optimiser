@@ -119,4 +119,33 @@ public class UserServiceImpl implements UserService {
 
     return UserMapper.toDto(userRepository.save(user));
   }
+
+  @Override
+  // TODO refactor this method to be more efficient with db query
+  public List<UserDTO> updateAdminsWithNewModel(String modelId) {
+    OptimizationModel model =
+        this.optimizationModelService
+            .findOptimizationModelById(modelId)
+            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + modelId));
+
+    return userRepository.findAll().stream()
+        .filter(user -> user.getRole() == UserRole.ADMIN)
+        .map(user -> addModelToUser(user.getId(), model))
+        .toList();
+  }
+
+  @Override
+  public UserDTO addModelToUser(String userId, OptimizationModel model) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found by id " + userId));
+
+    Set<OptimizationModel> updatedModels = new HashSet<>(user.getAvailableOptimizationModels());
+    updatedModels.add(model);
+
+    user.setAvailableOptimizationModels(updatedModels);
+
+    return UserMapper.toDto(userRepository.save(user));
+  }
 }

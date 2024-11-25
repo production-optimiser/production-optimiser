@@ -3,15 +3,12 @@ package it.polimi.productionoptimiserapi.controllers;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
-import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,16 +31,7 @@ public class OptimizationModelController {
     OptimizationModel om =
         this.optimizationModelService.saveOptimizationModel(optimizationModelDTO);
 
-    // Add the new optimization model to all admins
-    userService.getUsers().stream()
-        .filter(user -> user.getRole().equals(UserRole.ADMIN))
-        .forEach(
-            user -> {
-              Set<String> updatedModelIds = new HashSet<>(user.getOptimizationModelIds());
-              updatedModelIds.add(om.getId());
-
-              userService.updateUser(user.getId(), null, null, null, updatedModelIds);
-            });
+    userService.updateAdminsWithNewModel(om.getId());
 
     return ResponseEntity.created(
             ServletUriComponentsBuilder.fromCurrentRequest()
