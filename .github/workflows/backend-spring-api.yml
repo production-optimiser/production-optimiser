@@ -171,10 +171,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       #optimiser service tool
-      - name: Extract repository name
-        id: repo
-        run: echo "::set-output name=repo::$(echo ${{ github.repository }} | cut -d'/' -f2)"
-        shell: bash
 
       - name: Modify tags
         id: modify-tool-tags
