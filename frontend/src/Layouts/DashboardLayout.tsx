@@ -1,6 +1,6 @@
 import React from 'react';
-import SidebarNav from '../components/sidebar';
-import AppLayout from '../components/navbar';
+import SidebarNav from '../Components/sidebar';
+import AppLayout from '../Components/navbar';
 
 const App: React.FC = () => {
   return (
