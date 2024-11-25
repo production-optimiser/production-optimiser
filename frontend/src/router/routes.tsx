@@ -1,5 +1,6 @@
 // router/routes.tsx
-import { createBrowserRouter } from 'react-router-dom';
+// routes.tsx
+import { createBrowserRouter, Navigate } from 'react-router-dom'; // Add Navigate import
 import LoginPage from '../Pages/loginPage';
 import ContactForm from '../Pages/contactUs';
 import Layout from '../Layouts/DashboardLayout';
@@ -8,7 +9,11 @@ import { ProtectedRoute } from './ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
-    path: '*',
+    path: '/',
+    element: <Navigate to="/login" replace />
+  },
+  {
+    path: '/login',
     element: <LoginPage onContactClick={() => router.navigate('/contact')} />,
   },
   {
@@ -31,4 +36,9 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  // Catch-all route at the end
+  {
+    path: '*',
+    element: <Navigate to="/login" replace />
+  }
 ]);

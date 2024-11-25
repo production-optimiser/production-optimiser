@@ -1,4 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { UserProfile } from '../Components/UserProfile/index';
+import { useAuth } from '../Contexts/authContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -6,27 +19,48 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/Components/ui/table';
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Checkbox } from '@/Components/ui/checkbox';
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import SidebarNav from '../Components/sidebar';
-import { UserProfile } from '../components/UserProfile';
-
-interface Model {
-  id: string;
-  name: string;
-  url: string;
-  createdAt: string;
-}
+import { authService } from '../services/auth';
 
 const AdminSidebarContent = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [showLogoutAlert, setShowLogoutAlert] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowLogoutAlert(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
+    try {
+      await authService.logout();
+      logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // You might want to show an error toast here
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutAlert(false);
+    }
+  };
+
+  const handleAccountClick = () => {
+    navigate('/admin/account');
+  };
+
   const sections = [
     {
       id: 'user-management',
@@ -59,21 +93,49 @@ const AdminSidebarContent = () => {
   ];
 
   return (
-    <div className="h-screen border-r flex flex-col">
-      {/* Sidebar Navigation */}
-      <div className="flex-grow">
-        <SidebarNav modelName="Admin Panel" sections={sections} />
+    <>
+      <div className="flex flex-col h-full border-r">
+        <div className="flex-1 overflow-y-auto">
+          <SidebarNav modelName="Admin Panel" sections={sections} />
+        </div>
+        <div className="border-t">
+          <UserProfile 
+            name="Admin1" 
+            email="m@example.com"
+            role="admin"
+            onLogout={handleLogoutClick}
+            onAccountClick={handleAccountClick}
+          />
+        </div>
       </div>
-      {/* User Profile at the bottom */}
-      <div className="border-t mt-auto">
-        <UserProfile name="Admin1" email="m@example.com" />
-      </div>
-    </div>
+
+      <AlertDialog open={showLogoutAlert} onOpenChange={setShowLogoutAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will be signed out of your account and redirected to the login page.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleLogoutConfirm}
+              disabled={isLoggingOut}
+              className="bg-amber-600 hover:bg-amber-700"
+            >
+              {isLoggingOut ? "Logging out..." : "Log out"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
 const AdminDashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [filterText, setFilterText] = useState('');
   const [models] = useState<Model[]>([
     {
       id: '851be781-5493-4ea4-95a5-62e87bd5c7f0',
@@ -95,17 +157,27 @@ const AdminDashboard = () => {
     },
   ]);
 
+  // Filter models based on search text
+  const filteredModels = models.filter(model =>
+    model.name.toLowerCase().includes(filterText.toLowerCase())
+  );
+
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       <div className="w-64">
         <AdminSidebarContent />
       </div>
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Manage Models</h1>
         </div>
 
-        <Input className="max-w-sm mb-6" placeholder="Filter names..." />
+        <Input 
+          className="max-w-sm mb-6" 
+          placeholder="Filter names..." 
+          value={filterText}
+          onChange={(e) => setFilterText(e.target.value)}
+        />
 
         <Table>
           <TableHeader>
@@ -121,7 +193,7 @@ const AdminDashboard = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {models.map((model) => (
+            {filteredModels.map((model) => (
               <TableRow key={model.id}>
                 <TableCell>
                   <Checkbox />

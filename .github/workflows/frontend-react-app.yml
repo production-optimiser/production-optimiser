@@ -1,19 +1,19 @@
 name: Frontend React App
 
-on:
-  push:
-    paths:
-      - frontend/**
-    branches:
-      - main
-      - develop
-      
-  pull_request:
-    paths:
-      - frontend/**
-    branches:
-      - main
-      - develop
+#on:
+#  push:
+#    paths:
+#      - frontend/**
+#    branches:
+#      - main
+#      - develop
+#
+#  pull_request:
+#    paths:
+#      - frontend/**
+#    branches:
+#      - main
+#      - develop
 
 jobs:
   check-js-format:
