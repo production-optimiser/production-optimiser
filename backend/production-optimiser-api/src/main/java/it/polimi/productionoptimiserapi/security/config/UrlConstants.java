@@ -8,4 +8,5 @@ public class UrlConstants {
   public static final String DOCS_URL = "/docs/**";
   public static final String SWAGGER_URL = "/swagger-ui/**";
   public static final String ACTUATOR_URL = "/actuator/**";
+  public static final String USER_REQUEST_URL = BASE_URL + "/user-requests/form";
 }

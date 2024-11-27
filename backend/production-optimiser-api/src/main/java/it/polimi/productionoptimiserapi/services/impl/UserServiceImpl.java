@@ -7,8 +7,10 @@ import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.enums.UserStatus;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
+import it.polimi.productionoptimiserapi.repositories.UserRequestRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
+  private final UserRequestRepository userRequestRepository;
 
   private final OptimizationModelService optimizationModelService;
 
@@ -42,7 +45,10 @@ public class UserServiceImpl implements UserService {
         .collect(Collectors.toSet());
   }
 
+  // TODO send email when creating a user
   public User createUser(UserDTO userDTO) {
+    validateUserEmail(userDTO.getEmail());
+
     User user = userDTO.toEntity();
     user.setStatus(UserStatus.ACTIVE);
 
@@ -148,5 +154,16 @@ public class UserServiceImpl implements UserService {
     user.setAvailableOptimizationModels(updatedModels);
 
     return UserMapper.toDto(userRepository.save(user));
+  }
+
+  private void validateUserEmail(String email) {
+    if (userRepository.existsUserByEmail(email)) {
+      throw new EntityExistsException("User with email address: " + email + " already exists.");
+    }
+
+    if (userRequestRepository.existsUserRequestByEmail(email)) {
+      throw new EntityExistsException(
+          "User request with email address: " + email + " already exists.");
+    }
   }
 }
