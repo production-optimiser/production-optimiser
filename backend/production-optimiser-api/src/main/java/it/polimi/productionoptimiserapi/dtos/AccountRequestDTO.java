@@ -18,7 +18,7 @@ public class AccountRequestDTO {
   @Email
   private String email;
 
-  @NotNull @Email private String message;
+  @NotNull private String message;
 
   public AccountRequest toEntity() {
     return AccountRequest.builder().email(email).message(message).build();
