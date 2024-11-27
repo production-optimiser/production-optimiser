@@ -14,5 +14,5 @@ public interface AccountRequestService {
 
   UserDTO approveAccountRequest(KeyValueDTO keyValueDTO);
 
-  void denyAccountRequest(KeyValueDTO keyValueDTO);
+  AccountRequestDTO denyAccountRequest(KeyValueDTO keyValueDTO);
 }

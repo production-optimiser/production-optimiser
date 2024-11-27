@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
   // TODO send email when creating a user
   public User createUser(UserDTO userDTO) {
-    validateUserEmail(userDTO.getEmail());
+    validateExistingEmail(userDTO.getEmail());
 
     User user = userDTO.toEntity();
     user.setStatus(UserStatus.ACTIVE);
@@ -156,7 +156,8 @@ public class UserServiceImpl implements UserService {
     return UserMapper.toDto(userRepository.save(user));
   }
 
-  private void validateUserEmail(String email) {
+  @Override
+  public void validateExistingEmail(String email) {
     if (userRepository.existsUserByEmail(email)) {
       throw new EntityExistsException("User with email address: " + email + " already exists.");
     }

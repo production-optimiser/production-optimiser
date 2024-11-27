@@ -9,10 +9,8 @@ import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.mappers.AccountRequestMapper;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
-import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.AccountRequestService;
 import it.polimi.productionoptimiserapi.services.UserService;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountRequestServiceImpl implements AccountRequestService {
 
   private final AccountRequestRepository accountRequestRepository;
-  private final UserRepository userRepository;
   private final UserService userService;
 
   @Override
@@ -44,7 +41,7 @@ public class AccountRequestServiceImpl implements AccountRequestService {
   @Override
   @Transactional
   public AccountRequestDTO createAccountRequest(AccountRequestDTO accountRequestDTO) {
-    validateAccountRequestEmail(accountRequestDTO.getEmail());
+    userService.validateExistingEmail(accountRequestDTO.getEmail());
 
     AccountRequest accountRequest = accountRequestDTO.toEntity();
     accountRequest = accountRequestRepository.save(accountRequest);
@@ -79,23 +76,18 @@ public class AccountRequestServiceImpl implements AccountRequestService {
   // TODO send email when denying a request
   @Override
   @Transactional
-  public void denyAccountRequest(KeyValueDTO keyValueDTO) {
-    if (!accountRequestRepository.existsById(keyValueDTO.getKey())) {
-      throw new EntityNotFoundException(
-          "Account request with id " + keyValueDTO.getKey() + " not found");
-    }
+  public AccountRequestDTO denyAccountRequest(KeyValueDTO keyValueDTO) {
+    AccountRequest accountRequest =
+        accountRequestRepository
+            .findById(keyValueDTO.getKey())
+            .orElseThrow(
+                () ->
+                    new EntityNotFoundException(
+                        "Account request with id " + keyValueDTO.getKey() + " not found"));
 
+    AccountRequestDTO accountRequestDTO = AccountRequestMapper.toDto(accountRequest);
     accountRequestRepository.deleteById(keyValueDTO.getKey());
-  }
 
-  private void validateAccountRequestEmail(String email) {
-    if (accountRequestRepository.existsAccountRequestByEmail(email)) {
-      throw new EntityExistsException(
-          "Account request with email address: " + email + " already exists.");
-    }
-
-    if (userRepository.existsUserByEmail(email)) {
-      throw new EntityExistsException("User with email address: " + email + " already exists.");
-    }
+    return accountRequestDTO;
   }
 }

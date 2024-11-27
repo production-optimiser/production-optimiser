@@ -102,3 +102,10 @@ VALUES
     ('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440006'),
     ('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440007'),
     ('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440008');
+
+INSERT INTO account_requests(id, created_at, updated_at, email, message)
+VALUES
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request1@mail.com', 'Please add me as a user.'),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request2@mail.com', 'Please add me as a user.'),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request3@mail.com', 'Please add me as a user.'),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request4@mail.com', 'Please add me as a user.')

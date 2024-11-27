@@ -94,7 +94,7 @@ public class AccountRequestIntegrationTests extends BaseIntegrationTestSetup {
         .contentType(ContentType.JSON)
         .body(accountRequestDTO)
         .when()
-        .post("/api/account-requests/form")
+        .post("/api/account-requests")
         .then()
         .statusCode(HttpStatus.OK.value())
         .body("email", equalTo(accountRequestDTO.getEmail()))
@@ -172,7 +172,8 @@ public class AccountRequestIntegrationTests extends BaseIntegrationTestSetup {
         .post("/api/account-requests/deny")
         .then()
         .statusCode(HttpStatus.OK.value())
-        .body(equalTo("Account request with id: " + accountRequestId + " was denied."));
+        .body("email", equalTo(accountRequestDTO.getEmail()))
+        .body("message", equalTo(accountRequestDTO.getMessage()));
 
     assertTrue(accountRequestRepository.findById(accountRequestId).isEmpty());
   }

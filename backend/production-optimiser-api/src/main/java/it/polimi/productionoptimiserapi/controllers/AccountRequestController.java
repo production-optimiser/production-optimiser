@@ -23,13 +23,13 @@ public class AccountRequestController {
     return accountRequestService.getAccountRequest(id);
   }
 
-  @GetMapping("/all")
+  @GetMapping()
   @PreAuthorize("hasRole('ADMIN')")
   public List<AccountRequestDTO> getAccountRequests() {
     return accountRequestService.getAccountRequests();
   }
 
-  @PostMapping("/form")
+  @PostMapping()
   public AccountRequestDTO createAccountRequest(
       @Valid @RequestBody AccountRequestDTO accountRequestDTO) {
     return accountRequestService.createAccountRequest(accountRequestDTO);
@@ -51,8 +51,7 @@ public class AccountRequestController {
    */
   @PostMapping("/deny")
   @PreAuthorize("hasRole('ADMIN')")
-  public String denyAccountRequest(@RequestBody KeyValueDTO keyValueDTO) {
-    accountRequestService.denyAccountRequest(keyValueDTO);
-    return "Account request with id: " + keyValueDTO.getKey() + " was denied.";
+  public AccountRequestDTO denyAccountRequest(@RequestBody KeyValueDTO keyValueDTO) {
+    return accountRequestService.denyAccountRequest(keyValueDTO);
   }
 }
