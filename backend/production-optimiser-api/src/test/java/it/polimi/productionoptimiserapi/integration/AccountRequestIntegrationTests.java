@@ -145,7 +145,6 @@ public class AccountRequestIntegrationTests extends BaseIntegrationTestSetup {
         .body("email", equalTo(accountRequestDTO.getEmail()))
         .body("role", equalTo("CUSTOMER"));
 
-    // Verify that the account request has been deleted
     assertTrue(accountRequestRepository.findById(accountRequestId).isEmpty());
   }
 
@@ -175,7 +174,6 @@ public class AccountRequestIntegrationTests extends BaseIntegrationTestSetup {
         .statusCode(HttpStatus.OK.value())
         .body(equalTo("Account request with id: " + accountRequestId + " was denied."));
 
-    // Verify that the account request has been deleted
     assertTrue(accountRequestRepository.findById(accountRequestId).isEmpty());
   }
 }
