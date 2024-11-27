@@ -24,4 +24,6 @@ public interface UserService {
   List<UserDTO> updateAdminsWithNewModel(String modelId);
 
   UserDTO addModelToUser(String userId, OptimizationModel model);
+
+  void validateExistingEmail(String email);
 }
