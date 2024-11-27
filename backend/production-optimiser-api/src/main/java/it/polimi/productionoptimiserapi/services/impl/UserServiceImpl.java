@@ -6,8 +6,8 @@ import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.enums.UserStatus;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
+import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
-import it.polimi.productionoptimiserapi.repositories.UserRequestRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityExistsException;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
-  private final UserRequestRepository userRequestRepository;
+  private final AccountRequestRepository accountRequestRepository;
 
   private final OptimizationModelService optimizationModelService;
 
@@ -161,9 +161,9 @@ public class UserServiceImpl implements UserService {
       throw new EntityExistsException("User with email address: " + email + " already exists.");
     }
 
-    if (userRequestRepository.existsUserRequestByEmail(email)) {
+    if (accountRequestRepository.existsAccountRequestByEmail(email)) {
       throw new EntityExistsException(
-          "User request with email address: " + email + " already exists.");
+          "Account request with email address: " + email + " already exists.");
     }
   }
 }

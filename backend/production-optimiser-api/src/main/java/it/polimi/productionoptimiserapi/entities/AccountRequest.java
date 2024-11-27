@@ -7,13 +7,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table(name = "user_requests")
+@Table(name = "account_requests")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
-public class UserRequest extends BaseEntity {
+public class AccountRequest extends BaseEntity {
 
   @Column(unique = true)
   @NotNull

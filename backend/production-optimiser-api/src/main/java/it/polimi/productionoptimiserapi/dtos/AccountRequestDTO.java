@@ -1,6 +1,6 @@
 package it.polimi.productionoptimiserapi.dtos;
 
-import it.polimi.productionoptimiserapi.entities.UserRequest;
+import it.polimi.productionoptimiserapi.entities.AccountRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class UserRequestDTO {
+public class AccountRequestDTO {
 
   private String id;
 
@@ -20,7 +20,7 @@ public class UserRequestDTO {
 
   @NotNull @Email private String message;
 
-  public UserRequest toEntity() {
-    return UserRequest.builder().email(email).message(message).build();
+  public AccountRequest toEntity() {
+    return AccountRequest.builder().email(email).message(message).build();
   }
 }
