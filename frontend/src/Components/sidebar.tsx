@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
 import { ChevronDown, Copy } from 'lucide-react';
+import { UserProfile } from '../Components/UserProfile/index.tsx';
+import { User } from '@/types/auth';
+import { authService } from '@/services/auth';
 
 interface OptimizationItem {
   id: string; // Added unique identifier
@@ -73,55 +76,122 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
     // Implement model selection logic here
   };
 
-  return (
-    <Card className="w-64 h-screen">
-      <div className="p-4 border-b">
-        <Button
-          variant="ghost"
-          className="w-full justify-between"
-          onClick={handleModelSelect}
-          aria-label="Select model"
-          aria-expanded="false"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
-              <Copy className="w-4 h-4" aria-hidden="true" />
-            </div>
-            <span className="text-sm font-medium">
-              {modelName} - {modelVersion}
-            </span>
-          </div>
-          <ChevronDown className="w-4 h-4" aria-hidden="true" />
-        </Button>
-      </div>
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-      <ScrollArea className="h-[calc(100vh-5rem)]">
-        <nav aria-label="Optimization history" className="p-4">
-          <div className="space-y-4">
-            {sections.map((section) => (
-              <div key={section.id}>
-                <h2 className="text-sm font-medium mb-2">{section.title}</h2>
-                <div className="space-y-1">
-                  {section.items.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant="ghost"
-                      className={`w-full justify-start text-sm ${
-                        item.isDisabled ? 'text-gray-500' : ''
-                      }`}
-                      disabled={item.isDisabled}
-                      aria-label={`Open ${item.title}${item.isDisabled ? ' (disabled)' : ''}`}
-                    >
-                      {item.title}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            ))}
+  useEffect(() => {
+    // Get user details from token
+    const user = authService.getCurrentUser();
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, []);
+
+  return (
+    // <Card className="w-64 h-screen">
+    //   <div className="p-4 border-b">
+    //     <Button
+    //       variant="ghost"
+    //       className="w-full justify-between"
+    //       onClick={handleModelSelect}
+    //       aria-label="Select model"
+    //       aria-expanded="false"
+    //     >
+    //       <div className="flex items-center gap-2">
+    //         <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
+    //           <Copy className="w-4 h-4" aria-hidden="true" />
+    //         </div>
+    //         <span className="text-sm font-medium">
+    //           {modelName} - {modelVersion}
+    //         </span>
+    //       </div>
+    //       <ChevronDown className="w-4 h-4" aria-hidden="true" />
+    //     </Button>
+    //   </div>
+
+    //   <ScrollArea className="h-[calc(100vh-5rem)]">
+    //     <nav aria-label="Optimization history" className="p-4">
+    //       <div className="space-y-4">
+    //         {sections.map((section) => (
+    //           <div key={section.id}>
+    //             <h2 className="text-sm font-medium mb-2">{section.title}</h2>
+    //             <div className="space-y-1">
+    //               {section.items.map((item) => (
+    //                 <Button
+    //                   key={item.id}
+    //                   variant="ghost"
+    //                   className={`w-full justify-start text-sm ${
+    //                     item.isDisabled ? 'text-gray-500' : ''
+    //                   }`}
+    //                   disabled={item.isDisabled}
+    //                   aria-label={`Open ${item.title}${item.isDisabled ? ' (disabled)' : ''}`}
+    //                 >
+    //                   {item.title}
+    //                 </Button>
+    //               ))}
+    //             </div>
+    //           </div>
+    //         ))}
+    //       </div>
+           
+    //     </nav>
+    //     <div className="border-t mt-auto ">
+    //         <UserProfile name={currentUser?.email?.split('@')[0] || 'User'} email={currentUser?.email || ''} />
+    //       </div>
+    //   </ScrollArea>
+    // </Card>
+    <Card className="w-64 h-screen flex flex-col">
+  <div className="p-4 border-b">
+    <Button
+      variant="ghost"
+      className="w-full justify-between"
+      onClick={handleModelSelect}
+      aria-label="Select model"
+      aria-expanded="false"
+    >
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
+          <Copy className="w-4 h-4" aria-hidden="true" />
+        </div>
+        <span className="text-sm font-medium">
+          {modelName} - {modelVersion}
+        </span>
+      </div>
+      <ChevronDown className="w-4 h-4" aria-hidden="true" />
+    </Button>
+  </div>
+
+  <ScrollArea className="flex-1">
+    <nav aria-label="Optimization history" className="p-4">
+      <div className="space-y-4">
+        {sections.map((section) => (
+          <div key={section.id}>
+            <h2 className="text-sm font-medium mb-2">{section.title}</h2>
+            <div className="space-y-1">
+              {section.items.map((item) => (
+                <Button
+                  key={item.id}
+                  variant="ghost"
+                  className={`w-full justify-start text-sm ${
+                    item.isDisabled ? 'text-gray-500' : ''
+                  }`}
+                  disabled={item.isDisabled}
+                  aria-label={`Open ${item.title}${item.isDisabled ? ' (disabled)' : ''}`}
+                >
+                  {item.title}
+                </Button>
+              ))}
+            </div>
           </div>
-        </nav>
-      </ScrollArea>
-    </Card>
+        ))}
+      </div>
+    </nav>
+  </ScrollArea>
+
+  <div className="border-t p-4">
+    <UserProfile name={currentUser?.email?.split('@')[0] || 'User'} email={currentUser?.email || ''} />
+  </div>
+</Card>
+
   );
 };
 
