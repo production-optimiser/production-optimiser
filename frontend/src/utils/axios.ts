@@ -1,21 +1,4 @@
-/*import axios from 'axios';
-
-const instance = axios.create({
-  baseURL: 'http://localhost:8080/api',
-});
-
-instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export default instance;*/ 
-
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-
 
 // const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 const API_URL = 'https://dsd.commanderkowalski.uk/api';
@@ -58,7 +41,7 @@ instance.interceptors.response.use(
 
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      
+
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
@@ -82,7 +65,7 @@ export const handleApiError = (error: AxiosError): ApiError => {
       data: error.response.data
     };
   }
-  
+
   if (error.request) {
     return {
       status: 0,
@@ -90,7 +73,7 @@ export const handleApiError = (error: AxiosError): ApiError => {
       data: null
     };
   }
-  
+
   return {
     status: 0,
     message: error.message || 'Request failed',

@@ -1,8 +1,4 @@
-// components/users/ModelAssignment.tsx
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '@/utils/axios';
-import { Input } from '@/Components/ui/input';
-import { Button } from '@/Components/ui/button';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -11,6 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/Components/ui/table';
+import { Input } from '@/Components/ui/input';
+import { Button } from '@/Components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -45,74 +43,44 @@ export const ModelAssignment = () => {
   const [userModels, setUserModels] = useState<Model[]>([]);
   const [filterModels, setFilterModels] = useState('');
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
-  const [availableModels, setAvailableModels] = useState<Model[]>([]);
+  const [availableModels] = useState<Model[]>([
+    { id: '1', name: 'Model 2', url: 'model2.com', createdAt: '2024-01-01' },
+    { id: '2', name: 'Model 3', url: 'model3.com', createdAt: '2024-01-02' },
+    { id: '3', name: 'Model 4', url: 'model4.com', createdAt: '2024-01-03' },
+    { id: '4', name: 'Model 5', url: 'model5.com', createdAt: '2024-01-04' },
+    { id: '5', name: 'Deployed model', url: 'deployed.com', createdAt: '2024-01-05' },
+    { id: '6', name: 'testing', url: 'testing.com', createdAt: '2024-01-06' },
+    { id: '7', name: 'model 1', url: 'model1.com', createdAt: '2024-01-07' },
+  ]);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [modelToRemove, setModelToRemove] = useState<Model | null>(null);
 
-  const searchUsers = async () => {
-    try {
-      const response = await axiosInstance.get(`/users?filter=${searchUser}`);
-      const user = response.data[0]; // Assuming we want the first match
-      if (user) {
-        setSelectedUser(user);
-        fetchUserModels(user.id);
-      }
-    } catch (error) {
-      console.error('Error searching users:', error);
-    }
+  const searchUsers = () => {
+    // Simulate user search with dummy data
+    const user = {
+      id: '550e8400-e29b-41d4-a716-446655440002',
+      email: 'customer1',
+    };
+    setSelectedUser(user);
+    // Set some dummy models for the user
+    setUserModels([
+      { id: '8', name: 'Existing Model 1', url: 'existing1.com', createdAt: '2024-01-08' },
+      { id: '9', name: 'Existing Model 2', url: 'existing2.com', createdAt: '2024-01-09' },
+    ]);
   };
 
-  const fetchUserModels = async (userId: string) => {
-    try {
-      const response = await axiosInstance.get(`/users/${userId}`);
-      setUserModels(response.data.models || []);
-    } catch (error) {
-      console.error('Error fetching user models:', error);
-    }
+  const handleAssignModel = (model: Model) => {
+    alert(`Model "${model.name}" has been assigned to ${selectedUser?.email}`);
+    setIsAssignDialogOpen(false);
   };
 
-  const fetchAvailableModels = async () => {
-    try {
-      const response = await axiosInstance.get('/models');
-      const allModels = response.data;
-      // Filter out models that user already has
-      const available = allModels.filter(
-        (model: Model) => !userModels.some(um => um.id === model.id)
-      );
-      setAvailableModels(available);
-    } catch (error) {
-      console.error('Error fetching available models:', error);
-    }
-  };
-
-  const handleAssignModels = async (selectedModels: Model[]) => {
-    if (!selectedUser) return;
-    try {
-      // Keep old models and add new ones
-      const updatedModels = [...userModels, ...selectedModels];
-      await axiosInstance.patch(`/users/${selectedUser.id}`, {
-        models: updatedModels
-      });
-      setIsAssignDialogOpen(false);
-      fetchUserModels(selectedUser.id);
-    } catch (error) {
-      console.error('Error assigning models:', error);
-    }
-  };
-
-  const handleRemoveModel = async () => {
-    if (!selectedUser || !modelToRemove) return;
-    try {
-      const updatedModels = userModels.filter(m => m.id !== modelToRemove.id);
-      await axiosInstance.patch(`/users/${selectedUser.id}`, {
-        models: updatedModels
-      });
-      setIsRemoveDialogOpen(false);
-      setModelToRemove(null);
-      fetchUserModels(selectedUser.id);
-    } catch (error) {
-      console.error('Error removing model:', error);
-    }
+  const handleRemoveModel = () => {
+    if (!modelToRemove) return;
+    
+    alert(`Model "${modelToRemove.name}" has been removed from ${selectedUser?.email}`);
+    setUserModels(userModels.filter(m => m.id !== modelToRemove.id));
+    setIsRemoveDialogOpen(false);
+    setModelToRemove(null);
   };
 
   const filteredModels = userModels.filter(model =>
@@ -195,10 +163,7 @@ export const ModelAssignment = () => {
 
           <div className="mt-4">
             <Button
-              onClick={() => {
-                fetchAvailableModels();
-                setIsAssignDialogOpen(true);
-              }}
+              onClick={() => setIsAssignDialogOpen(true)}
               className="bg-amber-600 hover:bg-amber-700"
             >
               Assign Model
@@ -223,7 +188,7 @@ export const ModelAssignment = () => {
                     <div className="text-sm text-gray-500">{model.url}</div>
                   </div>
                   <Button
-                    onClick={() => handleAssignModels([model])}
+                    onClick={() => handleAssignModel(model)}
                     size="sm"
                   >
                     Select

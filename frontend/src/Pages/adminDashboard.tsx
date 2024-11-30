@@ -20,6 +20,7 @@ import SidebarNav from '../Components/sidebar';
 import { UserProfile } from '../Components/userProfile';
 import { UserManagement } from '../Components/users/UserManagement';
 import { ModelAssignment } from '../Components/users/ModelAssignment';
+import { UserRequests } from '../Components/users/UserRequests';
 
 interface Model {
   id: string;
@@ -43,8 +44,8 @@ const AdminSidebarContent = ({ onSectionSelect }: { onSectionSelect: (id: string
           title: 'Model Assignment',
         },
         {
-          id: 'account-requests',
-          title: 'Account Requests',
+          id: 'user-requests',
+          title: 'User Requests',
         },
       ],
     },
@@ -137,24 +138,6 @@ const ManageModels = ({ models, onOpenDialog }: {
   );
 };
 
-/*const ModelAssignment = () => {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Model Assignment</h1>
-      <div>Model Assignment content goes here</div>
-    </div>
-  );
-};
-*/
-const AccountRequests = () => {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Account Requests</h1>
-      <div>Account Requests content goes here</div>
-    </div>
-  );
-};
-
 const AdminDashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('manage-models');
@@ -191,14 +174,12 @@ const AdminDashboard = () => {
         return <ManageModels models={models} onOpenDialog={() => setIsDialogOpen(true)} />;
       case 'model-assignment':
         return <ModelAssignment />;
-      case 'account-requests':
-        return <AccountRequests />;
+      case 'user-requests':
+        return <UserRequests />;
       default:
         return <div>Select a section</div>;
     }
   };
-
-
 
   return (
     <div className="flex">
