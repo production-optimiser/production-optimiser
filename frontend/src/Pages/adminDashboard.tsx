@@ -19,6 +19,7 @@ import { Checkbox } from '@/Components/ui/checkbox';
 import SidebarNav from '../Components/sidebar';
 import { UserProfile } from '../Components/userProfile';
 import { UserManagement } from '../Components/users/UserManagement';
+import { ModelAssignment } from '../Components/users/ModelAssignment';
 
 interface Model {
   id: string;
@@ -136,7 +137,7 @@ const ManageModels = ({ models, onOpenDialog }: {
   );
 };
 
-const ModelAssignment = () => {
+/*const ModelAssignment = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Model Assignment</h1>
@@ -144,7 +145,7 @@ const ModelAssignment = () => {
     </div>
   );
 };
-
+*/
 const AccountRequests = () => {
   return (
     <div>
@@ -196,6 +197,8 @@ const AdminDashboard = () => {
         return <div>Select a section</div>;
     }
   };
+
+
 
   return (
     <div className="flex">
