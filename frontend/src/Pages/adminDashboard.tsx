@@ -70,9 +70,7 @@ const AdminSidebarContent = ({ onSectionSelect }: { onSectionSelect: (id: string
           onItemClick={onSectionSelect}
         />
       </div>
-      <div className="border-t mt-auto">
-        <UserProfile name="Admin1" email="m@example.com" />
-      </div>
+      
     </div>
   );
 };
