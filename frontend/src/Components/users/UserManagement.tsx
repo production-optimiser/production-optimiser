@@ -26,12 +26,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 interface User {
   id: string;
   email: string;
   role: 'ADMIN' | 'CUSTOMER';
+  status?: 'ACTIVE' | 'DELETED';
   createdAt: string;
+}
+
+interface EditUserForm {
+  email: string;
+  role: 'ADMIN' | 'CUSTOMER';
+  password?: string;
 }
 
 interface AddUserRequest {
@@ -45,8 +59,14 @@ export const UserManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({ email: '', password: '' });
+  const [editForm, setEditForm] = useState<EditUserForm>({
+    email: '',
+    role: 'CUSTOMER',
+    password: '',
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -80,15 +100,33 @@ export const UserManagement = () => {
   const handleEditUser = async () => {
     if (!selectedUser) return;
     try {
-      await axiosInstance.patch(`/users/${selectedUser.id}`, {
-        email: selectedUser.email,
-        role: selectedUser.role
-      });
+      const updateData = {
+        email: editForm.email,
+        role: editForm.role,
+        ...(editForm.password ? { password: editForm.password } : {})
+      };
+      
+      await axiosInstance.patch(`/users/${selectedUser.id}`, updateData);
       setIsEditDialogOpen(false);
       setSelectedUser(null);
+      setEditForm({ email: '', role: 'CUSTOMER', password: '' });
       await fetchUsers();
     } catch (error) {
       console.error('Error editing user:', error);
+    }
+  };
+
+  const handleBlockUser = async () => {
+    if (!selectedUser) return;
+    try {
+      await axiosInstance.patch(`/users/${selectedUser.id}`, {
+        status: 'DELETED'
+      });
+      setIsBlockDialogOpen(false);
+      setSelectedUser(null);
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error blocking user:', error);
     }
   };
 
@@ -104,13 +142,23 @@ export const UserManagement = () => {
     }
   };
 
+  const handleOpenEditDialog = (user: User) => {
+    setSelectedUser(user);
+    setEditForm({
+      email: user.email,
+      role: user.role,
+      password: ''
+    });
+    setIsEditDialogOpen(true);
+  };
+
   const filteredUsers = users.filter(user => 
     user.email.toLowerCase().includes(filterText.toLowerCase())
   );
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Manage Current Users</h1>
+      <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
       
       <div className="flex justify-between mb-4">
         <Input
@@ -127,19 +175,21 @@ export const UserManagement = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-12"><Checkbox /></TableHead>
-              <TableHead>Role</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead>Id</TableHead>
               <TableHead>Created At</TableHead>
-              <TableHead className="w-[70px]"></TableHead>
+              <TableHead className="w-[70px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredUsers.map((user) => (
               <TableRow key={user.id}>
                 <TableCell><Checkbox /></TableCell>
-                <TableCell>{user.role}</TableCell>
                 <TableCell>{user.email}</TableCell>
+                <TableCell>{user.status || 'ACTIVE'}</TableCell>
+                <TableCell>{user.role}</TableCell>
                 <TableCell>{user.id}</TableCell>
                 <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>
@@ -150,11 +200,16 @@ export const UserManagement = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => {
-                        setSelectedUser(user);
-                        setIsEditDialogOpen(true);
-                      }}>
+                      <DropdownMenuItem onClick={() => handleOpenEditDialog(user)}>
                         Edit User
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsBlockDialogOpen(true);
+                        }}
+                      >
+                        Block User
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         className="text-red-600"
@@ -224,27 +279,75 @@ export const UserManagement = () => {
           <DialogHeader>
             <DialogTitle>Edit user</DialogTitle>
           </DialogHeader>
-          {selectedUser && (
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <label htmlFor="edit-email">Email</label>
-                <Input
-                  id="edit-email"
-                  placeholder="Email"
-                  value={selectedUser.email}
-                  onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
-                />
-              </div>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label>Email</label>
+              <Input
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+              />
             </div>
-          )}
+            <div className="grid gap-2">
+              <label>Role</label>
+              <Select
+                value={editForm.role}
+                onValueChange={(value: 'ADMIN' | 'CUSTOMER') => 
+                  setEditForm({ ...editForm, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                  <SelectItem value="CUSTOMER">CUSTOMER</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <label>Password</label>
+              <Input
+                type="password"
+                placeholder="Enter new password (optional)"
+                value={editForm.password || ''}
+                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+              />
+            </div>
+          </div>
           <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={() => setIsEditDialogOpen(false)}
+              onClick={() => {
+                setIsEditDialogOpen(false);
+                setEditForm({ email: '', role: 'CUSTOMER', password: '' });
+              }}
             >
               Cancel
             </Button>
-            <Button onClick={handleEditUser}>Save changes</Button>
+            <Button onClick={handleEditUser}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block User Dialog */}
+      <Dialog open={isBlockDialogOpen} onOpenChange={setIsBlockDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Block user ({selectedUser?.email})?</DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsBlockDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleBlockUser}
+            >
+              Block
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
