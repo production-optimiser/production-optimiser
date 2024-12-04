@@ -6,9 +6,6 @@ import it.polimi.productionoptimiserapi.enums.GraphType;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
-
-import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,40 +43,39 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
     List<MaximumPalletsUsed> maximumPalletsUsed = new ArrayList<>();
     List<Graph> graphs = new ArrayList<>();
 
-    dto.getPalletsDefinedInExcel().forEach((pallets, count) ->
-            excelDefinedPallets.add(new ExcelDefinedPallets(pallets, count))
-    );
+    dto.getPalletsDefinedInExcel()
+        .forEach(
+            (pallets, count) -> excelDefinedPallets.add(new ExcelDefinedPallets(pallets, count)));
 
-    dto.getMaximumPalletsUsed().forEach((pallets, count) ->
-            maximumPalletsUsed.add(new MaximumPalletsUsed(pallets, count))
-    );
+    dto.getMaximumPalletsUsed()
+        .forEach(
+            (pallets, count) -> maximumPalletsUsed.add(new MaximumPalletsUsed(pallets, count)));
 
-    dto.getGraphs().forEach((type, content) -> {
-            Graph g = new Graph();
-            g.setType(type);
-            g.setBase64EncodedImage(content);
-            graphs.add(g);
-    });
-
-
+    dto.getGraphs()
+        .forEach(
+            (type, content) -> {
+              Graph g = new Graph();
+              g.setType(type);
+              g.setBase64EncodedImage(content);
+              graphs.add(g);
+            });
 
     return new OptimizationResult(
-            inputFile,
-            dto.getInitialTotalProductionTime(),
-            dto.getOptimizedTotalProductionTime(),
-            dto.getTimeImprovement(),
-            dto.getPercentageImprovement(),
-            dto.getAverageInitialTotalMachineUtilization(),
-            dto.getAverageOptimizedTotalMachineUtilization(),
-            dto.getUtilizationImprovement(),
-            excelDefinedPallets,
-            maximumPalletsUsed,
-            dto.getTotalTimeWithOptimizedPallets(),
-            dto.getTotalTimeWithExcelPallets(),
-            dto.getBestSequenceOfProducts(),
-            graphs,
-            user
-    );
+        inputFile,
+        dto.getInitialTotalProductionTime(),
+        dto.getOptimizedTotalProductionTime(),
+        dto.getTimeImprovement(),
+        dto.getPercentageImprovement(),
+        dto.getAverageInitialTotalMachineUtilization(),
+        dto.getAverageOptimizedTotalMachineUtilization(),
+        dto.getUtilizationImprovement(),
+        excelDefinedPallets,
+        maximumPalletsUsed,
+        dto.getTotalTimeWithOptimizedPallets(),
+        dto.getTotalTimeWithExcelPallets(),
+        dto.getBestSequenceOfProducts(),
+        graphs,
+        user);
   }
 
   @Override

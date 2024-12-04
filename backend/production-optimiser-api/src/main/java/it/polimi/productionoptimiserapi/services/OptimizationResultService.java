@@ -3,7 +3,6 @@ package it.polimi.productionoptimiserapi.services;
 import it.polimi.productionoptimiserapi.dtos.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.entities.OptimizationResult;
 import it.polimi.productionoptimiserapi.entities.User;
-
 import java.util.List;
 
 public interface OptimizationResultService {
