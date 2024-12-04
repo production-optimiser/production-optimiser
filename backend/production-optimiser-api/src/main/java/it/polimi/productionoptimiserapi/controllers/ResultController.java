@@ -1,6 +1,6 @@
 package it.polimi.productionoptimiserapi.controllers;
 
-import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
+import it.polimi.productionoptimiserapi.dtos.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,7 @@ public class ResultController {
 
   @GetMapping
   public List<OptimizationResultDto> getAllResults(@RequestParam String userId) {
+    System.out.println("Getting all results ofr user " + userId);
     return resultService.getAllResults(userId);
   }
 

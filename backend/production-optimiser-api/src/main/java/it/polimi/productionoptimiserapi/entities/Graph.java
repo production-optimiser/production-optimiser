@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "graphs")
 @AllArgsConstructor
@@ -27,4 +29,10 @@ public class Graph extends BaseEntity {
   @JoinColumn(name = "result_id", nullable = false)
   @JsonBackReference
   private OptimizationResult result;
+
+  public Graph(String id, LocalDateTime createdAt, LocalDateTime updatedAt, String base64EncodedImage, GraphType type) {
+    super(id, createdAt, updatedAt);
+    this.base64EncodedImage = base64EncodedImage;
+    this.type = type;
+  }
 }

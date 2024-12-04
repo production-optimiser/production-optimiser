@@ -46,7 +46,7 @@ VALUES
       513.5,
       18.46,
       'g skibidi skibidi e skibidi g skibidi skibidi b e e d i b b h h g c c c h i c c d f h e d g d d f h d h d d d c d e i b e h b c e g e h b c b f i skibidi skibidi skibidi c b f b f b f f g f c g skibidi g g g h skibidi h i f i i i e i e f i',
-     '550e8400-e29b-41d4-a716-446655440002');
+     '550e8400-e29b-41d4-a716-446655440000');
 
 
 INSERT INTO defined_pallets(pallets_count, created_at, updated_at, defined_pallets, id)

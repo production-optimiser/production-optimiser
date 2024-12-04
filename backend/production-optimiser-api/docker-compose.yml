@@ -20,20 +20,20 @@ services:
       start_period: 10s
     restart: on-failure
 
-  production-optimiser:
-    container_name: production-optimiser-api
-    image: production-optimiser-api:latest
-    pull_policy: build
-    build:
-      context: .
-      dockerfile: ./Dockerfile.local
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/production_optimiser
-      - SPRING_DATASOURCE_USERNAME=production_optimiser
-      - SPRING_DATASOURCE_PASSWORD=production_optimiser
-    ports:
-      - "8080:8080"
-    restart: on-failure
+#  production-optimiser:
+#    container_name: production-optimiser-api
+#    image: production-optimiser-api:latest
+#    pull_policy: build
+#    build:
+#      context: .
+#      dockerfile: ./Dockerfile.local
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/production_optimiser
+#      - SPRING_DATASOURCE_USERNAME=production_optimiser
+#      - SPRING_DATASOURCE_PASSWORD=production_optimiser
+#    ports:
+#      - "8080:8080"
+#    restart: on-failure
