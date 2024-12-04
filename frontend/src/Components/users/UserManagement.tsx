@@ -51,6 +51,9 @@ interface EditUserForm {
 interface AddUserRequest {
   email: string;
   password: string;
+  role: string;
+  status: string;
+  optimizationModelIds: [];
 }
 
 export const UserManagement = () => {
@@ -85,7 +88,10 @@ export const UserManagement = () => {
     try {
       const request: AddUserRequest = {
         email: newUser.email,
-        password: newUser.password
+        password: newUser.password,
+        role: "CUSTOMER",
+        status: "ACTIVE",
+        optimizationModelIds: []
       };
 
       await axiosInstance.post('/users', request);
@@ -96,6 +102,7 @@ export const UserManagement = () => {
       console.error('Error adding user:', error);
     }
   };
+  
 
   const handleEditUser = async () => {
     if (!selectedUser) return;
@@ -130,17 +137,36 @@ export const UserManagement = () => {
     }
   };
 
+  // const handleDeleteUser = async () => {
+  //   if (!selectedUser) return;
+  //   try {
+  //     await axiosInstance.delete(`/users/${selectedUser.id}`);
+  //     setIsDeleteDialogOpen(false);
+  //     setSelectedUser(null);
+  //     await fetchUsers();
+  //   } catch (error) {
+  //     console.error('Error deleting user:', error);
+  //   }
+  // };
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     try {
-      await axiosInstance.delete(`/users/${selectedUser.id}`);
+      console.log('Attempting to delete user with id:', selectedUser.id);
+  
+      const response = await axiosInstance.delete(`/users/${selectedUser.id}`);
+      console.log('API Response:', response);
+  
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== selectedUser.id));
       setIsDeleteDialogOpen(false);
       setSelectedUser(null);
-      await fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
+     
     }
   };
+  
+  
+  
 
   const handleOpenEditDialog = (user: User) => {
     setSelectedUser(user);
@@ -216,6 +242,7 @@ export const UserManagement = () => {
                         onClick={() => {
                           setSelectedUser(user);
                           setIsDeleteDialogOpen(true);
+                          
                         }}
                       >
                         Delete User
