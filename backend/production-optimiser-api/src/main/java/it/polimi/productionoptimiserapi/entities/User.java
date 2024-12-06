@@ -100,7 +100,7 @@ public class User extends BaseEntity implements UserDetails {
 
   @Override
   public boolean isAccountNonLocked() {
-    return UserDetails.super.isAccountNonLocked();
+    return isEnabled();
   }
 
   @Override

@@ -1,10 +1,9 @@
 package it.polimi.productionoptimiserapi.services.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.*;
-import it.polimi.productionoptimiserapi.enums.GraphType;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.mappers.MultipartFileResource;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
@@ -118,68 +117,9 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
     String response = responseEntity.getBody();
     ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, Object> responseMap = objectMapper.readValue(response, new TypeReference<>() {});
 
-    // TODO: All of this can be made into a singular JSONB to store freely on Postgres...
-    JsonNode content = objectMapper.readTree(response);
-
-    or.setInitialTotalProductionTime(content.get("initial_total_production_time").asDouble());
-    or.setOptimizedTotalProductionTime(content.get("optimized_total_production_time").asDouble());
-    or.setTimeImprovement(content.get("time_improvement").asDouble());
-    or.setPercentageImprovement(content.get("percentage_improvement").asDouble());
-    or.setAverageInitialTotalMachineUtilization(
-        content.get("average_initial_total_machine_utilization").asDouble());
-    or.setAverageOptimizedTotalMachineUtilization(
-        content.get("average_optimized_total_machine_utilization").asDouble());
-    or.setUtilizationImprovement(content.get("utilization_improvement").asDouble());
-
-    JsonNode maximumPalletsUsed = content.get("maximum_pallets_used");
-    List<MaximumPalletsUsed> maximumPalletsUseds = new ArrayList<>();
-
-    for (Iterator<Map.Entry<String, JsonNode>> it = maximumPalletsUsed.fields(); it.hasNext(); ) {
-      Map.Entry<String, JsonNode> entry = it.next();
-
-      MaximumPalletsUsed mpu = new MaximumPalletsUsed();
-      mpu.setDefinedPallets(entry.getKey());
-      mpu.setCount(entry.getValue().asInt());
-
-      maximumPalletsUseds.add(mpu);
-    }
-    or.setMaximumPalletsUsed(maximumPalletsUseds);
-
-    // TODO: Correct key here, should be `pallets_defined_in_excel`
-    JsonNode palletsDefinedInExcel = content.get("pallets_defined_in_Excel:");
-    List<ExcelDefinedPallets> excelDefinedPallets = new ArrayList<>();
-
-    for (Iterator<Map.Entry<String, JsonNode>> it = palletsDefinedInExcel.fields();
-        it.hasNext(); ) {
-      Map.Entry<String, JsonNode> entry = it.next();
-
-      ExcelDefinedPallets edp = new ExcelDefinedPallets();
-      edp.setDefinedPallets(entry.getKey());
-      edp.setCount(entry.getValue().asInt());
-
-      excelDefinedPallets.add(edp);
-    }
-    or.setPalletsDefinedInExcel(excelDefinedPallets);
-
-    or.setTotalTimeWithOptimizedPallets(
-        content.get("total_time_with_optimized_pallets").asDouble());
-    or.setTotalTimeWithExcelPallets(content.get("total_time_with_excel_pallets").asDouble());
-    or.setBestSequenceOfProducts(content.get("best_sequence_of_products").asText(""));
-
-    JsonNode graphsNode = content.get("graphs");
-    List<Graph> graphs = new ArrayList<>();
-
-    for (Iterator<Map.Entry<String, JsonNode>> it = graphsNode.fields(); it.hasNext(); ) {
-      Map.Entry<String, JsonNode> entry = it.next();
-
-      Graph g = new Graph();
-      g.setType(GraphType.fromKey(entry.getKey()));
-      g.setBase64EncodedImage(entry.getValue().asText(""));
-
-      graphs.add(g);
-    }
-    or.setGraphs(graphs);
+    or.setOutputJSON(responseMap);
 
     or.setUser(invoker);
     optimizationResultRepository.save(or);
