@@ -48,7 +48,6 @@ public class UserServiceImpl implements UserService {
         .collect(Collectors.toSet());
   }
 
-  // TODO send email when creating a user
   public UserDTO createUser(UserDTO userDTO) {
     validateExistingEmail(userDTO.getEmail());
 
