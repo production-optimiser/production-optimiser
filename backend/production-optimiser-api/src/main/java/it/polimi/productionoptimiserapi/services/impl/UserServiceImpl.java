@@ -1,5 +1,6 @@
 package it.polimi.productionoptimiserapi.services.impl;
 
+import it.polimi.productionoptimiserapi.config.Constants;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
@@ -8,6 +9,7 @@ import it.polimi.productionoptimiserapi.enums.UserStatus;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
+import it.polimi.productionoptimiserapi.services.EmailService;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityExistsException;
@@ -28,6 +30,7 @@ public class UserServiceImpl implements UserService {
   private final AccountRequestRepository accountRequestRepository;
 
   private final OptimizationModelService optimizationModelService;
+  private final EmailService emailService;
 
   private Set<OptimizationModel> mapModelIdsToModels(Set<String> modelIds)
       throws EntityNotFoundException {
@@ -46,7 +49,7 @@ public class UserServiceImpl implements UserService {
   }
 
   // TODO send email when creating a user
-  public User createUser(UserDTO userDTO) {
+  public UserDTO createUser(UserDTO userDTO) {
     validateExistingEmail(userDTO.getEmail());
 
     User user = userDTO.toEntity();
@@ -60,7 +63,14 @@ public class UserServiceImpl implements UserService {
     }
 
     user.setAvailableOptimizationModels(updatedModels);
-    return this.userRepository.save(user);
+    user = userRepository.save(user);
+
+    emailService.sendHtmlEmail(
+        user.getEmail(),
+        Constants.EMAIL_SUBJECT_NEW_ACCOUNT,
+        Constants.EMAIL_BODY_NEW_ACCOUNT + userDTO.getPassword());
+
+    return UserMapper.toDto(user);
   }
 
   @Override

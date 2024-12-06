@@ -1,4 +1,4 @@
-package it.polimi.productionoptimiserapi.dto;
+package it.polimi.productionoptimiserapi.dtos;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class OptimizationResultDto {
+public class OptimizationResultDTO {
   private String id;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;

@@ -9,7 +9,6 @@ import io.restassured.http.ContentType;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
-import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
@@ -23,6 +22,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -88,9 +88,9 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private OptimizationModelService optimizationModelService;
 
-  // @Test
+  //@Test
   void shouldCreateOptimizationModel() {
-    User customer =
+    UserDTO customer =
         userService.createUser(
             UserDTO.builder()
                 .email("customer@potest.it")
