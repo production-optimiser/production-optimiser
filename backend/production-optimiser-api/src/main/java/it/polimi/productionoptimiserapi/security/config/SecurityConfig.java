@@ -88,7 +88,8 @@ public class SecurityConfig {
                         UrlConstants.LOGIN_URL,
                         UrlConstants.DOCS_URL,
                         UrlConstants.SWAGGER_URL,
-                        UrlConstants.ACTUATOR_URL)
+                        UrlConstants.ACTUATOR_URL,
+                        UrlConstants.ACCOUNT_REQUEST_URL)
                     .permitAll()
                     .requestMatchers(UrlConstants.REGISTER_USER_URL)
                     .hasRole("ADMIN")

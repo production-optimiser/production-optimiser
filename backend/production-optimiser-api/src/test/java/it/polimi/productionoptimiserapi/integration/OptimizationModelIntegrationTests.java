@@ -12,6 +12,7 @@ import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
@@ -23,15 +24,18 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup {
 
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -48,6 +52,8 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private UserRepository userRepository;
 
+  @Autowired private OptimizationModelRepository optimizationModelRepository;
+
   String accessToken;
 
   @BeforeAll
@@ -58,6 +64,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
   @BeforeEach
   void beforeEach() {
     userRepository.deleteAll();
+    optimizationModelRepository.deleteAll();
 
     userService.createUser(
         UserDTO.builder()
@@ -88,7 +95,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private OptimizationModelService optimizationModelService;
 
-  // @Test
+  @Test
   void shouldCreateOptimizationModel() {
     User customer =
         userService.createUser(
@@ -116,7 +123,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_shouldGetById() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -136,7 +143,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_customerShouldGetForbidden() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -174,7 +181,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .statusCode(HttpStatus.FORBIDDEN.value());
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_shouldRetire() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -203,7 +210,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .statusCode(HttpStatus.NOT_FOUND.value());
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_shouldInvoke() throws IOException {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
