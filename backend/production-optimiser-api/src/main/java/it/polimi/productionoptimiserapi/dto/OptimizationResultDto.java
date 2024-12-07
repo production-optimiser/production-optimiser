@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.dto;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
