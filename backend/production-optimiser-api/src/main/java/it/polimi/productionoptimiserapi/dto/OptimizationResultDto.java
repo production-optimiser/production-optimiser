@@ -1,4 +1,4 @@
-package it.polimi.productionoptimiserapi.dtos;
+package it.polimi.productionoptimiserapi.dto;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

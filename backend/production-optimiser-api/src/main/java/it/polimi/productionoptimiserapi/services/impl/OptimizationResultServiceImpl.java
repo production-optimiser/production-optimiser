@@ -1,6 +1,6 @@
 package it.polimi.productionoptimiserapi.services.impl;
 
-import it.polimi.productionoptimiserapi.dtos.OptimizationResultDTO;
+import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.entities.OptimizationResult;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
@@ -18,14 +18,14 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
 
   private final OptimizationResultRepository resultRepository;
 
-  public List<OptimizationResultDTO> getAllResults(String userId) {
+  public List<OptimizationResultDto> getAllResults(String userId) {
     return resultRepository.findByUserId(userId).stream()
         .map(OptimizationResultServiceImpl::resultToDto)
         .toList();
   }
 
   @Override
-  public OptimizationResultDTO getResultById(String resultId) {
+  public OptimizationResultDto getResultById(String resultId) {
     return resultToDto(
         resultRepository
             .findById(resultId)
@@ -33,7 +33,7 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
                 () -> new NoSuchElementException("No result with id=" + resultId + " exists")));
   }
 
-  private static OptimizationResultDTO resultToDto(OptimizationResult result) {
+  private static OptimizationResultDto resultToDto(OptimizationResult result) {
     HashMap<String, Integer> maximumPalletsUsed = new HashMap<>();
     HashMap<String, Integer> palletsDefinedInExcel = new HashMap<>();
     HashMap<String, String> graphs = new HashMap<>();
@@ -49,7 +49,7 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
         .getGraphs()
         .forEach((graph) -> graphs.put(graph.getType().toString(), graph.getBase64EncodedImage()));
 
-    return new OptimizationResultDTO(
+    return new OptimizationResultDto(
         result.getId(),
         result.getCreatedAt(),
         result.getUpdatedAt(),
