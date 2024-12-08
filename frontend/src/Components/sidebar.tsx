@@ -23,7 +23,7 @@ interface SidebarNavProps {
   modelName?: string;
   modelVersion?: string;
   sections?: TimeSection[];
-  onItemClick?: (id: string) => void;  // Added this prop
+  onItemClick?: (id: string) => void;
 }
 
 const generateId = (prefix: string, value: string) =>
@@ -71,13 +71,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   modelName = 'Python 1',
   modelVersion = 'v3.4.2',
   sections = defaultSections,
-  onItemClick,  // Added this prop
+  onItemClick,
 }) => {
-  const handleModelSelect = () => {
-    // Implement model selection logic here
-  };
-
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   useEffect(() => {
     const user = authService.getCurrentUser();
@@ -86,15 +83,18 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
     }
   }, []);
 
+  const handleItemClick = (id: string) => {
+    setSelectedItem(id);
+    onItemClick?.(id);
+  };
+
   return (
     <Card className="w-64 h-screen flex flex-col">
       <div className="p-4 border-b">
         <Button
           variant="ghost"
           className="w-full justify-between"
-          onClick={handleModelSelect}
-          aria-label="Select model"
-          aria-expanded="false"
+          onClick={() => {}}
         >
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
@@ -113,18 +113,17 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
           <div className="space-y-4">
             {sections.map((section) => (
               <div key={section.id}>
-                <h2 className="text-sm font-medium mb-2">{section.title}</h2>
+                <h2 className="text-sm text-gray-500 mb-2">{section.title}</h2>
                 <div className="space-y-1">
                   {section.items.map((item) => (
                     <Button
                       key={item.id}
                       variant="ghost"
                       className={`w-full justify-start text-sm ${
-                        item.isDisabled ? 'text-gray-500' : ''
-                      }`}
+                        selectedItem === item.id ? 'bg-gray-100' : ''
+                      } ${item.isDisabled ? 'text-gray-500' : ''}`}
                       disabled={item.isDisabled}
-                      onClick={() => onItemClick?.(item.id)}  // Added onClick handler
-                      aria-label={`Open ${item.title}${item.isDisabled ? ' (disabled)' : ''}`}
+                      onClick={() => handleItemClick(item.id)}
                     >
                       {item.title}
                     </Button>
@@ -137,7 +136,10 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
       </ScrollArea>
 
       <div className="border-t p-4">
-        <UserProfile name={currentUser?.email?.split('@')[0] || 'User'} email={currentUser?.email || ''} />
+        <UserProfile 
+          name={currentUser?.email?.split('@')[0] || 'User'} 
+          email={currentUser?.email || ''} 
+        />
       </div>
     </Card>
   );
