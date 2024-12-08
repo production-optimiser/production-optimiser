@@ -6,6 +6,7 @@ import ContactForm from '../Pages/contactUs';
 import Layout from '../Layouts/DashboardLayout';
 import AdminDashboard from '../Pages/adminDashboard';
 import { ProtectedRoute } from './ProtectedRoute';
+import OptimizationResultsDashboard from '@/Components/optimizationResult';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +37,15 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+    path: '/optimizationresult',
+    element: (
+      <ProtectedRoute requiredRole="CUSTOMER">
+        <OptimizationResultsDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  
   // Catch-all route at the end
   {
     path: '*',
