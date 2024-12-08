@@ -22,37 +22,73 @@ interface DecodedToken {
 }
 
 // Map email to roles
-const EMAIL_ROLE_MAP: Record<string, Role> = {
-  'admin1': 'ADMIN',
-  'customer1': 'CUSTOMER',
-};
+// const EMAIL_ROLE_MAP: Record<string, Role> = {
+//   'admin1': 'ADMIN',
+//   'customer1': 'CUSTOMER',
+// };
 
 export const authService = {
+  // async login(email: string, password: string): Promise<User> {
+  //   try {
+  //     console.log('Attempting login with:', { email, password });
+
+  //     const response = await axiosInstance.post<AuthenticationResponseDTO>('/auth/login', {
+  //       email,
+  //       password,
+  //     } as LoginRequest);
+
+  //     const { token } = response.data;
+  //     console.log('Login successful, received token:', token);
+
+  //     if (token) {
+  //       localStorage.setItem('token', token);
+  //       localStorage.setItem('userEmail', email);
+
+  //       const role: Role = EMAIL_ROLE_MAP[email] || 'CUSTOMER';
+
+  //       return {
+  //         id: email,
+  //         email: email,
+  //         roles: [role],
+  //       };
+  //     }
+
+  //     throw new Error('No token received');
+  //   } catch (error) {
+  //     console.error('Login error:', error);
+  //     const apiError = handleApiError(error as AxiosError);
+  //     throw new Error(apiError.message || 'Invalid credentials');
+  //   }
+  // },
   async login(email: string, password: string): Promise<User> {
     try {
       console.log('Attempting login with:', { email, password });
-
+  
       const response = await axiosInstance.post<AuthenticationResponseDTO>('/auth/login', {
         email,
         password,
       } as LoginRequest);
-
+  
       const { token } = response.data;
       console.log('Login successful, received token:', token);
-
+  
       if (token) {
         localStorage.setItem('token', token);
         localStorage.setItem('userEmail', email);
-
-        const role: Role = EMAIL_ROLE_MAP[email] || 'CUSTOMER';
-
+  
+        // Decode the token to extract roles dynamically
+        const decoded = jwtDecode<DecodedToken>(token);
+        const roles = decoded.roles.map(role => role.replace('ROLE_', '') as Role);
+  
+        console.log('Decoded roles:', roles);
+  
         return {
           id: email,
           email: email,
-          roles: [role],
+          roles,
         };
       }
-
+  
       throw new Error('No token received');
     } catch (error) {
       console.error('Login error:', error);
@@ -60,6 +96,7 @@ export const authService = {
       throw new Error(apiError.message || 'Invalid credentials');
     }
   },
+  
 
   logout(): void {
     localStorage.removeItem('token');

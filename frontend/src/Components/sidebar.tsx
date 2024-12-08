@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';
 import { ChevronDown, Copy } from 'lucide-react';
+import { UserProfile } from '../Components/UserProfile/index.tsx';
+import { User } from '@/types/auth';
+import { authService } from '@/services/auth';
 
 interface OptimizationItem {
-  id: string; // Added unique identifier
+  id: string;
   title: string;
   isDisabled?: boolean;
 }
 
 interface TimeSection {
-  id: string; // Added unique identifier
+  id: string;
   title: string;
   items: OptimizationItem[];
 }
@@ -20,9 +23,9 @@ interface SidebarNavProps {
   modelName?: string;
   modelVersion?: string;
   sections?: TimeSection[];
+  onItemClick?: (id: string) => void;
 }
 
-// Helper function to generate unique IDs
 const generateId = (prefix: string, value: string) =>
   `${prefix}-${value.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
 
@@ -68,20 +71,30 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
   modelName = 'Python 1',
   modelVersion = 'v3.4.2',
   sections = defaultSections,
+  onItemClick,
 }) => {
-  const handleModelSelect = () => {
-    // Implement model selection logic here
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, []);
+
+  const handleItemClick = (id: string) => {
+    setSelectedItem(id);
+    onItemClick?.(id);
   };
 
   return (
-    <Card className="w-64 h-screen">
+    <Card className="w-64 h-screen flex flex-col">
       <div className="p-4 border-b">
         <Button
           variant="ghost"
           className="w-full justify-between"
-          onClick={handleModelSelect}
-          aria-label="Select model"
-          aria-expanded="false"
+          onClick={() => {}}
         >
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
@@ -95,22 +108,22 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
         </Button>
       </div>
 
-      <ScrollArea className="h-[calc(100vh-5rem)]">
+      <ScrollArea className="flex-1">
         <nav aria-label="Optimization history" className="p-4">
           <div className="space-y-4">
             {sections.map((section) => (
               <div key={section.id}>
-                <h2 className="text-sm font-medium mb-2">{section.title}</h2>
+                <h2 className="text-sm text-gray-500 mb-2">{section.title}</h2>
                 <div className="space-y-1">
                   {section.items.map((item) => (
                     <Button
                       key={item.id}
                       variant="ghost"
                       className={`w-full justify-start text-sm ${
-                        item.isDisabled ? 'text-gray-500' : ''
-                      }`}
+                        selectedItem === item.id ? 'bg-gray-100' : ''
+                      } ${item.isDisabled ? 'text-gray-500' : ''}`}
                       disabled={item.isDisabled}
-                      aria-label={`Open ${item.title}${item.isDisabled ? ' (disabled)' : ''}`}
+                      onClick={() => handleItemClick(item.id)}
                     >
                       {item.title}
                     </Button>
@@ -121,8 +134,16 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
           </div>
         </nav>
       </ScrollArea>
+
+      <div className="border-t p-4">
+        <UserProfile 
+          name={currentUser?.email?.split('@')[0] || 'User'} 
+          email={currentUser?.email || ''} 
+        />
+      </div>
     </Card>
   );
 };
 
 export default SidebarNav;
+

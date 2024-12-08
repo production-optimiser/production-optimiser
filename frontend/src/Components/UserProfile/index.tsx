@@ -7,6 +7,7 @@ import {
 } from "@/Components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/Components/ui/avatar";
 import { Clock, LogOut, ChevronDown } from 'lucide-react';
+import { router } from '@/router/routes';
 
 export interface UserProfileProps {
   name: string;
@@ -20,7 +21,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   name, 
   email,
   role = 'customer', 
-  onLogout = () => {}, 
+  onLogout,
   onAccountClick = () => {} 
 }) => {
   const initials = name
@@ -28,6 +29,15 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     .map(word => word[0])
     .join('')
     .toUpperCase();
+
+    const handleLogout = () => {
+      // Perform any logout logic (e.g., clearing tokens, session storage, etc.)
+      if (onLogout) onLogout();
+  
+      // Redirect to the login page
+      router.navigate('/login');
+    };
+  
 
   return (
     <div className="px-2 py-3">
@@ -56,7 +66,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             <span>Account</span>
           </DropdownMenuItem>
           <DropdownMenuItem 
-            onClick={onLogout}
+            onClick={handleLogout}
             className="flex items-center cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950"
           >
             <LogOut className="mr-2 h-4 w-4" />
