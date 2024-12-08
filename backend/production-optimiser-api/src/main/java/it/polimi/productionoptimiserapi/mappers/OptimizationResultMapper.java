@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class OptimizationResultMapper {
-  public static OptimizationResult dtoToResult(byte[] inputFile, OptimizationResultDto dto, User user) {
+  public static OptimizationResult dtoToResult(
+      byte[] inputFile, OptimizationResultDto dto, User user) {
     List<ExcelDefinedPallets> excelDefinedPallets = new ArrayList<>();
     List<MaximumPalletsUsed> maximumPalletsUsed = new ArrayList<>();
     List<Graph> graphs = new ArrayList<>();
