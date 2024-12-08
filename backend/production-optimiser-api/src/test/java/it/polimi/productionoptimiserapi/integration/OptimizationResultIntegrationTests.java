@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 
 import io.restassured.http.ContentType;
 import it.polimi.productionoptimiserapi.dtos.OptimizationResultDto;
-import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.GraphType;
 import it.polimi.productionoptimiserapi.enums.UserRole;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -65,11 +63,7 @@ public class OptimizationResultIntegrationTests extends BaseIntegrationTestSetup
     userRepository.deleteAll();
 
     User user =
-            User.builder()
-                .email("admin@potest.it")
-                .password("password!")
-                .role(UserRole.ADMIN)
-                .build();
+        User.builder().email("admin@potest.it").password("password!").role(UserRole.ADMIN).build();
 
     userID = user.getId();
 
@@ -146,7 +140,7 @@ public class OptimizationResultIntegrationTests extends BaseIntegrationTestSetup
   //    }
 
   // TODO Refactor test in next Sprint
-  //@Test
+  // @Test
   public void givenResultId_shouldFetch() {
     HashMap<String, String> requestParams = new HashMap<>();
     given()
