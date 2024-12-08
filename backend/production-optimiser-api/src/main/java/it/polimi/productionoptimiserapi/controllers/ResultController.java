@@ -1,6 +1,6 @@
 package it.polimi.productionoptimiserapi.controllers;
 
-import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
+import it.polimi.productionoptimiserapi.dto.OptimizationResultDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +17,12 @@ public class ResultController {
   private final OptimizationResultService resultService;
 
   @GetMapping
-  public List<OptimizationResultDto> getAllResults(@RequestParam String userId) {
+  public List<OptimizationResultDTO> getAllResults(@RequestParam String userId) {
     return resultService.getAllResults(userId);
   }
 
   @GetMapping("/{id}")
-  public OptimizationResultDto getResultById(@PathVariable String id) {
+  public OptimizationResultDTO getResultById(@PathVariable String id) {
     return resultService.getResultById(id);
   }
 }

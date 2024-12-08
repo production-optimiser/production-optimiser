@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class OptimizationResultDto {
+public class OptimizationResultDTO {
   private String id;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;

@@ -1,10 +1,10 @@
 package it.polimi.productionoptimiserapi.services;
 
-import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
+import it.polimi.productionoptimiserapi.dto.OptimizationResultDTO;
 import java.util.List;
 
 public interface OptimizationResultService {
-  List<OptimizationResultDto> getAllResults(String userId);
+  List<OptimizationResultDTO> getAllResults(String userId);
 
-  OptimizationResultDto getResultById(String resultId);
+  OptimizationResultDTO getResultById(String resultId);
 }
