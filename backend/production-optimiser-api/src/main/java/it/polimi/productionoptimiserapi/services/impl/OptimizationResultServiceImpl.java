@@ -2,13 +2,10 @@ package it.polimi.productionoptimiserapi.services.impl;
 
 import it.polimi.productionoptimiserapi.dtos.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.entities.*;
-import it.polimi.productionoptimiserapi.enums.GraphType;
 import it.polimi.productionoptimiserapi.mappers.OptimizationResultMapper;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +44,4 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
   public void deleteAll() {
     resultRepository.deleteAll();
   }
-
-
 }
