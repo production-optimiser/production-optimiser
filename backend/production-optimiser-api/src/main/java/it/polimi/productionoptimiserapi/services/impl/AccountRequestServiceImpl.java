@@ -1,15 +1,15 @@
 package it.polimi.productionoptimiserapi.services.impl;
 
+import it.polimi.productionoptimiserapi.config.Constants;
 import it.polimi.productionoptimiserapi.dtos.AccountRequestDTO;
 import it.polimi.productionoptimiserapi.dtos.KeyValueDTO;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.AccountRequest;
-import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.mappers.AccountRequestMapper;
-import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
 import it.polimi.productionoptimiserapi.services.AccountRequestService;
+import it.polimi.productionoptimiserapi.services.EmailService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
@@ -23,6 +23,7 @@ public class AccountRequestServiceImpl implements AccountRequestService {
 
   private final AccountRequestRepository accountRequestRepository;
   private final UserService userService;
+  private final EmailService emailService;
 
   @Override
   public AccountRequestDTO getAccountRequest(String id) {
@@ -69,11 +70,9 @@ public class AccountRequestServiceImpl implements AccountRequestService {
 
     accountRequestRepository.delete(accountRequest);
 
-    User user = userService.createUser(userDTO);
-    return UserMapper.toDto(user);
+    return userService.createUser(userDTO);
   }
 
-  // TODO send email when denying a request
   @Override
   @Transactional
   public AccountRequestDTO denyAccountRequest(KeyValueDTO keyValueDTO) {
@@ -84,6 +83,11 @@ public class AccountRequestServiceImpl implements AccountRequestService {
                 () ->
                     new EntityNotFoundException(
                         "Account request with id " + keyValueDTO.getKey() + " not found"));
+
+    emailService.sendHtmlEmail(
+        accountRequest.getEmail(),
+        Constants.EMAIL_SUBJECT_DENIED_ACCOUNT,
+        Constants.EMAIL_BODY_DENIED_ACCOUNT + keyValueDTO.getValue());
 
     AccountRequestDTO accountRequestDTO = AccountRequestMapper.toDto(accountRequest);
     accountRequestRepository.deleteById(keyValueDTO.getKey());
