@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/results")
 @RequiredArgsConstructor
-public class ResultController {
+public class OptimizationResultController {
   private final OptimizationResultService resultService;
 
   @GetMapping
   public List<OptimizationResultDto> getAllResults(@RequestParam String userId) {
-    System.out.println("Getting all results ofr user " + userId);
     return resultService.getAllResults(userId);
   }
 
