@@ -1,6 +1,6 @@
 package it.polimi.productionoptimiserapi.controllers;
 
-import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
+import it.polimi.productionoptimiserapi.dtos.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/results")
 @RequiredArgsConstructor
-public class ResultController {
+public class OptimizationResultController {
   private final OptimizationResultService resultService;
 
   @GetMapping
