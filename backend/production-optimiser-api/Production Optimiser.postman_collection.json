@@ -1,0 +1,422 @@
+{
+	"info": {
+		"_postman_id": "d2dfbedf-b529-46e3-913f-9d7d6c50a6fe",
+		"name": "Production Optimiser",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "18307849"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"admin1\",\r\n    \"password\": \"admin1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{beBaseUrl}}/api/auth/login"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Models",
+			"item": [
+				{
+					"name": "Get Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/models"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Model",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/models"
+					},
+					"response": []
+				},
+				{
+					"name": "Invoke Model by Id",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "input",
+									"type": "file",
+									"src": "/C:/Users/GIOVANNI/OneDrive/UNIVIDA/Esami/DSD/main_excel.xlsx"
+								}
+							]
+						},
+						"url": "{{beBaseUrl}}/api/models/550e8400-e29b-41d4-a716-446655440004/invoke"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Model by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/models/550e8400-e29b-41d4-a716-446655440004"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Model by Id",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Updated Deployed Model\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{beBaseUrl}}/api/models/550e8400-e29b-41d4-a716-446655440004"
+					},
+					"response": []
+				},
+				{
+					"name": "Retire Model",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/models/550e8400-e29b-41d4-a716-446655440008/retire"
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "{{accessToken}}"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Results",
+			"item": [
+				{
+					"name": "Get Results for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{beBaseUrl}}/api/results?userId=550e8400-e29b-41d4-a716-446655440002",
+							"host": [
+								"{{beBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"results"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "550e8400-e29b-41d4-a716-446655440002"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Result by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/results/550e8400-e29b-41d4-a716-446655440009"
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "{{accessToken}}"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test2@test.hr\",\r\n    \"password\": \"TestPassword1\",\r\n    \"role\": \"CUSTOMER\",\r\n    \"optimizationModelIds\": [\r\n        \"550e8400-e29b-41d4-a716-446655440006\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{beBaseUrl}}/api/users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/users/550e8400-e29b-41d4-a716-446655440000"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/users/550e8400-e29b-41d4-a716-446655440000"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by Id",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{beBaseUrl}}/api/users/550e8400-e29b-41d4-a716-446655440000?email=update@test.hr",
+							"host": [
+								"{{beBaseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"550e8400-e29b-41d4-a716-446655440000"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "update@test.hr"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "{{accessToken}}"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "AccountRequests",
+			"item": [
+				{
+					"name": "Create Account Request",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"test2\",\r\n  \"message\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{beBaseUrl}}/api/account-requests/form"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account Requests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/account-requests/all"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Account Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"key\": \"a706c68e-f942-4e2b-89e1-24eaf3ca2990\",\r\n  \"value\": \"password1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{beBaseUrl}}/api/account-requests/approve"
+					},
+					"response": []
+				},
+				{
+					"name": "Deny Account Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"key\": \"80c9c6c9-607c-4f9f-976f-eafe0d3f0429\",\r\n  \"value\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{beBaseUrl}}/api/account-requests/deny"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account Request By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{beBaseUrl}}/api/account-requests/{id}"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "beBaseUrl",
+			"value": "https://dsd.commanderkowalski.uk",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbjEiLCJpc3MiOiJwcm9kdWN0aW9uLW9wdGltaXNlciIsImlhdCI6MTczMjYyODY1MCwiZXhwIjoxNzMyNzE1MDUwLCJyb2xlcyI6WyJST0xFX0FETUlOIl19.yjoGOJUWeTBCmXAF0cZabxAYbUUAxRZ1Ni05LE2CFKz4BBL7S5wrZk8F5RJ48e2b3o61z6Nh-EREdMkkSTyAo_goV0zCoSZeHhYUk6JlHdNAXkD7_cyldJwuM2ctxScXKfTFhfExljeNZGgoHOT_DDQtQwh0fxt7AmgbuxX4ohCsUQjmSzdsk4dbUvKrNYyY1_NHGuboMfymRQasxQNxAUP4n6pAphcAjuyYZlJ3Y_ZgvEZJACW-xUVrVpGg2Xh3Y65_SDjPEzk7gKo8fpP2tPLYZ2IpiJf4Rrk3XqtEwgImJzT7EmZ7Z9hhjN1BP4wWTNBAjbXWVYvpapQ3g4w2dw",
+			"type": "string"
+		}
+	]
+}
