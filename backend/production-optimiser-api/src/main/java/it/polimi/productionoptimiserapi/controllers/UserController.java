@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.controllers;
 
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.enums.UserRole;
-import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -44,7 +43,7 @@ public class UserController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public UserDTO createUser(@Valid @RequestBody UserDTO userDTO) {
-    return UserMapper.toDto(userService.createUser(userDTO));
+    return userService.createUser(userDTO);
   }
 
   @PatchMapping("/{id}")

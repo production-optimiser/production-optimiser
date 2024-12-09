@@ -1,5 +1,6 @@
-package it.polimi.productionoptimiserapi.dto;
+package it.polimi.productionoptimiserapi.dtos;
 
+import it.polimi.productionoptimiserapi.enums.GraphType;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import lombok.AllArgsConstructor;
@@ -25,5 +26,5 @@ public class OptimizationResultDto {
   private Double totalTimeWithOptimizedPallets;
   private Double totalTimeWithExcelPallets;
   private String bestSequenceOfProducts;
-  private HashMap<String, String> graphs;
+  private HashMap<GraphType, String> graphs;
 }

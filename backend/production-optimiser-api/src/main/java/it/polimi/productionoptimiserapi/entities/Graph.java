@@ -3,6 +3,7 @@ package it.polimi.productionoptimiserapi.entities;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import it.polimi.productionoptimiserapi.enums.GraphType;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,4 +28,15 @@ public class Graph extends BaseEntity {
   @JoinColumn(name = "result_id", nullable = false)
   @JsonBackReference
   private OptimizationResult result;
+
+  public Graph(
+      String id,
+      LocalDateTime createdAt,
+      LocalDateTime updatedAt,
+      String base64EncodedImage,
+      GraphType type) {
+    super(id, createdAt, updatedAt);
+    this.base64EncodedImage = base64EncodedImage;
+    this.type = type;
+  }
 }

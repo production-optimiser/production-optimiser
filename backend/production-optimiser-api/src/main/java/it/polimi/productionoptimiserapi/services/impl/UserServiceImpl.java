@@ -1,14 +1,18 @@
 package it.polimi.productionoptimiserapi.services.impl;
 
+import it.polimi.productionoptimiserapi.config.Constants;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.enums.UserStatus;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
+import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
+import it.polimi.productionoptimiserapi.services.EmailService;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import it.polimi.productionoptimiserapi.services.UserService;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.List;
@@ -23,8 +27,10 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
+  private final AccountRequestRepository accountRequestRepository;
 
   private final OptimizationModelService optimizationModelService;
+  private final EmailService emailService;
 
   private Set<OptimizationModel> mapModelIdsToModels(Set<String> modelIds)
       throws EntityNotFoundException {
@@ -42,7 +48,9 @@ public class UserServiceImpl implements UserService {
         .collect(Collectors.toSet());
   }
 
-  public User createUser(UserDTO userDTO) {
+  public UserDTO createUser(UserDTO userDTO) {
+    validateExistingEmail(userDTO.getEmail());
+
     User user = userDTO.toEntity();
     user.setStatus(UserStatus.ACTIVE);
 
@@ -54,7 +62,14 @@ public class UserServiceImpl implements UserService {
     }
 
     user.setAvailableOptimizationModels(updatedModels);
-    return this.userRepository.save(user);
+    user = userRepository.save(user);
+
+    emailService.sendHtmlEmail(
+        user.getEmail(),
+        Constants.EMAIL_SUBJECT_NEW_ACCOUNT,
+        Constants.EMAIL_BODY_NEW_ACCOUNT + userDTO.getPassword());
+
+    return UserMapper.toDto(user);
   }
 
   @Override
@@ -148,5 +163,17 @@ public class UserServiceImpl implements UserService {
     user.setAvailableOptimizationModels(updatedModels);
 
     return UserMapper.toDto(userRepository.save(user));
+  }
+
+  @Override
+  public void validateExistingEmail(String email) {
+    if (userRepository.existsUserByEmail(email)) {
+      throw new EntityExistsException("User with email address: " + email + " already exists.");
+    }
+
+    if (accountRequestRepository.existsAccountRequestByEmail(email)) {
+      throw new EntityExistsException(
+          "Account request with email address: " + email + " already exists.");
+    }
   }
 }

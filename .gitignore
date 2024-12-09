@@ -34,3 +34,10 @@ build/
 .vscode/
 
 **/postgres-data/
+
+### Python ###
+Include
+Lib
+pyvenv.cfg
+*pycache*
+Scripts
