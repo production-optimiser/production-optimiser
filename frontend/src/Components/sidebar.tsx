@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ChevronDown, Copy } from 'lucide-react';
+import { ChevronDown, Copy, Plus } from 'lucide-react';
 import { UserProfile } from '../Components/UserProfile/index.tsx';
 import { User } from '@/types/auth';
 import { authService } from '@/services/auth';
@@ -36,6 +36,7 @@ interface SidebarNavProps {
   modelVersion?: string;
   sections?: TimeSection[];
   onItemClick?: (id: string) => void;
+  onNewChat?: () => void;
   availableModels?: Model[];
   selectedModel?: Model | null;
   onModelSelect?: (model: Model) => void;
@@ -87,6 +88,7 @@ const SidebarNav = ({
   modelVersion = 'v3.4.2',
   sections = defaultSections,
   onItemClick,
+  onNewChat,
   availableModels = [],
   selectedModel,
   onModelSelect,
@@ -144,6 +146,17 @@ const SidebarNav = ({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+
+      <div className="p-4 border-b">
+        <Button 
+          variant="outline" 
+          className="w-full flex items-center gap-2"
+          onClick={onNewChat}
+        >
+          <Plus className="w-4 h-4" />
+          <span>New Chat</span>
+        </Button>
       </div>
 
       <ScrollArea className="flex-1">
