@@ -7,8 +7,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+} from '@/Components/ui/dialog';
+import { Input } from '@/Components/ui/input';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
