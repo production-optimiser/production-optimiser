@@ -1,11 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollArea } from '@/Components/ui/scroll-area';
-import { Button } from '@/Components/ui/button';
-import { Card } from '@/Components/ui/card';
+import { useEffect, useState } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ChevronDown, Copy } from 'lucide-react';
 import { UserProfile } from '../Components/UserProfile/index.tsx';
 import { User } from '@/types/auth';
 import { authService } from '@/services/auth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+interface Model {
+  id: string;
+  name: string;
+  version: string;
+}
 
 interface OptimizationItem {
   id: string;
@@ -24,6 +36,9 @@ interface SidebarNavProps {
   modelVersion?: string;
   sections?: TimeSection[];
   onItemClick?: (id: string) => void;
+  availableModels?: Model[];
+  selectedModel?: Model | null;
+  onModelSelect?: (model: Model) => void;
 }
 
 const generateId = (prefix: string, value: string) =>
@@ -67,14 +82,18 @@ const defaultSections: TimeSection[] = [
   },
 ];
 
-const SidebarNav: React.FC<SidebarNavProps> = ({
+const SidebarNav = ({
   modelName = 'Python 1',
   modelVersion = 'v3.4.2',
   sections = defaultSections,
   onItemClick,
-}) => {
+  availableModels = [],
+  selectedModel,
+  onModelSelect,
+}: SidebarNavProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const user = authService.getCurrentUser();
@@ -88,24 +107,43 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
     onItemClick?.(id);
   };
 
+  const handleModelSelect = (model: Model) => {
+    onModelSelect?.(model);
+    setIsDropdownOpen(false);
+  };
+
   return (
     <Card className="w-64 h-screen flex flex-col">
       <div className="p-4 border-b">
-        <Button
-          variant="ghost"
-          className="w-full justify-between"
-          onClick={() => {}}
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
-              <Copy className="w-4 h-4" aria-hidden="true" />
-            </div>
-            <span className="text-sm font-medium">
-              {modelName} - {modelVersion}
-            </span>
-          </div>
-          <ChevronDown className="w-4 h-4" aria-hidden="true" />
-        </Button>
+        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
+                  <Copy className="w-4 h-4" aria-hidden="true" />
+                </div>
+                <span className="text-sm font-medium">
+                  {selectedModel ? `${selectedModel.name} - ${selectedModel.version}` : `${modelName} - ${modelVersion}`}
+                </span>
+              </div>
+              <ChevronDown className="w-4 h-4" aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            {availableModels.map((model) => (
+              <DropdownMenuItem
+                key={model.id}
+                onClick={() => handleModelSelect(model)}
+                className="cursor-pointer"
+              >
+                <span>{model.name} - {model.version}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <ScrollArea className="flex-1">
@@ -146,4 +184,3 @@ const SidebarNav: React.FC<SidebarNavProps> = ({
 };
 
 export default SidebarNav;
-

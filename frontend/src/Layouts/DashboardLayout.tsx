@@ -23,85 +23,63 @@
 
 // export default DashboardLayout;
 
-
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SidebarNav from '../Components/sidebar';
 import AppLayout from '../Components/navbar';
 import { authService } from '@/services/auth';
 import axiosInstance from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
 
-
-interface OptimizationItem {
-  id: string;
-  title: string;
-  isDisabled?: boolean;
-}
-interface TimeSection {
-  id: string;
-  title: string;
-  items: OptimizationItem[];
-}
-
-const DashboardLayout: React.FC = () => {
-  const [selectedOptimization, setSelectedOptimization] = useState<string | null>(null);
-  const [sections, setSections] = useState<TimeSection[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+const DashboardLayout = () => {
+  const [selectedOptimization, setSelectedOptimization] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [availableModels, setAvailableModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState(null);
   const navigate = useNavigate();
+
+  const fetchModels = async () => {
+    try {
+      const user = authService.getCurrentUser();
+      if (!user) return;
+      
+      const response = await axiosInstance.get(`/api/users/${user.id}/models`);
+      const models = response.data;
+      setAvailableModels(models);
+      if (models.length > 0) {
+        setSelectedModel(models[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching models:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOptimizationSelect = (id: string) => {
     setSelectedOptimization(id);
-    navigate('/optimizationresult')
+    navigate('/optimizationresult');
   };
 
   useEffect(() => {
-    const fetchSections = async () => {
-      try {
-        const user = authService.getCurrentUser();
-
-        if (user && !user.roles.includes('ADMIN')) {
-          const response = await axiosInstance.get(
-            `/results?userId=550e8400-e29b-41d4-a716-446655440002`
-          );
-          const resultItems = response.data.map(
-            (result: { id: string; createdAt: string }) => ({
-              id: result.id,
-              title: `Result on ${new Date(result.createdAt).toLocaleDateString()}`,
-            })
-          );
-          setSections([
-            {
-              id: 'optimization-results',
-              title: 'Your Results',
-              items: resultItems,
-            },
-          ]);
-        } else {
-          setSections([]); // Clear sections if user is admin
-        }
-      } catch (error) {
-        console.error('Error fetching results:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSections();
+    fetchModels();
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Optionally, you can use a spinner or skeleton loader
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   return (
-    <AppLayout>
+    <div className="flex h-screen">
       <SidebarNav
-        onItemClick={handleOptimizationSelect}
         modelName="Python 1"
         modelVersion="v3.4.2"
-        sections={sections}
+        onItemClick={handleOptimizationSelect}
+        availableModels={availableModels}
+        selectedModel={selectedModel}
+        onModelSelect={setSelectedModel}
       />
-    </AppLayout>
+      <AppLayout />
+    </div>
   );
 };
 
