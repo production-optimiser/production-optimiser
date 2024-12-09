@@ -189,8 +189,29 @@ jobs:
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: ./model-services
-          file: ./model-services/Dockerfile
+          file: ./model-services/production-optimizer/Dockerfile
           push: true
           tags: ${{ steps.modify-tool-tags.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Modify tags
+        id: modify-dummy-tool-tags
+        run: |
+          IFS=',' read -ra tags <<< "${{ steps.meta.outputs.tags }}"
+          modified_tags=()
+          for tag in "${tags[@]}"; do
+            prefix=$(echo "$tag" | awk -F: '{print $1}')
+            version=$(echo "$tag" | awk -F: '{print $NF}')
+            modified_tags+=("$prefix:${{ steps.repo.outputs.repo }}-dummy-tool-$version")
+          done
+          echo "::set-output name=tags::${modified_tags[*]}"
+        shell: bash
+
+      - name: Build and push Docker image Python Dummy Tool
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./model-services
+          file: ./model-services/dummy-service/Dockerfile
+          push: true
+          tags: ${{ steps.modify-tool-tags.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
