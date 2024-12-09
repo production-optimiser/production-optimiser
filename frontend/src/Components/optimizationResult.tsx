@@ -16,8 +16,10 @@ const OptimizationResultsDashboard = () => {
         if (!currentUser) {
           throw new Error('No authenticated user found');
         }
-        const response = await axiosInstance.get(`/results?userId=550e8400-e29b-41d4-a716-446655440002`);
+        console.log(currentUser.userId);
+        const response = await axiosInstance.get(`/results/userId=${currentUser.userId}`);
         setOptimizationData(response.data);
+        console.log(response);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError(error.message || 'Failed to fetch optimization results');

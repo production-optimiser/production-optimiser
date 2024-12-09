@@ -21,7 +21,6 @@
 //   );
 // };
 
-// src/Layouts/DashboardLayout.tsx
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
@@ -30,16 +29,8 @@ import NewOptimizationForm from '../Components/NewOptimizationForm';
 import { authService } from '@/services/auth';
 import axiosInstance from '../utils/axios';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Legend
+  LineChart, Line, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, BarChart, Bar, Legend
 } from 'recharts';
 
 interface ContentState {
@@ -47,72 +38,85 @@ interface ContentState {
   resultId?: string;
 }
 
+interface Model {
+  id: string;
+  name: string;
+  version: string;
+}
+
 const defaultSections = [
   {
     id: 'today-section',
     title: 'Today',
     items: [
-      {
-        id: 'candy-opt',
-        title: 'Candy Optimization',
-      },
-      {
-        id: 'plane-opt',
-        title: 'Plane engine optimization',
-      },
+      { id: 'candy-opt', title: 'Candy Optimization' },
+      { id: 'plane-opt', title: 'Plane engine optimization' },
     ],
   },
   {
     id: 'last-7-days',
     title: 'Last 7 days',
-    items: Array(10)
-      .fill(null)
-      .map((_, index) => ({
-        id: `test-opt-${index}`,
-        title: 'Test optimization',
-      })),
+    items: Array(10).fill(null).map((_, index) => ({
+      id: `test-opt-${index}`,
+      title: 'Test optimization',
+    })),
   },
   {
     id: 'last-30-days',
     title: 'Last 30 days',
-    items: Array(5)
-      .fill(null)
-      .map((_, index) => ({
-        id: `old-opt-${index}`,
-        title: 'Older optimization',
-        isDisabled: true,
-      })),
+    items: Array(5).fill(null).map((_, index) => ({
+      id: `old-opt-${index}`,
+      title: 'Older optimization',
+      isDisabled: true,
+    })),
   },
 ];
 
 export default function DashboardLayout() {
   const [selectedOptimization, setSelectedOptimization] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [availableModels, setAvailableModels] = useState([]);
-  const [selectedModel, setSelectedModel] = useState(null);
+  const [availableModels, setAvailableModels] = useState<Model[]>([]);
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
   const [contentState, setContentState] = useState<ContentState>({ type: 'empty' });
   const [optimizationData, setOptimizationData] = useState(null);
 
   const fetchModels = async () => {
-    try {
-      const user = authService.getCurrentUser();
-      if (!user) return;
-      
-      const response = await axiosInstance.get(`/api/users/${user.id}/models`);
-      const models = response.data;
+  try {
+    const userId = localStorage.getItem('userId'); // Get userId from localStorage
+    if (!userId) {
+      console.error('No user ID found');
+      return;
+    }
+    
+    const response = await axiosInstance.get(`/users/${userId}`);
+    
+    if (response.data?.optimizationModelIds) {
+      const models = response.data.optimizationModelIds.map(id => ({
+        id,
+        name: 'Python 1',
+        version: 'v3.4.2'
+      }));
       setAvailableModels(models);
       if (models.length > 0) {
         setSelectedModel(models[0]);
       }
-    } catch (error) {
-      console.error('Error fetching models:', error);
     }
+  } catch (error) {
+    console.error('Error fetching user models:', error);
+    setAvailableModels([]);
+  }
   };
-
   const fetchOptimizationResults = async () => {
+
     try {
+        const userId = localStorage.getItem('userId'); // Get userId from localStorage
+    if (!userId) {
+      console.error('No user ID found');
+      return;
+    }
+
       const response = await axiosInstance.get(
-        `/results?userId=550e8400-e29b-41d4-a716-446655440002`
+        `/results?userId=550e8400-e29b-41d4-a716-446655440000`
       );
       if (response.data && response.data.length > 0) {
         setOptimizationData(response.data[0]);
@@ -138,7 +142,6 @@ export default function DashboardLayout() {
       const response = await axiosInstance.post('/api/optimizations', formData);
       if (response.data.id) {
         setContentState({ type: 'optimization-result', resultId: response.data.id });
-        // Refresh optimization data after submission
         fetchOptimizationResults();
       }
     } catch (error) {
@@ -212,8 +215,6 @@ export default function DashboardLayout() {
   return (
     <div className="flex h-screen">
       <SidebarNav
-        modelName={selectedModel?.name}
-        modelVersion={selectedModel?.version}
         sections={defaultSections}
         onItemClick={handleOptimizationSelect}
         onNewChat={handleNewChat}
@@ -273,3 +274,4 @@ export default function DashboardLayout() {
     </div>
   );
 }
+
