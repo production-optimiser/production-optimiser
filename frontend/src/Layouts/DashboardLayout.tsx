@@ -22,7 +22,7 @@
 // };
 
 import { useEffect, useState } from 'react';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import SidebarNav from '../Components/sidebar';
 import NewOptimizationForm from '../Components/NewOptimizationForm';
@@ -274,3 +274,4 @@ export default function DashboardLayout() {
     </div>
   );
 }
+

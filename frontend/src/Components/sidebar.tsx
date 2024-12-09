@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ScrollArea } from '@/Components/ui/scroll-area';
-import { Button } from '@/Components/ui/button';
-import { Card } from '@/Components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ChevronDown, Copy, Plus } from 'lucide-react';
 import { UserProfile } from '../Components/UserProfile/index.tsx';
 import { User } from '@/types/auth';
@@ -12,7 +12,7 @@ import {
  DropdownMenuContent,
  DropdownMenuItem,
  DropdownMenuTrigger,
-} from '@/Components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 interface Model {
  id: string;
