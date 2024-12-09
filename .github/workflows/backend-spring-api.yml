@@ -62,7 +62,6 @@ jobs:
     - name: Maven test
       run: mvn surefire:test
 
-#todo include python api
   package:
     name: "Package maven api"
     runs-on: ubuntu-latest
@@ -214,5 +213,5 @@ jobs:
           context: ./model-services/dummy-service
           file: ./model-services/dummy-service/Dockerfile
           push: true
-          tags: ${{ steps.modify-tool-tags.outputs.tags }}
+          tags: ${{ steps.modify-dummy-tool-tags.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
