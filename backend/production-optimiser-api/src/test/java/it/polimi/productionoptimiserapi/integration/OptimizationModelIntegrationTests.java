@@ -9,7 +9,6 @@ import io.restassured.http.ContentType;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
-import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
@@ -97,7 +96,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Test
   void shouldCreateOptimizationModel() {
-    User customer =
+    UserDTO customer =
         userService.createUser(
             UserDTO.builder()
                 .email("customer@potest.it")
