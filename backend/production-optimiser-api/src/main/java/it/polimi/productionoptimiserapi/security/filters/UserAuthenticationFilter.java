@@ -1,6 +1,7 @@
 package it.polimi.productionoptimiserapi.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.security.dtos.AuthenticationResponseDTO;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.security.utils.JwtUtil;
@@ -54,9 +55,10 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
       FilterChain chain,
       Authentication authResult)
       throws IOException {
+    User user = (User) authResult.getPrincipal();
     String token = jwtUtil.generateToken(authResult);
 
-    AuthenticationResponseDTO responseDto = new AuthenticationResponseDTO(token);
+    AuthenticationResponseDTO responseDto = new AuthenticationResponseDTO(user.getId(), token);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
