@@ -1,10 +1,11 @@
 package it.polimi.productionoptimiserapi.services.impl;
 
-import it.polimi.productionoptimiserapi.dto.OptimizationResultDto;
-import it.polimi.productionoptimiserapi.entities.OptimizationResult;
+import it.polimi.productionoptimiserapi.dtos.OptimizationResultDto;
+import it.polimi.productionoptimiserapi.entities.*;
+import it.polimi.productionoptimiserapi.mappers.OptimizationResultMapper;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
+import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
-import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -17,54 +18,32 @@ import org.springframework.stereotype.Service;
 public class OptimizationResultServiceImpl implements OptimizationResultService {
 
   private final OptimizationResultRepository resultRepository;
+  private final UserRepository userRepository;
 
   public List<OptimizationResultDto> getAllResults(String userId) {
     return resultRepository.findByUserId(userId).stream()
-        .map(OptimizationResultServiceImpl::resultToDto)
+        .map(OptimizationResultMapper::resultToDto)
         .toList();
   }
 
   @Override
   public OptimizationResultDto getResultById(String resultId) {
-    return resultToDto(
+    return OptimizationResultMapper.resultToDto(
         resultRepository
             .findById(resultId)
             .orElseThrow(
                 () -> new NoSuchElementException("No result with id=" + resultId + " exists")));
   }
 
-  private static OptimizationResultDto resultToDto(OptimizationResult result) {
-    HashMap<String, Integer> maximumPalletsUsed = new HashMap<>();
-    HashMap<String, Integer> palletsDefinedInExcel = new HashMap<>();
-    HashMap<String, String> graphs = new HashMap<>();
+  @Override
+  public String saveOptimizationResult(byte[] inputFile, OptimizationResultDto dto, User user) {
+    return resultRepository
+        .save(OptimizationResultMapper.dtoToResult(inputFile, dto, user))
+        .getId();
+  }
 
-    result
-        .getMaximumPalletsUsed()
-        .forEach((pallet) -> maximumPalletsUsed.put(pallet.getDefinedPallets(), pallet.getCount()));
-    result
-        .getPalletsDefinedInExcel()
-        .forEach(
-            (pallet) -> palletsDefinedInExcel.put(pallet.getDefinedPallets(), pallet.getCount()));
-    result
-        .getGraphs()
-        .forEach((graph) -> graphs.put(graph.getType().toString(), graph.getBase64EncodedImage()));
-
-    return new OptimizationResultDto(
-        result.getId(),
-        result.getCreatedAt(),
-        result.getUpdatedAt(),
-        result.getInitialTotalProductionTime(),
-        result.getOptimizedTotalProductionTime(),
-        result.getTimeImprovement(),
-        result.getPercentageImprovement(),
-        result.getAverageInitialTotalMachineUtilization(),
-        result.getAverageOptimizedTotalMachineUtilization(),
-        result.getUtilizationImprovement(),
-        maximumPalletsUsed,
-        palletsDefinedInExcel,
-        result.getTotalTimeWithOptimizedPallets(),
-        result.getTotalTimeWithExcelPallets(),
-        result.getBestSequenceOfProducts(),
-        graphs);
+  @Override
+  public void deleteAll() {
+    resultRepository.deleteAll();
   }
 }
