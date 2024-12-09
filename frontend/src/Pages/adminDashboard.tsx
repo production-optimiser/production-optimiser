@@ -1,17 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserProfile } from '../Components/UserProfile/index';
-import { useAuth } from '../Contexts/authContext';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/Components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -30,37 +17,19 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Checkbox } from '@/Components/ui/checkbox';
 import SidebarNav from '../Components/sidebar';
-import { authService } from '../services/auth';
+import { UserProfile } from '../Components/userProfile';
+import { UserManagement } from '../Components/users/UserManagement';
+import { ModelAssignment } from '../Components/users/ModelAssignment';
+import { UserRequests } from '../Components/users/UserRequests';
 
-const AdminSidebarContent = () => {
-  const navigate = useNavigate();
-  const { logout } = useAuth();
-  const [showLogoutAlert, setShowLogoutAlert] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+interface Model {
+  id: string;
+  name: string;
+  url: string;
+  createdAt: string;
+}
 
-  const handleLogoutClick = () => {
-    setShowLogoutAlert(true);
-  };
-
-  const handleLogoutConfirm = async () => {
-    setIsLoggingOut(true);
-    try {
-      await authService.logout();
-      logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // You might want to show an error toast here
-    } finally {
-      setIsLoggingOut(false);
-      setShowLogoutAlert(false);
-    }
-  };
-
-  const handleAccountClick = () => {
-    navigate('/admin/account');
-  };
-
+const AdminSidebarContent = ({ onSectionSelect }: { onSectionSelect: (id: string) => void }) => {
   const sections = [
     {
       id: 'user-management',
@@ -75,8 +44,8 @@ const AdminSidebarContent = () => {
           title: 'Model Assignment',
         },
         {
-          id: 'account-requests',
-          title: 'Account Requests',
+          id: 'user-requests',
+          title: 'User Requests',
         },
       ],
     },
@@ -93,49 +62,83 @@ const AdminSidebarContent = () => {
   ];
 
   return (
+    <div className="h-screen border-r flex flex-col">
+      <div className="flex-grow">
+        <SidebarNav 
+          modelName="Admin Panel" 
+          sections={sections} 
+          onItemClick={onSectionSelect}
+        />
+      </div>
+      
+    </div>
+  );
+};
+
+const ManageModels = ({ models, onOpenDialog }: { 
+  models: Model[], 
+  onOpenDialog: () => void 
+}) => {
+  return (
     <>
-      <div className="flex flex-col h-full border-r">
-        <div className="flex-1 overflow-y-auto">
-          <SidebarNav modelName="Admin Panel" sections={sections} />
-        </div>
-        <div className="border-t">
-          <UserProfile 
-            name="Admin1" 
-            email="m@example.com"
-            role="admin"
-            onLogout={handleLogoutClick}
-            onAccountClick={handleAccountClick}
-          />
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Manage Models</h1>
       </div>
 
-      <AlertDialog open={showLogoutAlert} onOpenChange={setShowLogoutAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You will be signed out of your account and redirected to the login page.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleLogoutConfirm}
-              disabled={isLoggingOut}
-              className="bg-amber-600 hover:bg-amber-700"
-            >
-              {isLoggingOut ? "Logging out..." : "Log out"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Input className="max-w-sm mb-6" placeholder="Filter names..." />
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12">
+              <Checkbox />
+            </TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Url</TableHead>
+            <TableHead>Id</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {models.map((model) => (
+            <TableRow key={model.id}>
+              <TableCell>
+                <Checkbox />
+              </TableCell>
+              <TableCell>{model.name}</TableCell>
+              <TableCell>{model.url}</TableCell>
+              <TableCell>{model.id}</TableCell>
+              <TableCell>{model.createdAt}</TableCell>
+              <TableCell className="text-right">
+                <Button variant="ghost" size="sm">
+                  •••
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <div className="mt-4 flex justify-between">
+        <Button
+          onClick={onOpenDialog}
+          className="bg-amber-600 hover:bg-amber-700"
+        >
+          Link Model
+        </Button>
+        <div className="space-x-2">
+          <Button variant="outline">Previous</Button>
+          <Button variant="outline">Next</Button>
+        </div>
+      </div>
     </>
   );
 };
 
 const AdminDashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [filterText, setFilterText] = useState('');
+  const [currentSection, setCurrentSection] = useState('manage-models');
   const [models] = useState<Model[]>([
     {
       id: '851be781-5493-4ea4-95a5-62e87bd5c7f0',
@@ -157,95 +160,54 @@ const AdminDashboard = () => {
     },
   ]);
 
-  // Filter models based on search text
-  const filteredModels = models.filter(model =>
-    model.name.toLowerCase().includes(filterText.toLowerCase())
-  );
+  const handleSectionSelect = (sectionId: string) => {
+    setCurrentSection(sectionId);
+  };
+
+  const renderContent = () => {
+    switch (currentSection) {
+      case 'manage-users':
+        return <UserManagement />;
+      case 'manage-models':
+        return <ManageModels models={models} onOpenDialog={() => setIsDialogOpen(true)} />;
+      case 'model-assignment':
+        return <ModelAssignment />;
+      case 'user-requests':
+        return <UserRequests />;
+      default:
+        return <div>Select a section</div>;
+    }
+  };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex">
       <div className="w-64">
-        <AdminSidebarContent />
+        <AdminSidebarContent onSectionSelect={handleSectionSelect} />
       </div>
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Manage Models</h1>
-        </div>
+      <div className="flex-1 p-6">
+        {renderContent()}
+      </div>
 
-        <Input 
-          className="max-w-sm mb-6" 
-          placeholder="Filter names..." 
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-        />
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox />
-              </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Url</TableHead>
-              <TableHead>Id</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredModels.map((model) => (
-              <TableRow key={model.id}>
-                <TableCell>
-                  <Checkbox />
-                </TableCell>
-                <TableCell>{model.name}</TableCell>
-                <TableCell>{model.url}</TableCell>
-                <TableCell>{model.id}</TableCell>
-                <TableCell>{model.createdAt}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    •••
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        <div className="mt-4 flex justify-between">
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-amber-600 hover:bg-amber-700"
-          >
-            Link Model
-          </Button>
-          <div className="space-x-2">
-            <Button variant="outline">Previous</Button>
-            <Button variant="outline">Next</Button>
-          </div>
-        </div>
-
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Model</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Name</label>
-                <Input />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Url</label>
-                <Input />
-              </div>
-              <Button className="w-full bg-amber-600 hover:bg-amber-700">
-                Link
-              </Button>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Model</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Name</label>
+              <Input />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            <div>
+              <label className="text-sm font-medium">Url</label>
+              <Input />
+            </div>
+            <Button className="w-full bg-amber-600 hover:bg-amber-700">
+              Link
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
