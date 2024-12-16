@@ -30,11 +30,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Transactional
 public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup {
 
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -190,10 +188,10 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
-    assertEquals(om.getStatus(), OptimizationModelStatus.ACTIVE);
+    assertEquals(OptimizationModelStatus.ACTIVE, om.getStatus());
 
     om = optimizationModelService.retireOptimizationModel(om.getId());
-    assertEquals(om.getStatus(), OptimizationModelStatus.RETIRED);
+    assertEquals(OptimizationModelStatus.RETIRED, om.getStatus());
 
     Optional<OptimizationModel> oom =
         optimizationModelService.findOptimizationModelById(om.getId());
