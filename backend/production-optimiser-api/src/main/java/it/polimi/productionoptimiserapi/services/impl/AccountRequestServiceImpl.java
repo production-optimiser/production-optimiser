@@ -14,11 +14,13 @@ import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountRequestServiceImpl implements AccountRequestService {
 
   private final AccountRequestRepository accountRequestRepository;
@@ -27,15 +29,21 @@ public class AccountRequestServiceImpl implements AccountRequestService {
 
   @Override
   public AccountRequestDTO getAccountRequest(String id) {
+    log.info("Fetching account request with id " + id + "...");
     return accountRequestRepository
         .findById(id)
         .map(AccountRequestMapper::toDto)
         .orElseThrow(
-            () -> new EntityNotFoundException("Account request with id " + id + " not found"));
+            () -> {
+              String message = "Account request with id " + id + " not found";
+              log.warn(message);
+              return new EntityNotFoundException(message);
+            });
   }
 
   @Override
   public List<AccountRequestDTO> getAccountRequests() {
+    log.info("Fetching all account requests...");
     return accountRequestRepository.findAll().stream().map(AccountRequestMapper::toDto).toList();
   }
 
@@ -44,6 +52,7 @@ public class AccountRequestServiceImpl implements AccountRequestService {
   public AccountRequestDTO createAccountRequest(AccountRequestDTO accountRequestDTO) {
     userService.validateExistingEmail(accountRequestDTO.getEmail());
 
+    log.info("Creating account request with id=" + accountRequestDTO.getId());
     AccountRequest accountRequest = accountRequestDTO.toEntity();
     accountRequest = accountRequestRepository.save(accountRequest);
 
@@ -53,13 +62,16 @@ public class AccountRequestServiceImpl implements AccountRequestService {
   @Override
   @Transactional
   public UserDTO approveAccountRequest(KeyValueDTO keyValueDTO) {
+
     AccountRequest accountRequest =
         accountRequestRepository
             .findById(keyValueDTO.getKey())
             .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        "Account request with id " + keyValueDTO.getKey() + " not found"));
+                () -> {
+                  String msg = "Account request with id " + keyValueDTO.getKey() + " not found";
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
     UserDTO userDTO =
         UserDTO.builder()
@@ -68,6 +80,7 @@ public class AccountRequestServiceImpl implements AccountRequestService {
             .role(UserRole.CUSTOMER)
             .build();
 
+    log.info("Deleting account request with id=" + accountRequest.getId());
     accountRequestRepository.delete(accountRequest);
 
     return userService.createUser(userDTO);
@@ -80,9 +93,11 @@ public class AccountRequestServiceImpl implements AccountRequestService {
         accountRequestRepository
             .findById(keyValueDTO.getKey())
             .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        "Account request with id " + keyValueDTO.getKey() + " not found"));
+                () -> {
+                  String msg = "Account request with id " + keyValueDTO.getKey() + " not found";
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
     emailService.sendHtmlEmail(
         accountRequest.getEmail(),
@@ -90,6 +105,8 @@ public class AccountRequestServiceImpl implements AccountRequestService {
         Constants.EMAIL_BODY_DENIED_ACCOUNT + keyValueDTO.getValue());
 
     AccountRequestDTO accountRequestDTO = AccountRequestMapper.toDto(accountRequest);
+
+    log.info("Deleting account request with id=" + accountRequest.getId());
     accountRequestRepository.deleteById(keyValueDTO.getKey());
 
     return accountRequestDTO;

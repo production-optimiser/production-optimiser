@@ -21,6 +21,7 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
   private final UserRepository userRepository;
 
   public List<OptimizationResultDto> getAllResults(String userId) {
+    log.info("Fetching results for user id=" + userId);
     return resultRepository.findByUserId(userId).stream()
         .map(OptimizationResultMapper::resultToDto)
         .toList();
@@ -28,15 +29,21 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
 
   @Override
   public OptimizationResultDto getResultById(String resultId) {
+    log.info("Fetching result with id=" + resultId);
     return OptimizationResultMapper.resultToDto(
         resultRepository
             .findById(resultId)
             .orElseThrow(
-                () -> new NoSuchElementException("No result with id=" + resultId + " exists")));
+                () -> {
+                  String msg = "No result with id=" + resultId;
+                  log.warn(msg);
+                  return new NoSuchElementException(msg);
+                }));
   }
 
   @Override
   public String saveOptimizationResult(byte[] inputFile, OptimizationResultDto dto, User user) {
+    log.info("Saving optimization result");
     return resultRepository
         .save(OptimizationResultMapper.dtoToResult(inputFile, dto, user))
         .getId();
@@ -44,6 +51,7 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
 
   @Override
   public void deleteAll() {
+    log.warn("Deleting all results");
     resultRepository.deleteAll();
   }
 }

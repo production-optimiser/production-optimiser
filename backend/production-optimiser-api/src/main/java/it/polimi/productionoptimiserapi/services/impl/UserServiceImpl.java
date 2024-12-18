@@ -20,10 +20,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
@@ -44,7 +46,11 @@ public class UserServiceImpl implements UserService {
                 this.optimizationModelService
                     .findOptimizationModelById(modelId)
                     .orElseThrow(
-                        () -> new EntityNotFoundException("Model not found by id " + modelId)))
+                        () -> {
+                          String msg = "Model not found by id " + modelId;
+                          log.warn(msg);
+                          return new EntityNotFoundException(msg);
+                        }))
         .collect(Collectors.toSet());
   }
 
@@ -62,6 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     user.setAvailableOptimizationModels(updatedModels);
+    log.info("Creating user " + userDTO.getEmail());
     user = userRepository.save(user);
 
     emailService.sendHtmlEmail(
@@ -74,11 +81,13 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public List<UserDTO> getUsers() {
+    log.info("Getting all users");
     return userRepository.findAll().stream().map(UserMapper::toDto).collect(Collectors.toList());
   }
 
   @Override
   public Optional<UserDTO> getUser(String id) {
+    log.info("Getting user with id " + id);
     return userRepository.findById(id).map(UserMapper::toDto);
   }
 
@@ -92,22 +101,34 @@ public class UserServiceImpl implements UserService {
     User user =
         userRepository
             .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("User not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "User not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
     if (email != null) {
+      log.info("Updating email=" + email);
       user.setEmail(email);
     }
 
     if (password != null) {
+      log.info("Updating password");
       user.setPassword(password);
     }
 
     if (requestedRole != null) {
       if (user.getRole() == UserRole.ADMIN && requestedRole == UserRole.CUSTOMER) {
         // TODO if we allow this customer will keep all of the models permissions, we can clear them
+        log.warn("Cannot change role of an admin user to customer");
         throw new IllegalArgumentException("Cannot change role of an admin user to customer");
       }
+
+      log.info("Updating role " + requestedRole);
       user.setRole(requestedRole);
+
+      log.info("Updating optimization models");
       user.setAvailableOptimizationModels(
           requestedRole == UserRole.ADMIN
               ? new HashSet<>(this.optimizationModelService.findAllOptimizationModels())
@@ -126,14 +147,24 @@ public class UserServiceImpl implements UserService {
     User user =
         userRepository
             .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("User not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "User not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
     if (user.getRole() == UserRole.ADMIN) {
-      throw new IllegalArgumentException("Cannot delete an admin user");
+      String msg = "Cannot delete an admin user";
+      log.warn(msg);
+      throw new IllegalArgumentException(msg);
     }
-    user.setStatus(UserStatus.DELETED);
 
-    return UserMapper.toDto(userRepository.save(user));
+    UserDTO userDTO = UserMapper.toDto(user);
+    log.info("Deleting user " + userDTO.getId());
+    userRepository.delete(user);
+
+    return userDTO;
   }
 
   @Override
@@ -142,7 +173,12 @@ public class UserServiceImpl implements UserService {
     OptimizationModel model =
         this.optimizationModelService
             .findOptimizationModelById(modelId)
-            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + modelId));
+            .orElseThrow(
+                () -> {
+                  String msg = "Model not found by id " + modelId;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
     return userRepository.findAll().stream()
         .filter(user -> user.getRole() == UserRole.ADMIN)
@@ -155,8 +191,14 @@ public class UserServiceImpl implements UserService {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found by id " + userId));
+            .orElseThrow(
+                () -> {
+                  String msg = "User not found by id " + userId;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
+    log.info("Adding model " + model.getId() + " to user " + userId);
     Set<OptimizationModel> updatedModels = new HashSet<>(user.getAvailableOptimizationModels());
     updatedModels.add(model);
 
@@ -167,13 +209,17 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void validateExistingEmail(String email) {
+    log.info("Validating email " + email + "...");
     if (userRepository.existsUserByEmail(email)) {
-      throw new EntityExistsException("User with email address: " + email + " already exists.");
+      String msg = "User with email address: " + email + " already exists.";
+      log.warn(msg);
+      throw new EntityExistsException(msg);
     }
 
     if (accountRequestRepository.existsAccountRequestByEmail(email)) {
-      throw new EntityExistsException(
-          "Account request with email address: " + email + " already exists.");
+      String msg = "Account request with email address: " + email + " already exists.";
+      log.warn(msg);
+      throw new EntityExistsException(msg);
     }
   }
 }
