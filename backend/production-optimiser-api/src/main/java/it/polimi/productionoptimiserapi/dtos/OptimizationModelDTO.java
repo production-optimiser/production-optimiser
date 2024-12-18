@@ -1,6 +1,7 @@
 package it.polimi.productionoptimiserapi.dtos;
 
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
+import it.polimi.productionoptimiserapi.enums.InputType;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Set;
 import lombok.Builder;
@@ -20,10 +21,14 @@ public class OptimizationModelDTO {
 
   public Set<String> userIds;
 
+  @NotBlank(message = "inputType must be provided")
+  public InputType inputType;
+
   public OptimizationModel toEntity() {
     OptimizationModel optimizationModel = new OptimizationModel();
     optimizationModel.setName(this.name);
     optimizationModel.setApiUrl(this.apiUrl);
+    optimizationModel.setInputType(this.inputType);
     return optimizationModel;
   }
 }

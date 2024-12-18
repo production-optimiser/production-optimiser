@@ -1,6 +1,7 @@
 package it.polimi.productionoptimiserapi.integration;
 
 import static io.restassured.RestAssured.given;
+import static it.polimi.productionoptimiserapi.config.Constants.ALLOWED_FILE_EXTENSIONS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,6 +10,7 @@ import io.restassured.http.ContentType;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
+import it.polimi.productionoptimiserapi.enums.InputType;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
@@ -123,6 +125,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
             .userIds(Set.of())
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
@@ -133,6 +136,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .get("/api/models/" + om.getId())
         .then()
         .statusCode(HttpStatus.OK.value())
+        .header("Allowed-Extensions", String.join(", ", ALLOWED_FILE_EXTENSIONS))
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 

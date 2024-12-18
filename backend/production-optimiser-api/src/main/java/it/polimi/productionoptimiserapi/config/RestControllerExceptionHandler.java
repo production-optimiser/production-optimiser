@@ -20,37 +20,37 @@ public class RestControllerExceptionHandler {
   @ExceptionHandler(MissingServletRequestParameterException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorDetails handleMissingServletRequestParameterException(
-      MissingServletRequestParameterException ex) {
+      Exception ex) {
     return new ErrorDetails(ex);
   }
 
   @ExceptionHandler({ForbiddenException.class, AuthorizationDeniedException.class})
   @ResponseStatus(HttpStatus.FORBIDDEN)
-  public ErrorDetails handleOAuthException(ForbiddenException ex) {
+  public ErrorDetails handleOAuthException(Exception ex) {
     return new ErrorDetails(ex);
   }
 
   @ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorDetails handleValidationException(ValidationException ex) {
+  public ErrorDetails handleValidationException(Exception ex) {
     return new ErrorDetails(ex);
   }
 
   @ExceptionHandler(EntityNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ErrorDetails handleEntityNotFoundException(EntityNotFoundException ex) {
+  public ErrorDetails handleEntityNotFoundException(Exception ex) {
     return new ErrorDetails(ex);
   }
 
   @ExceptionHandler(BadRequestException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorDetails handleOAuthException(BadRequestException ex) {
+  public ErrorDetails handleBadRequestException(Exception ex) {
     return new ErrorDetails(ex);
   }
 
   @ExceptionHandler(RuntimeException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ErrorDetails handleRuntimeException(RuntimeException ex) {
+  public ErrorDetails handleRuntimeException(Exception ex) {
     return new ErrorDetails(ex);
   }
 
