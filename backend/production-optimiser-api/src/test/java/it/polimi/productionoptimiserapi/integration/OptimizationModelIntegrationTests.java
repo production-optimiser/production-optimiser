@@ -11,6 +11,7 @@ import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
@@ -48,6 +49,8 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private UserRepository userRepository;
 
+  @Autowired private OptimizationModelRepository optimizationModelRepository;
+
   String accessToken;
 
   @BeforeAll
@@ -58,6 +61,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
   @BeforeEach
   void beforeEach() {
     userRepository.deleteAll();
+    optimizationModelRepository.deleteAll();
 
     userService.createUser(
         UserDTO.builder()
@@ -88,7 +92,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private OptimizationModelService optimizationModelService;
 
-  // @Test
+  @Test
   void shouldCreateOptimizationModel() {
     UserDTO customer =
         userService.createUser(
@@ -136,7 +140,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_customerShouldGetForbidden() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -174,7 +178,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .statusCode(HttpStatus.FORBIDDEN.value());
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_shouldRetire() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
@@ -184,10 +188,10 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
-    assertEquals(om.getStatus(), OptimizationModelStatus.ACTIVE);
+    assertEquals(OptimizationModelStatus.ACTIVE, om.getStatus());
 
     om = optimizationModelService.retireOptimizationModel(om.getId());
-    assertEquals(om.getStatus(), OptimizationModelStatus.RETIRED);
+    assertEquals(OptimizationModelStatus.RETIRED, om.getStatus());
 
     Optional<OptimizationModel> oom =
         optimizationModelService.findOptimizationModelById(om.getId());

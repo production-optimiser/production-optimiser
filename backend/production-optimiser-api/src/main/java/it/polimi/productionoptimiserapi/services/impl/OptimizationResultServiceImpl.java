@@ -35,6 +35,11 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
                 () -> new NoSuchElementException("No result with id=" + resultId + " exists")));
   }
 
+  private static OptimizationResultDto resultToDto(OptimizationResult result) {
+    return new OptimizationResultDto(
+        result.getId(), result.getCreatedAt(), result.getUpdatedAt(), result.getOutputJSON());
+  }
+
   @Override
   public String saveOptimizationResult(byte[] inputFile, OptimizationResultDto dto, User user) {
     return resultRepository
