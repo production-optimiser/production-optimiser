@@ -218,7 +218,7 @@ export default function DashboardLayout() {
         id: result.id,
         title: generateOptimizationTitle(result),
         isDisabled: false,
-        data: result // Store the full result data for later use if needed
+        data: result 
       };
 
       if (resultDate >= today) {
@@ -232,7 +232,6 @@ export default function DashboardLayout() {
       }
     });
 
-    // Sort items within each section by creation date (newest first)
     sections.forEach(section => {
       section.items.sort((a, b) => {
         const dateA = new Date((a.data as OptimizationResultDto).createdAt);
@@ -240,31 +239,19 @@ export default function DashboardLayout() {
         return dateB.getTime() - dateA.getTime();
       });
     });
-
-    // Remove empty sections
     return sections.filter(section => section.items.length > 0);
   };
 
-  useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-      console.log(user)
-    }
-  }, []);
+ 
 
    useEffect(() => {
     const fetchSections = async () => {
-      if (!currentUser) return;
-  
-      setIsLoading(true);
       try {
-        const response = await axiosInstance.get(`/results`, {
-          params: { userId: currentUser.id },
-        });
+        const userId = localStorage.getItem('userId')
+        console.log(userId)
+        const response = await axiosInstance.get(`/results?userId=550e8400-e29b-41d4-a716-446655440002`);
+        console.log(response)
         const results: OptimizationResultDto[] = response.data;
-        
-        // Transform the results into sections
         const formattedSections = groupResultsByDate(results);
         setDynamicSections(formattedSections);
       } catch (error) {

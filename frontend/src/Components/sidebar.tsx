@@ -315,8 +315,7 @@ const SidebarNav = ({
  const [currentUser, setCurrentUser] = useState<User | null>(null);
  const [selectedItem, setSelectedItem] = useState<string | null>(null);
  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
- const [dynamicSections, setDynamicSections] = useState<TimeSection[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+ 
  
  const navigate = useNavigate();
 
@@ -327,28 +326,7 @@ const SidebarNav = ({
    }
  }, []);
 
- 
- useEffect(() => {
-  const fetchSections = async () => {
-    if (!currentUser) return;
 
-    setIsLoading(true);
-    try {
-      const response = await axiosInstance.get(`/results`, {
-        params: { userId: currentUser.id },
-      });
-      const fetchedSections: TimeSection[] = response.data;
-      console.log('API Response:', response.data);
-      setDynamicSections(fetchedSections);
-    } catch (error) {
-      console.error('Error fetching sections:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  fetchSections();
-}, [currentUser]);
 
  const handleItemClick = (id: string) => {
    setSelectedItem(id);
@@ -425,7 +403,7 @@ const SidebarNav = ({
                    <Button
                      key={item.id}
                      variant="ghost"
-                     className={`w-full justify-start text-sm ${
+                     className={`w-full justify-start text-sm whitespace-normal text-left h-auto py-2 ${
                        selectedItem === item.id ? 'bg-gray-100' : ''
                      } ${item.isDisabled ? 'text-gray-500' : ''}`}
                      disabled={item.isDisabled}
