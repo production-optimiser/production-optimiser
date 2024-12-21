@@ -32,6 +32,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, BarChart, Bar, Legend
 } from 'recharts';
+import { User } from '@/types/auth';
 
 interface ContentState {
   type: 'new-chat' | 'optimization-result' | 'empty';
@@ -43,6 +44,20 @@ interface Model {
   name: string;
   version: string;
 }
+
+interface OptimizationItem {
+  id: string;
+  title: string;
+  isDisabled?: boolean;
+  data?: OptimizationResultDto;
+ }
+ 
+
+interface TimeSection {
+  id: string;
+  title: string;
+  items: OptimizationItem[];
+ }
 
 const defaultSections = [
   {
@@ -72,6 +87,25 @@ const defaultSections = [
   },
 ];
 
+interface OptimizationResultDto {
+  id: string;
+  createdAt: string; // LocalDateTime will come as ISO string
+  updatedAt: string;
+  initialTotalProductionTime: number;
+  optimizedTotalProductionTime: number;
+  timeImprovement: number;
+  percentageImprovement: number;
+  averageInitialTotalMachineUtilization: number;
+  averageOptimizedTotalMachineUtilization: number;
+  utilizationImprovement: number;
+  maximumPalletsUsed: { [key: string]: number };
+  palletsDefinedInExcel: { [key: string]: number };
+  totalTimeWithOptimizedPallets: number;
+  totalTimeWithExcelPallets: number;
+  bestSequenceOfProducts: string;
+  
+}
+
 export default function DashboardLayout() {
   const [selectedOptimization, setSelectedOptimization] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,6 +113,9 @@ export default function DashboardLayout() {
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
   const [contentState, setContentState] = useState<ContentState>({ type: 'empty' });
   const [optimizationData, setOptimizationData] = useState(null);
+  const [dynamicSections, setDynamicSections] = useState<TimeSection[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const fetchModels = async () => {
   try {
@@ -153,6 +190,93 @@ export default function DashboardLayout() {
     Promise.all([fetchModels(), fetchOptimizationResults()]);
   }, []);
 
+  const generateOptimizationTitle = (result: OptimizationResultDto): string => {
+    const improvementPercentage = result.percentageImprovement.toFixed(2);
+    const date = new Date(result.createdAt).toLocaleDateString();
+    return `Optimization (${improvementPercentage}% improvement) - ${date}`;
+  };
+  const groupResultsByDate = (results: OptimizationResultDto[]): TimeSection[] => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(lastWeek.getDate() - 7);
+    const lastMonth = new Date(today);
+    lastMonth.setDate(lastMonth.getDate() - 30);
+
+    const sections: TimeSection[] = [
+      { id: 'today', title: 'Today', items: [] },
+      { id: 'yesterday', title: 'Yesterday', items: [] },
+      { id: 'last-7-days', title: 'Last 7 days', items: [] },
+      { id: 'last-30-days', title: 'Last 30 days', items: [] }
+    ];
+
+    results.forEach(result => {
+      const resultDate = new Date(result.createdAt);
+      const optimizationItem: OptimizationItem = {
+        id: result.id,
+        title: generateOptimizationTitle(result),
+        isDisabled: false,
+        data: result // Store the full result data for later use if needed
+      };
+
+      if (resultDate >= today) {
+        sections[0].items.push(optimizationItem);
+      } else if (resultDate >= yesterday) {
+        sections[1].items.push(optimizationItem);
+      } else if (resultDate >= lastWeek) {
+        sections[2].items.push(optimizationItem);
+      } else if (resultDate >= lastMonth) {
+        sections[3].items.push(optimizationItem);
+      }
+    });
+
+    // Sort items within each section by creation date (newest first)
+    sections.forEach(section => {
+      section.items.sort((a, b) => {
+        const dateA = new Date((a.data as OptimizationResultDto).createdAt);
+        const dateB = new Date((b.data as OptimizationResultDto).createdAt);
+        return dateB.getTime() - dateA.getTime();
+      });
+    });
+
+    // Remove empty sections
+    return sections.filter(section => section.items.length > 0);
+  };
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    if (user) {
+      setCurrentUser(user);
+      console.log(user)
+    }
+  }, []);
+
+   useEffect(() => {
+    const fetchSections = async () => {
+      if (!currentUser) return;
+  
+      setIsLoading(true);
+      try {
+        const response = await axiosInstance.get(`/results`, {
+          params: { userId: currentUser.id },
+        });
+        const results: OptimizationResultDto[] = response.data;
+        
+        // Transform the results into sections
+        const formattedSections = groupResultsByDate(results);
+        setDynamicSections(formattedSections);
+      } catch (error) {
+        console.error('Error fetching sections:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchSections();
+  }, [currentUser]);
+
   const renderMachineUtilizationChart = () => {
     if (!optimizationData) return null;
 
@@ -215,7 +339,7 @@ export default function DashboardLayout() {
   return (
     <div className="flex h-screen">
       <SidebarNav
-        sections={defaultSections}
+        sections={dynamicSections}
         onItemClick={handleOptimizationSelect}
         onNewChat={handleNewChat}
         availableModels={availableModels}
