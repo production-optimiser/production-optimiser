@@ -49,6 +49,7 @@ interface EditUserForm {
 }
 
 interface AddUserRequest {
+  id: string
   email: string;
   password: string;
   role: string;
@@ -79,29 +80,62 @@ export const UserManagement = () => {
     try {
       const response = await axiosInstance.get<User[]>('/users');
       setUsers(response.data);
+      console.log('Fetched Users:', response.data); // Log the response data
     } catch (error) {
       console.error('Error fetching users:', error);
     }
   };
 
+  const generateRandomId = (): string => {
+    return `id-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+  };
+  // const handleAddUser = async () => {
+  //   try {
+  //     const request: AddUserRequest = {
+  //       id: generateRandomId(),
+  //       status: "ACTIVE",
+  //       email: newUser.email,
+  //       password: newUser.password,
+  //       role: "CUSTOMER",
+  //       optimizationModelIds: []
+  //     };
+
+  //     await axiosInstance.post('/users', request);
+  //     setIsAddDialogOpen(false);
+  //     setNewUser({ email: '', password: '' });
+  //     await fetchUsers();
+  //   } catch (error) {
+  //     console.error('Error adding user:', error);
+  //   }
+  // };
+  
   const handleAddUser = async () => {
+    if (!newUser.email || !newUser.password) {
+      alert('Email and Password are required.');
+      return;
+    }
+  
     try {
       const request: AddUserRequest = {
+        id: generateRandomId(),
         email: newUser.email,
         password: newUser.password,
         role: "CUSTOMER",
         status: "ACTIVE",
-        optimizationModelIds: []
+        optimizationModelIds: [],
       };
-
+  
       await axiosInstance.post('/users', request);
+  
+      alert('User added successfully!');
       setIsAddDialogOpen(false);
       setNewUser({ email: '', password: '' });
       await fetchUsers();
-    } catch (error) {
-      console.error('Error adding user:', error);
+    } catch (error: any) {
+      console.error('Error adding user:', error?.response?.data || error.message);
     }
   };
+  
   
 
   const handleEditUser = async () => {
@@ -137,17 +171,6 @@ export const UserManagement = () => {
     }
   };
 
-  // const handleDeleteUser = async () => {
-  //   if (!selectedUser) return;
-  //   try {
-  //     await axiosInstance.delete(`/users/${selectedUser.id}`);
-  //     setIsDeleteDialogOpen(false);
-  //     setSelectedUser(null);
-  //     await fetchUsers();
-  //   } catch (error) {
-  //     console.error('Error deleting user:', error);
-  //   }
-  // };
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     try {
