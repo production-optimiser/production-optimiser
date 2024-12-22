@@ -1,8 +1,9 @@
 
+// // AdminDashboard.tsx
 
-// import React, { useState } from 'react';
+// import React, { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router-dom';
-// import axiosInstance from '@/utils/axios'; // <-- Ensure this path matches your project structure
+// import axiosInstance from '@/utils/axios'; // <-- Make sure this path is correct for your project
 
 // import {
 //   Dialog,
@@ -42,7 +43,7 @@
 // interface ManageModel {
 //   id: string;
 //   name: string;
-//   url: string;
+//   url: string;         // We'll map "apiUrl" from the backend to "url" here
 //   createdAt: string;
 // }
 
@@ -205,7 +206,6 @@
 //   const [isDialogOpen, setIsDialogOpen] = useState(false);
 //   const [currentSection, setCurrentSection] = useState('all-statistics');
 
-//   // Corrected bracket/TypeScript for the contentState:
 //   const [contentState, setContentState] = useState<{ type: 'empty' | 'new-chat' }>({
 //     type: 'empty',
 //   });
@@ -224,31 +224,29 @@
 //     availableModels[0] || null
 //   );
 
-//   // We store the "Manage models" data here
-//   const [manageModels] = useState<ManageModel[]>([
-//     {
-//       id: '851be781-5493-4ea4-95a5-62e87bd5c7f0',
-//       name: 'Model 1',
-//       url: 'model1-python-docker.com',
-//       createdAt: '11/11/2024 10:54',
-//     },
-//     {
-//       id: '852be781-5493-4ea4-95a5-62e87bd5c7f0',
-//       name: 'Model 2',
-//       url: 'model2-python-docker.com',
-//       createdAt: '11/11/2024 10:54',
-//     },
-//     {
-//       id: '853be781-5493-4ea4-95a5-62e87bd5c7f0',
-//       name: 'Model 3',
-//       url: 'model3-python-docker.com',
-//       createdAt: '11/11/2024 10:54',
-//     },
-//   ]);
+//   // The list of models from /models endpoint
+//   const [manageModels, setManageModels] = useState<ManageModel[]>([]);
 
 //   // State for the "Link Model" form
 //   const [modelName, setModelName] = useState('');
 //   const [modelUrl, setModelUrl] = useState('');
+
+//   // Fetch models on mount
+//   useEffect(() => {
+//     fetchModels();
+//   }, []);
+
+//   const fetchModels = async () => {
+//     try {
+//       const response = await axiosInstance.get<ManageModel[]>('/models');
+//       // Depending on your backend field names, you might need to map:
+//       // e.g. if the backend returns { apiUrl: "...", ... }, map it to { url: responseItem.apiUrl }
+//       // but let's assume it already returns "url"
+//       setManageModels(response.data);
+//     } catch (error) {
+//       console.error('Error fetching models:', error);
+//     }
+//   };
 
 //   // Switch content to "new-chat"
 //   const handleNewChat = () => {
@@ -307,7 +305,9 @@
 //       // Reset the form fields
 //       setModelName('');
 //       setModelUrl('');
-//       // If you need to fetch updated list from the backend, do it here
+
+//       // Refresh the list
+//       fetchModels();
 //     } catch (error) {
 //       console.error('Error linking model:', error);
 //     }
@@ -380,13 +380,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '@/utils/axios'; // <-- Make sure this path is correct for your project
+import axiosInstance from '@/utils/axios';
 
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -399,6 +400,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
+import { MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 import SidebarNav from '../Components/sidebar';
 import { UserManagement } from '../Components/users/UserManagement';
@@ -419,13 +427,19 @@ interface SidebarModel {
 
 interface ManageModel {
   id: string;
-  name: string;
-  url: string;         // We'll map "apiUrl" from the backend to "url" here
+  name: string; 
+  url: string;         // We'll map the backend's "apiUrl" to "url"
   createdAt: string;
 }
 
+// We can define a simpler type for the form
+interface EditModelForm {
+  name: string;
+  url: string;
+}
+
 // ---------------------------------
-// Sidebar Sections
+// Sidebar sections
 // ---------------------------------
 
 const sections = [
@@ -506,15 +520,24 @@ const sections = [
 ];
 
 // ---------------------------------
-// ManageModels Component
+// ManageModels component
 // ---------------------------------
 
+/**
+ * Renders a table of models, each with a 3-dot actions menu:
+ *   - Edit Model
+ *   - Retire Model
+ */
 const ManageModels = ({
   models,
-  onOpenDialog,
+  onLinkModelDialog,
+  onEditModel,
+  onRetireModel,
 }: {
   models: ManageModel[];
-  onOpenDialog: () => void;
+  onLinkModelDialog: () => void;
+  onEditModel: (model: ManageModel) => void;
+  onRetireModel: (model: ManageModel) => void;
 }) => {
   return (
     <>
@@ -549,9 +572,24 @@ const ManageModels = ({
                 <TableCell>{model.id}</TableCell>
                 <TableCell>{model.createdAt}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    •••
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEditModel(model)}>
+                        Edit Model
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => onRetireModel(model)}
+                      >
+                        Retire Model
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -561,7 +599,7 @@ const ManageModels = ({
 
       <div className="mt-4 flex justify-between">
         <Button
-          onClick={onOpenDialog}
+          onClick={onLinkModelDialog}
           className="bg-amber-600 hover:bg-amber-700"
         >
           Link Model
@@ -576,13 +614,11 @@ const ManageModels = ({
 };
 
 // ---------------------------------
-// AdminDashboard Component
+// Main AdminDashboard component
 // ---------------------------------
 
 const AdminDashboard = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('all-statistics');
-
   const [contentState, setContentState] = useState<{ type: 'empty' | 'new-chat' }>({
     type: 'empty',
   });
@@ -597,18 +633,34 @@ const AdminDashboard = () => {
       version: 'v3.4.2',
     },
   ]);
-  const [selectedModel, setSelectedModel] = useState<SidebarModel | null>(
+  const [selectedModelForPlayground, setSelectedModelForPlayground] = useState<SidebarModel | null>(
     availableModels[0] || null
   );
 
-  // The list of models from /models endpoint
+  // --------------------------------------------------------------------------------
+  // Manage Models state
+  // --------------------------------------------------------------------------------
+
+  // The list we fetch from GET /models
   const [manageModels, setManageModels] = useState<ManageModel[]>([]);
 
-  // State for the "Link Model" form
+  // Link Model (Add Model) dialog
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [modelName, setModelName] = useState('');
   const [modelUrl, setModelUrl] = useState('');
 
-  // Fetch models on mount
+  // Edit Model dialog
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState<EditModelForm>({ name: '', url: '' });
+  const [selectedModel, setSelectedModel] = useState<ManageModel | null>(null);
+
+  // Retire Model dialog
+  const [isRetireDialogOpen, setIsRetireDialogOpen] = useState(false);
+
+  // --------------------------------------------------------------------------------
+  // Lifecycle: Fetch models on mount
+  // --------------------------------------------------------------------------------
+
   useEffect(() => {
     fetchModels();
   }, []);
@@ -616,26 +668,127 @@ const AdminDashboard = () => {
   const fetchModels = async () => {
     try {
       const response = await axiosInstance.get<ManageModel[]>('/models');
-      // Depending on your backend field names, you might need to map:
-      // e.g. if the backend returns { apiUrl: "...", ... }, map it to { url: responseItem.apiUrl }
-      // but let's assume it already returns "url"
+      // If your backend returns { apiUrl, ... }, you might map it:
+      // const data = response.data.map(item => ({
+      //   ...item,
+      //   url: item.apiUrl,
+      // }));
+      // setManageModels(data);
+
       setManageModels(response.data);
     } catch (error) {
       console.error('Error fetching models:', error);
     }
   };
 
-  // Switch content to "new-chat"
+  // --------------------------------------------------------------------------------
+  // "Link model" actions
+  // --------------------------------------------------------------------------------
+
+  const handleLinkModel = async () => {
+    try {
+      await axiosInstance.post('/models', {
+        name: modelName,
+        apiUrl: modelUrl,
+        userIds: [],
+      });
+
+      alert('Model linked successfully!');
+      setIsLinkDialogOpen(false);
+
+      // Reset fields
+      setModelName('');
+      setModelUrl('');
+
+      // Refresh
+      fetchModels();
+    } catch (error) {
+      console.error('Error linking model:', error);
+    }
+  };
+
+  // --------------------------------------------------------------------------------
+  // "Edit model" actions
+  // --------------------------------------------------------------------------------
+
+  /** Called from the 3-dot menu of a specific row */
+  const handleOpenEditModel = (model: ManageModel) => {
+    setSelectedModel(model);
+    setEditForm({ name: model.name, url: model.url });
+    setIsEditDialogOpen(true);
+  };
+
+  /** When user clicks "Save" in the Edit Model dialog */
+  const handlePatchModel = async () => {
+    if (!selectedModel) return;
+
+    try {
+      await axiosInstance.patch(`/models/${selectedModel.id}`, {
+        name: editForm.name,
+        apiUrl: editForm.url,
+        userIds:[]
+      });
+
+      alert('Model updated successfully!');
+      setIsEditDialogOpen(false);
+
+      // Reset
+      setSelectedModel(null);
+      setEditForm({ name: '', url: '' });
+
+      // Refresh
+      fetchModels();
+    } catch (error) {
+      console.error('Error patching model:', error);
+    }
+  };
+
+  // --------------------------------------------------------------------------------
+  // "Retire model" actions
+  // --------------------------------------------------------------------------------
+
+  /** Called from the 3-dot menu of a specific row */
+  const handleOpenRetireDialog = (model: ManageModel) => {
+    setSelectedModel(model);
+    setIsRetireDialogOpen(true);
+  };
+
+  /** When user confirms "Retire" in the Retire Model dialog */
+  const handleRetireModel = async () => {
+    if (!selectedModel) return;
+
+    try {
+      await axiosInstance.patch(`/models/${selectedModel.id}/retire`);
+      alert('Model retired successfully!');
+      setIsRetireDialogOpen(false);
+
+      // Reset
+      setSelectedModel(null);
+
+      // Refresh
+      await fetchModels();
+    } catch (error) {
+      console.error('Error retiring model:', error);
+    }
+  };
+
+  // --------------------------------------------------------------------------------
+  // "New Chat" action from the sidebar
+  // --------------------------------------------------------------------------------
+
   const handleNewChat = () => {
     setContentState({ type: 'new-chat' });
   };
 
-  // Render main section based on currentSection
+  // --------------------------------------------------------------------------------
+  // Render the main content
+  // --------------------------------------------------------------------------------
+
   const renderContent = () => {
     if (contentState.type === 'new-chat') {
       return (
         <NewOptimizationForm
-          selectedModel={selectedModel}
+          selectedModel={selectedModelForPlayground}
           onSubmit={(formData) => console.log('Admin Submit:', formData)}
         />
       );
@@ -648,7 +801,9 @@ const AdminDashboard = () => {
         return (
           <ManageModels
             models={manageModels}
-            onOpenDialog={() => setIsDialogOpen(true)}
+            onLinkModelDialog={() => setIsLinkDialogOpen(true)}
+            onEditModel={handleOpenEditModel}
+            onRetireModel={handleOpenRetireDialog}
           />
         );
       case 'model-assignment':
@@ -667,32 +822,12 @@ const AdminDashboard = () => {
     }
   };
 
-  // Called when user clicks "Link" in the dialog
-  const handleLinkModel = async () => {
-    try {
-      await axiosInstance.post('/models', {
-        name: modelName,
-        apiUrl: modelUrl,
-        userIds: [],
-      });
-
-      alert('Model linked successfully!');
-      setIsDialogOpen(false);
-
-      // Reset the form fields
-      setModelName('');
-      setModelUrl('');
-
-      // Refresh the list
-      fetchModels();
-    } catch (error) {
-      console.error('Error linking model:', error);
-    }
-  };
+  // --------------------------------------------------------------------------------
+  // Return the overall layout
+  // --------------------------------------------------------------------------------
 
   return (
     <div className="flex">
-      {/* Sidebar */}
       <div className="w-64">
         <SidebarNav
           modelName="Admin Panel"
@@ -708,16 +843,17 @@ const AdminDashboard = () => {
           }}
           onNewChat={handleNewChat}
           availableModels={availableModels}
-          selectedModel={selectedModel}
-          onModelSelect={setSelectedModel}
+          selectedModel={selectedModelForPlayground}
+          onModelSelect={setSelectedModelForPlayground}
         />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 p-6">{renderContent()}</div>
 
-      {/* Link Model Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/*
+        Link Model Dialog
+      */}
+      <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Model</DialogTitle>
@@ -744,6 +880,62 @@ const AdminDashboard = () => {
               Link
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/*
+        Edit Model Dialog
+      */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Model</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label>Name</label>
+              <Input
+                value={editForm.name}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, name: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <label>URL</label>
+              <Input
+                value={editForm.url}
+                onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePatchModel}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/*
+        Retire Model Confirmation Dialog
+      */}
+      <Dialog open={isRetireDialogOpen} onOpenChange={setIsRetireDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Retire Model {selectedModel ? `"${selectedModel.name}"?` : '?'}
+            </DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRetireDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleRetireModel}>
+              Retire
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
