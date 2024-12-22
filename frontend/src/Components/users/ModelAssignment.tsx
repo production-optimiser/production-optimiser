@@ -24,10 +24,14 @@ import {
   DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
+import axiosInstance from '../../utils/axios'
 
 interface User {
   id: string;
   email: string;
+  status: string;
+  role: string;
+  optimizationModelIds: string[];
 }
 
 interface Model {
@@ -35,6 +39,7 @@ interface Model {
   name: string;
   url: string;
   createdAt: string;
+  optimizationModelIds: string[];
 }
 
 export const ModelAssignment = () => {
@@ -43,31 +48,57 @@ export const ModelAssignment = () => {
   const [userModels, setUserModels] = useState<Model[]>([]);
   const [filterModels, setFilterModels] = useState('');
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
-  const [availableModels] = useState<Model[]>([
-    { id: '1', name: 'Model 2', url: 'model2.com', createdAt: '2024-01-01' },
-    { id: '2', name: 'Model 3', url: 'model3.com', createdAt: '2024-01-02' },
-    { id: '3', name: 'Model 4', url: 'model4.com', createdAt: '2024-01-03' },
-    { id: '4', name: 'Model 5', url: 'model5.com', createdAt: '2024-01-04' },
-    { id: '5', name: 'Deployed model', url: 'deployed.com', createdAt: '2024-01-05' },
-    { id: '6', name: 'testing', url: 'testing.com', createdAt: '2024-01-06' },
-    { id: '7', name: 'model 1', url: 'model1.com', createdAt: '2024-01-07' },
-  ]);
+  
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [modelToRemove, setModelToRemove] = useState<Model | null>(null);
 
-  const searchUsers = () => {
-    // Simulate user search with dummy data
-    const user = {
-      id: '550e8400-e29b-41d4-a716-446655440002',
-      email: 'customer1',
-    };
-    setSelectedUser(user);
-    // Set some dummy models for the user
-    setUserModels([
-      { id: '8', name: 'Existing Model 1', url: 'existing1.com', createdAt: '2024-01-08' },
-      { id: '9', name: 'Existing Model 2', url: 'existing2.com', createdAt: '2024-01-09' },
-    ]);
+  const searchUsers = async () => {
+    try {
+      // Fetch all users
+      const response = await axiosInstance.get<User[]>('/users');
+      const users = response.data;
+  
+      // Find user by email
+      const user = users.find((u) => u.email.toLowerCase() === searchUser.toLowerCase());
+      if (user) {
+        // Fetch detailed user info
+        const userDetailsResponse = await axiosInstance.get<User>(`/users/${user.id}`);
+        setSelectedUser(userDetailsResponse.data);
+        
+        // Check if optimizationModelIds exists in the response
+        if (userDetailsResponse.data?.optimizationModelIds) {
+          // Map through the model IDs and fetch each model's details
+          const models = await Promise.all(
+            userDetailsResponse.data.optimizationModelIds.map(async (modelId: string) => {
+              try {
+                const modelResponse = await axiosInstance.get(`/models/${modelId}`);
+                return modelResponse.data;
+              } catch (error) {
+                console.error(`Error fetching model ${modelId}:`, error);
+                return null;
+              }
+            })
+          );
+  
+          // Filter out any null values from failed requests
+          const validModels = models.filter(model => model !== null);
+          setUserModels(validModels);
+        } else {
+          setUserModels([]);
+        }
+      } else {
+        setSelectedUser(null);
+        setUserModels([]);
+        alert('User not found');
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      alert('Failed to fetch user details');
+      setSelectedUser(null);
+      setUserModels([]);
+    }
   };
+  
 
   const handleAssignModel = (model: Model) => {
     alert(`Model "${model.name}" has been assigned to ${selectedUser?.email}`);
@@ -181,7 +212,7 @@ export const ModelAssignment = () => {
           <div className="space-y-4">
             <Input placeholder="Type a command or search..." />
             <div className="max-h-96 overflow-y-auto">
-              {availableModels.map((model) => (
+              {userModels.map((model) => (
                 <div key={model.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded">
                   <div>
                     <div>{model.name}</div>
