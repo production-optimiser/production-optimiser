@@ -515,6 +515,11 @@ const sections = [
         title: 'Model playground',
         component: 'model-playground',
       },
+      {
+        id: 'model-assignment',
+        title: 'Model Assignment',
+        component: 'model-assignment'
+      },
     ],
   },
 ];
