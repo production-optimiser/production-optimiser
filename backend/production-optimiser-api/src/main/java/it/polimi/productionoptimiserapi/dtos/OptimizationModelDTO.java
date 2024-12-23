@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.dtos;
 
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import jakarta.validation.constraints.NotBlank;
-import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
