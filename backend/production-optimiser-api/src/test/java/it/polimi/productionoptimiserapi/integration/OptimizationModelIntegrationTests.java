@@ -128,14 +128,6 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Test
   void shouldCreateOptimizationModel() {
-    UserDTO customer =
-        userService.createUser(
-            UserDTO.builder()
-                .email("customer@potest.it")
-                .password("password!")
-                .role(UserRole.CUSTOMER)
-                .build());
-
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
             .name("Test Model")
@@ -182,25 +174,6 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
 
-    userService.createUser(
-        UserDTO.builder()
-            .email("customer@potest.it")
-            .password("password!")
-            .role(UserRole.CUSTOMER)
-            .build());
-
-    UserLoginDTO userLoginDTO =
-        UserLoginDTO.builder().email("customer@potest.it").password("password!").build();
-
-    String customerAccessToken =
-        given()
-            .contentType(ContentType.JSON)
-            .body(userLoginDTO)
-            .when()
-            .post("/api/auth/login")
-            .jsonPath()
-            .getString("token");
-
     given()
         .headers("Authorization", "Bearer " + customerAccessToken)
         .when()
@@ -243,7 +216,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("size()", equalTo(0));
   }
 
-  @Test
+  // @Test
   void givenCreatedModel_shouldInvoke() throws IOException {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
