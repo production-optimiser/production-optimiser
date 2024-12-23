@@ -40,7 +40,7 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
 
   private static OptimizationResultDto resultToDto(OptimizationResult result) {
     return new OptimizationResultDto(
-        result.getId(), result.getCreatedAt(), result.getUpdatedAt(), result.getOutputJSON());
+        result.getId(), result.getCreatedAt(), result.getUpdatedAt(), result.getOutputJSON(), result.getUser().getId());
   }
 
   @Override
