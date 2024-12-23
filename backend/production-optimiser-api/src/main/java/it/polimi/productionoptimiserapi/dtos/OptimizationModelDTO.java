@@ -18,8 +18,6 @@ public class OptimizationModelDTO {
   @URL(message = "apiUrl must be a valid URL")
   public String apiUrl;
 
-  public Set<String> userIds;
-
   public OptimizationModel toEntity() {
     OptimizationModel optimizationModel = new OptimizationModel();
     optimizationModel.setName(this.name);

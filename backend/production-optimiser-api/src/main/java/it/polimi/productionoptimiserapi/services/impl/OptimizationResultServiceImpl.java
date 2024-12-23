@@ -6,6 +6,7 @@ import it.polimi.productionoptimiserapi.mappers.OptimizationResultMapper;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
   private final OptimizationResultRepository resultRepository;
   private final UserRepository userRepository;
 
+  @Override
+  @Transactional
   public List<OptimizationResultDto> getAllResults(String userId) {
     return resultRepository.findByUserId(userId).stream()
         .map(OptimizationResultMapper::resultToDto)
