@@ -14,4 +14,5 @@ public class OptimizationResultDto {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private Map<String, Object> outputJSON;
+  private String userId;
 }
