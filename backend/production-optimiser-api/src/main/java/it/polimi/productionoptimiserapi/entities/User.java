@@ -38,7 +38,8 @@ public class User extends BaseEntity implements UserDetails {
   private UserRole role = UserRole.CUSTOMER;
 
   @ManyToMany(
-      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+      fetch = FetchType.EAGER)
   @JoinTable(
       name = "users_optimization_models",
       joinColumns = @JoinColumn(name = "user_id"),
@@ -115,5 +116,9 @@ public class User extends BaseEntity implements UserDetails {
 
   public boolean isCustomer() {
     return role == UserRole.CUSTOMER;
+  }
+
+  public boolean isAdmin() {
+    return role == UserRole.ADMIN;
   }
 }

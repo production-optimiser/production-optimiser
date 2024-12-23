@@ -60,9 +60,7 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
   public OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO)
       throws EntityNotFoundException {
-    OptimizationModel om = optimizationModelDTO.toEntity();
-    om.setUsers(this.mapUserIdsToUsers(optimizationModelDTO.getUserIds()));
-    return this.optimizationModelRepository.save(om);
+    return this.optimizationModelRepository.save(optimizationModelDTO.toEntity());
   }
 
   public Optional<OptimizationModel> findOptimizationModelById(String id) {
@@ -81,6 +79,11 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
   @Override
   public List<OptimizationModel> findAllOptimizationModels() {
     return this.optimizationModelRepository.findAll();
+  }
+
+  @Override
+  public List<OptimizationModel> findAllOptimizationModelsByUser(User user) {
+    return this.optimizationModelRepository.findAllByUser(user.getId());
   }
 
   @Override
