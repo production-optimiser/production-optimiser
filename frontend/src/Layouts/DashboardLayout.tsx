@@ -478,15 +478,18 @@ export default function DashboardLayout() {
     setContentState({ type: 'new-chat' });
   };
 
-  const handleNewOptimizationSubmit = async (formData: FormData) => {
+ 
+  const handleNewOptimizationSubmit = async (response: any) => {
     try {
-      const response = await axiosInstance.post('/api/optimizations', formData);
-      if (response.data.id) {
-        setContentState({ type: 'optimization-result', resultId: response.data.id });
-        fetchOptimizationResultById(response.data.id);
+      // Since we already have the response from NewOptimizationForm
+      console.log('Received optimization response:', response);
+      if (response.id) {
+        setContentState({ type: 'optimization-result', resultId: response.id });
+        fetchOptimizationResultById(response.id);
+        
       }
     } catch (error) {
-      console.error('Error creating optimization:', error);
+      console.error('Error handling optimization response:', error);
     }
   };
 

@@ -11,11 +11,11 @@ VALUES
 
 INSERT INTO optimization_models (id, name, created_at, updated_at, api_url, status)
 VALUES
-    ('550e8400-e29b-41d4-a716-446655440004', 'Model 1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440004', 'ACTIVE'),
-    ('550e8400-e29b-41d4-a716-446655440005', 'Model 2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440005', 'ACTIVE'),
-    ('550e8400-e29b-41d4-a716-446655440006', 'Model 3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440006', 'ACTIVE'),
-    ('550e8400-e29b-41d4-a716-446655440007', 'Model 4', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440007', 'ACTIVE'),
-    ('550e8400-e29b-41d4-a716-446655440008', 'Model 5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:8080/api/models/550e8400-e29b-41d4-a716-446655440008', 'ACTIVE');
+    ('550e8400-e29b-41d4-a716-446655440004', 'Model 1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'https://dsd-tool.commanderkowalski.uk/optimize', 'ACTIVE'),
+    ('550e8400-e29b-41d4-a716-446655440005', 'Model 2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'https://dsd-tool.commanderkowalski.uk/optimize', 'ACTIVE'),
+    ('550e8400-e29b-41d4-a716-446655440006', 'Model 3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'https://dsd-tool.commanderkowalski.uk/optimize', 'ACTIVE'),
+    ('550e8400-e29b-41d4-a716-446655440007', 'Model 4', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'https://dsd-tool.commanderkowalski.uk/optimize', 'ACTIVE'),
+    ('550e8400-e29b-41d4-a716-446655440008', 'Model 5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'https://dsd-tool.commanderkowalski.uk/optimize', 'ACTIVE');
 
 INSERT INTO optimization_results(
             id,
