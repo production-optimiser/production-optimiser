@@ -22,7 +22,9 @@ public class OptimizationResultController {
 
   @GetMapping
   @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-  public List<OptimizationResultDto> getAllResults(@RequestParam String userId, @AuthenticationPrincipal User loggedUser) throws ForbiddenException {
+  public List<OptimizationResultDto> getAllResults(
+      @RequestParam String userId, @AuthenticationPrincipal User loggedUser)
+      throws ForbiddenException {
     if (loggedUser.isCustomer() && !loggedUser.getId().equals(userId)) {
       throw new ForbiddenException("You can only access your own results");
     }
@@ -32,7 +34,8 @@ public class OptimizationResultController {
 
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
-  public OptimizationResultDto getResultById(@PathVariable String id, @AuthenticationPrincipal User loggedUser) throws ForbiddenException {
+  public OptimizationResultDto getResultById(
+      @PathVariable String id, @AuthenticationPrincipal User loggedUser) throws ForbiddenException {
     OptimizationResultDto result = resultService.getResultById(id);
     if (loggedUser.isCustomer() && !loggedUser.getId().equals(result.getUserId())) {
       throw new ForbiddenException("You can only access your own results");
