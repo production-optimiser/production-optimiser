@@ -15,4 +15,5 @@ public class OptimizationResultDto {
   private LocalDateTime updatedAt;
   private Map<String, Object> outputJSON;
   private String userId;
+  private byte[] inputFile;
 }
