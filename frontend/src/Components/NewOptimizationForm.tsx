@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/Components/ui/button';
 import { Label } from '@/Components/ui/label';
 import { Card } from '@/Components/ui/card';
+import { Input } from '@/Components/ui/input';
 import { Upload } from 'lucide-react';
 import axiosInstance from '@/utils/axios';
 
@@ -14,22 +15,21 @@ interface Model {
 interface NewOptimizationFormProps {
   selectedModel: Model | null;
   onSubmit: (response: any) => void;
-  
 }
 
 export default function NewOptimizationForm({
   selectedModel,
   onSubmit,
-  
 }: NewOptimizationFormProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [optimizationName, setOptimizationName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!file || !selectedModel) {
-      alert('Please ensure a file is selected and a model is chosen.');
+    if (!file || !selectedModel || !optimizationName.trim()) {
+      alert('Please ensure a file is selected, a model is chosen, and name is provided.');
       return;
     }
 
@@ -41,7 +41,8 @@ export default function NewOptimizationForm({
     }
 
     const formData = new FormData();
-    formData.append('input', file); 
+    formData.append('input', file);
+    formData.append('name', optimizationName.trim());
 
     try {
       setIsSubmitting(true);
@@ -49,21 +50,20 @@ export default function NewOptimizationForm({
         console.log('FormData content:', pair[0], pair[1]);
       }
       const response = await axiosInstance.post(
-        `/models/550e8400-e29b-41d4-a716-446655440005/invoke`, 
+        `/models/550e8400-e29b-41d4-a716-446655440005/invoke`,
         formData,
         {
           headers: {
-            
-            'Content-Type':'multipart/form-data'
+            'Content-Type': 'multipart/form-data'
           },
-          timeout: 60000,  // Increase timeout to 60 seconds for file upload
+          timeout: 60000,
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
               (progressEvent.loaded * 100) / (progressEvent.total ?? 100)
             );
             console.log(`Upload Progress: ${percentCompleted}%`);
           }
-        } 
+        }
       );
 
       console.log('Response:', response.data);
@@ -113,6 +113,21 @@ export default function NewOptimizationForm({
               </div>
             </div>
 
+            {/* Optimization Name Input */}
+            <div>
+              <Label htmlFor="optimization-name">Optimization Name</Label>
+              <div className="mt-1">
+                <Input
+                  id="optimization-name"
+                  type="text"
+                  value={optimizationName}
+                  onChange={(e) => setOptimizationName(e.target.value)}
+                  placeholder="Enter optimization name"
+                  required
+                />
+              </div>
+            </div>
+
             {/* File Upload */}
             <div>
               <Label htmlFor="file">Input File (.xlsx)</Label>
@@ -137,7 +152,10 @@ export default function NewOptimizationForm({
           </div>
         </div>
         <div className="flex justify-end">
-          <Button type="submit" disabled={!file || !selectedModel || isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={!file || !selectedModel || !optimizationName.trim() || isSubmitting}
+          >
             {isSubmitting ? 'Submitting...' : 'Send'}
           </Button>
         </div>
