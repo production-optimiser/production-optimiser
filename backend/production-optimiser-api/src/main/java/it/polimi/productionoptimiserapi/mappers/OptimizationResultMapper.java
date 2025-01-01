@@ -3,8 +3,6 @@ package it.polimi.productionoptimiserapi.mappers;
 import it.polimi.productionoptimiserapi.dtos.OptimizationResultDto;
 import it.polimi.productionoptimiserapi.entities.*;
 
-import java.util.Arrays;
-
 public class OptimizationResultMapper {
   public static OptimizationResult dtoToResult(
       byte[] inputFile, OptimizationResultDto dto, User user) {
@@ -18,7 +16,6 @@ public class OptimizationResultMapper {
         result.getUpdatedAt(),
         result.getOutputJSON(),
         result.getUser().getId(),
-        result.getInputFile()
-    );
+        result.getInputFile());
   }
 }
