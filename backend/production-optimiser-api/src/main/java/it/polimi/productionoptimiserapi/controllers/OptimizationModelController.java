@@ -1,5 +1,8 @@
 package it.polimi.productionoptimiserapi.controllers;
 
+import static it.polimi.productionoptimiserapi.config.Constants.ALLOWED_FILE_EXTENSIONS;
+import static it.polimi.productionoptimiserapi.config.Constants.ALLOWED_IMAGE_EXTENSIONS;
+
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.OptimizationResult;
@@ -11,7 +14,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -71,7 +78,15 @@ public class OptimizationModelController {
       throw new ForbiddenException("This optimization model does not belong to you!");
     }
 
-    return ResponseEntity.ok(om);
+    Set<String> allowedExtensions =
+        switch (om.getInputType()) {
+          case FILE -> ALLOWED_FILE_EXTENSIONS;
+          case IMAGE -> ALLOWED_IMAGE_EXTENSIONS;
+          default -> Set.of();
+        };
+    HttpHeaders responseHeaders = new HttpHeaders();
+    responseHeaders.set("Allowed-Extensions", String.join(", ", allowedExtensions));
+    return new ResponseEntity<>(om, responseHeaders, HttpStatus.OK);
   }
 
   @PatchMapping("/{id}/retire")
@@ -94,13 +109,16 @@ public class OptimizationModelController {
   @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
   public ResponseEntity<OptimizationResult> invoke(
       @PathVariable String id,
-      @RequestParam("input") MultipartFile inputFile,
+      @RequestParam(value = "inputFile", required = false) MultipartFile inputFile,
+      @RequestParam(value = "inputString", required = false) String inputString,
       @AuthenticationPrincipal User loggedUser)
       throws ForbiddenException, IOException {
     OptimizationModel om =
         this.optimizationModelService
             .findOptimizationModelById(id)
             .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+
+    validateInput(om, inputFile, inputString);
 
     if (loggedUser.isCustomer()
         && om.getUsers().stream().noneMatch(u -> Objects.equals(u.getId(), loggedUser.getId()))) {
@@ -109,7 +127,54 @@ public class OptimizationModelController {
     }
 
     OptimizationResult or =
-        this.optimizationModelService.invokeOptimizationModel(om, inputFile, loggedUser);
+        this.optimizationModelService.invokeOptimizationModel(
+            om, inputFile, inputString, loggedUser);
     return ResponseEntity.ok(or);
+  }
+
+  private void validateInput(OptimizationModel om, MultipartFile inputFile, String input) {
+    if (inputFile != null && input != null) {
+      throw new IllegalArgumentException("Only one input type is allowed.");
+    }
+    if (inputFile == null && input == null) {
+      throw new IllegalArgumentException("Model needs either a file or a string input.");
+    }
+    switch (om.getInputType()) {
+      case FILE:
+        if (inputFile == null) {
+          throw new IllegalArgumentException("Model requires a file input.");
+        } else {
+          if (!ALLOWED_FILE_EXTENSIONS.contains(
+              FilenameUtils.getExtension(inputFile.getOriginalFilename()))) {
+            throw new IllegalArgumentException(
+                "Invalid file extension. Allowed extensions are: "
+                    + String.join(", ", ALLOWED_FILE_EXTENSIONS));
+          }
+        }
+        break;
+      case IMAGE:
+        if (inputFile == null) {
+          throw new IllegalArgumentException("Model requires an image input.");
+        } else {
+          if (!ALLOWED_IMAGE_EXTENSIONS.contains(
+              FilenameUtils.getExtension(inputFile.getOriginalFilename()))) {
+            throw new IllegalArgumentException(
+                "Invalid file extension. Allowed extensions are: "
+                    + String.join(", ", ALLOWED_IMAGE_EXTENSIONS));
+          }
+        }
+        break;
+      case STRING:
+        if (input == null) {
+          throw new IllegalArgumentException("Model requires a string input.");
+        } else {
+          if (input.isBlank()) {
+            throw new IllegalArgumentException("Model requires a non-empty string input.");
+          }
+        }
+        break;
+      default:
+        throw new IllegalArgumentException("Invalid model input type.");
+    }
   }
 }

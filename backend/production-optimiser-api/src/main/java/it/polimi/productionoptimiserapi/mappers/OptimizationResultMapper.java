@@ -5,8 +5,8 @@ import it.polimi.productionoptimiserapi.entities.*;
 
 public class OptimizationResultMapper {
   public static OptimizationResult dtoToResult(
-      byte[] inputFile, OptimizationResultDto dto, User user) {
-    return new OptimizationResult(inputFile, dto.getOutputJSON(), user);
+      byte[] inputFile, String inputString, OptimizationResultDto dto, User user) {
+    return new OptimizationResult(inputFile, inputString, dto.getOutputJSON(), user);
   }
 
   public static OptimizationResultDto resultToDto(OptimizationResult result) {
@@ -16,6 +16,7 @@ public class OptimizationResultMapper {
         result.getUpdatedAt(),
         result.getOutputJSON(),
         result.getUser().getId(),
-        result.getInputFile());
+        result.getInputFile(),
+        result.getInputString());
   }
 }
