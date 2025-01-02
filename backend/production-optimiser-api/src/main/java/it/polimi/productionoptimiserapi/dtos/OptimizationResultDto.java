@@ -16,4 +16,5 @@ public class OptimizationResultDto {
   private Map<String, Object> outputJSON;
   private String userId;
   private byte[] inputFile;
+  private String inputString;
 }

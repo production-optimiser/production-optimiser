@@ -26,13 +26,13 @@ public class RestControllerExceptionHandler {
 
   @ExceptionHandler({ForbiddenException.class, AuthorizationDeniedException.class})
   @ResponseStatus(HttpStatus.FORBIDDEN)
-  public ErrorDetails handleOAuthException(ForbiddenException ex) {
+  public ErrorDetails handleOAuthException(Exception ex) {
     return new ErrorDetails(ex);
   }
 
   @ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorDetails handleValidationException(ValidationException ex) {
+  public ErrorDetails handleValidationException(Exception ex) {
     return new ErrorDetails(ex);
   }
 
