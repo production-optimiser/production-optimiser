@@ -37,7 +37,8 @@ public class OptimizationResultServiceImpl implements OptimizationResultService 
   }
 
   @Override
-  public String saveOptimizationResult(byte[] inputFile, String inputString, OptimizationResultDto dto, User user) {
+  public String saveOptimizationResult(
+      byte[] inputFile, String inputString, OptimizationResultDto dto, User user) {
     return resultRepository
         .save(OptimizationResultMapper.dtoToResult(inputFile, inputString, dto, user))
         .getId();

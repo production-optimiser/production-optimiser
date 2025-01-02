@@ -15,5 +15,6 @@ public class Constants {
   public static final String EMAIL_BODY_DENIED_ACCOUNT =
       "We regret to inform you that your account request was denied for the following reason: ";
   public static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif");
-  public static final Set<String> ALLOWED_FILE_EXTENSIONS = Set.of("csv", "json", "xls", "xlsx", "txt");
+  public static final Set<String> ALLOWED_FILE_EXTENSIONS =
+      Set.of("csv", "json", "xls", "xlsx", "txt");
 }

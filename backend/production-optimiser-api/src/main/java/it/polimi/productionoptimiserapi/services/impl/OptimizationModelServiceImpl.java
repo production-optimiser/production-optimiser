@@ -99,18 +99,19 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
   }
 
   public OptimizationResult invokeOptimizationModel(
-      OptimizationModel model, MultipartFile inputFile, String inputString, User invoker) throws IOException {
+      OptimizationModel model, MultipartFile inputFile, String inputString, User invoker)
+      throws IOException {
     OptimizationResult or = new OptimizationResult();
-    if(inputFile == null && inputString == null) {
+    if (inputFile == null && inputString == null) {
       throw new IllegalArgumentException("Either inputFile or inputString must be provided");
     }
-    if(inputFile != null && inputString != null) {
+    if (inputFile != null && inputString != null) {
       throw new IllegalArgumentException("Only one of inputFile or inputString must be provided");
     }
 
     ResponseEntity<String> responseEntity = null;
 
-    if(inputFile != null) {
+    if (inputFile != null) {
       or.setInputFile(inputFile.getBytes());
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.MULTIPART_FORM_DATA);

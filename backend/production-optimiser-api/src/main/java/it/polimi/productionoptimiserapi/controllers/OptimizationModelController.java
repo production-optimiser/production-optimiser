@@ -1,5 +1,8 @@
 package it.polimi.productionoptimiserapi.controllers;
 
+import static it.polimi.productionoptimiserapi.config.Constants.ALLOWED_FILE_EXTENSIONS;
+import static it.polimi.productionoptimiserapi.config.Constants.ALLOWED_IMAGE_EXTENSIONS;
+
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.OptimizationResult;
@@ -12,8 +15,6 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpHeaders;
@@ -24,9 +25,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import static it.polimi.productionoptimiserapi.config.Constants.ALLOWED_FILE_EXTENSIONS;
-import static it.polimi.productionoptimiserapi.config.Constants.ALLOWED_IMAGE_EXTENSIONS;
 
 @RestController
 @RequestMapping("/api/models")
@@ -80,11 +78,12 @@ public class OptimizationModelController {
       throw new ForbiddenException("This optimization model does not belong to you!");
     }
 
-    Set<String> allowedExtensions = switch (om.getInputType()) {
-      case FILE -> ALLOWED_FILE_EXTENSIONS;
-      case IMAGE -> ALLOWED_IMAGE_EXTENSIONS;
-      default -> Set.of();
-    };
+    Set<String> allowedExtensions =
+        switch (om.getInputType()) {
+          case FILE -> ALLOWED_FILE_EXTENSIONS;
+          case IMAGE -> ALLOWED_IMAGE_EXTENSIONS;
+          default -> Set.of();
+        };
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set("Allowed-Extensions", String.join(", ", allowedExtensions));
     return new ResponseEntity<>(om, responseHeaders, HttpStatus.OK);
@@ -128,7 +127,8 @@ public class OptimizationModelController {
     }
 
     OptimizationResult or =
-        this.optimizationModelService.invokeOptimizationModel(om, inputFile, inputString, loggedUser);
+        this.optimizationModelService.invokeOptimizationModel(
+            om, inputFile, inputString, loggedUser);
     return ResponseEntity.ok(or);
   }
 
@@ -144,7 +144,8 @@ public class OptimizationModelController {
         if (inputFile == null) {
           throw new IllegalArgumentException("Model requires a file input.");
         } else {
-          if (!ALLOWED_FILE_EXTENSIONS.contains(FilenameUtils.getExtension(inputFile.getOriginalFilename()))) {
+          if (!ALLOWED_FILE_EXTENSIONS.contains(
+              FilenameUtils.getExtension(inputFile.getOriginalFilename()))) {
             throw new IllegalArgumentException(
                 "Invalid file extension. Allowed extensions are: "
                     + String.join(", ", ALLOWED_FILE_EXTENSIONS));
@@ -155,7 +156,8 @@ public class OptimizationModelController {
         if (inputFile == null) {
           throw new IllegalArgumentException("Model requires an image input.");
         } else {
-          if (!ALLOWED_IMAGE_EXTENSIONS.contains(FilenameUtils.getExtension(inputFile.getOriginalFilename()))) {
+          if (!ALLOWED_IMAGE_EXTENSIONS.contains(
+              FilenameUtils.getExtension(inputFile.getOriginalFilename()))) {
             throw new IllegalArgumentException(
                 "Invalid file extension. Allowed extensions are: "
                     + String.join(", ", ALLOWED_IMAGE_EXTENSIONS));
