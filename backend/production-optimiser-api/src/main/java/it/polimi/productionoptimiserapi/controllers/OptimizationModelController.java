@@ -45,9 +45,15 @@ public class OptimizationModelController {
   }
 
   @GetMapping
-  @PreAuthorize("hasAnyRole('ADMIN')")
-  public ResponseEntity<Iterable<OptimizationModel>> getAll() {
-    return ResponseEntity.ok(this.optimizationModelService.findAllOptimizationModels());
+  @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+  public ResponseEntity<Iterable<OptimizationModel>> getAll(
+      @AuthenticationPrincipal User loggedUser) {
+    if (loggedUser.isAdmin()) {
+      return ResponseEntity.ok(this.optimizationModelService.findAllOptimizationModels());
+    }
+
+    return ResponseEntity.ok(
+        this.optimizationModelService.findAllOptimizationModelsByUser(loggedUser));
   }
 
   @GetMapping("/{id}")
