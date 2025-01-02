@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
 import { authService } from '../services/auth';
 import axiosInstance from '../utils/axios';
-import { Button } from '@/Components/ui/button';
-import { Download } from 'lucide-react';
 
-const OptimizationResultsDashboard = () => {
+export default function OptimizationResultsDashboard() {
   const [optimizationData, setOptimizationData] = useState([]);
   const [error, setError] = useState(null);
 
@@ -16,150 +19,187 @@ const OptimizationResultsDashboard = () => {
         if (!currentUser) {
           throw new Error('No authenticated user found');
         }
-        console.log(currentUser.userId);
         const response = await axiosInstance.get(`/results/userId=${currentUser.userId}`);
-        setOptimizationData(response.data);
-        console.log(response);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(error.message || 'Failed to fetch optimization results');
+        setOptimizationData(Array.isArray(response.data) ? response.data : [response.data]);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to fetch optimization results');
       }
     };
-  
     fetchData();
   }, []);
 
-  const downloadChart = (chartType) => {
-    // Get the chart SVG element
-    const chartElement = document.querySelector(
-      chartType === 'bar' ? '#machine-utilization-chart svg' : '#production-time-chart svg'
-    );
+  const machineUtilData = useMemo(() => {
+    return optimizationData.map((item) => ({
+      label: new Date(item.createdAt).toLocaleString(),
+      initial: item.average_initial_total_machine_utilization || 0,
+      optimized: item.average_optimized_total_machine_utilization || 0,
+      improvement: item.utilization_improvement || 0
+    }));
+  }, [optimizationData]);
 
-    if (!chartElement) {
-      console.error('Chart element not found');
-      return;
-    }
+  const productionTimeData = useMemo(() => {
+    return optimizationData.map((item) => ({
+      label: new Date(item.createdAt).toLocaleString(),
+      initial: item.initial_total_production_time || 0,
+      optimized: item.optimized_total_production_time || 0,
+      improvement: item.time_improvement || 0
+    }));
+  }, [optimizationData]);
 
-    // Deep clone the SVG element
-    const svgCopy = chartElement.cloneNode(true);
+  const downloadChart = (chartId) => {
+    const svgElement = document.querySelector(`#${chartId} svg`);
+    if (!svgElement) return;
     
-    // Get the computed style of the original SVG
-    const computedStyle = window.getComputedStyle(chartElement);
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
     
-    // Set the white background and dimensions
-    svgCopy.style.backgroundColor = 'white';
-    svgCopy.setAttribute('width', computedStyle.width);
-    svgCopy.setAttribute('height', computedStyle.height);
-    
-    // Convert SVG to string with correct dimensions
-    const svgString = new XMLSerializer().serializeToString(svgCopy);
-    const blob = new Blob([svgString], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    
-    // Create an image to load the SVG
-    const img = new Image();
-    img.onload = () => {
-      // Create canvas with the same dimensions
-      const canvas = document.createElement('canvas');
-      const scale = 2; // Increase resolution
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      
-      // Get canvas context and set white background
-      const ctx = canvas.getContext('2d');
-      ctx.scale(scale, scale);
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw the image
-      ctx.drawImage(img, 0, 0);
-      
-      // Convert to blob and download
-      canvas.toBlob((blob) => {
-        const downloadUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = chartType === 'bar' ? 'machine-utilization.png' : 'production-time.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(downloadUrl);
-      }, 'image/png');
-    };
-    
-    img.src = url;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${chartId}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const formatValue = (value) => {
+    return typeof value === 'number' ? value.toFixed(2) : '0.00';
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto my-8">
+    <div className="w-full max-w-6xl mx-auto my-8 p-4">
       <h2 className="text-2xl font-bold mb-4">Optimization Results</h2>
-      {error && <div className="text-red-500 mb-4">Error: {error}</div>}
+      {error && <div className="text-red-500 mb-4">{error}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-xl font-bold">Machine Utilization</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Machine Utilization Chart */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Machine Utilization (%)</h3>
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => downloadChart('bar')}
+              onClick={() => downloadChart('machine-utilization-chart')}
               className="flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Download
             </Button>
           </div>
-          <div id="machine-utilization-chart">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={optimizationData}>
-                <XAxis dataKey="averageInitialTotalMachineUtilization" />
-                <YAxis />
+          <div id="machine-utilization-chart" className="h-96">
+            <ResponsiveContainer>
+              <BarChart data={machineUtilData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
+                <XAxis 
+                  dataKey="label" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
+                />
+                <YAxis domain={[0, 100]} />
+                <Tooltip 
+                  formatter={(value) => formatValue(value) + '%'}
+                />
                 <Legend />
-                <Bar dataKey="averageOptimizedTotalMachineUtilization" fill="#8884d8" name="Machine Utilization" />
+                <Bar 
+                  dataKey="initial" 
+                  fill="#9333ea" 
+                  name="Initial Utilization" 
+                />
+                <Bar 
+                  dataKey="optimized" 
+                  fill="#22c55e" 
+                  name="Optimized Utilization" 
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-xl font-bold">Production Time</h3>
+        {/* Production Time Chart */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Production Time (minutes)</h3>
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => downloadChart('line')}
+              onClick={() => downloadChart('production-time-chart')}
               className="flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Download
             </Button>
           </div>
-          <div id="production-time-chart">
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={optimizationData}>
-                <XAxis dataKey="initialTotalProductionTime" />
-                <YAxis />
+          <div id="production-time-chart" className="h-96">
+            <ResponsiveContainer>
+              <LineChart data={productionTimeData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
+                <XAxis 
+                  dataKey="label" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
+                />
+                <YAxis />
+                <Tooltip formatter={(value) => formatValue(value)} />
                 <Legend />
-                <Line type="monotone" dataKey="optimizedTotalProductionTime" stroke="#8884d8" name="Production Time" />
+                <Line
+                  type="monotone"
+                  dataKey="initial"
+                  stroke="#9333ea"
+                  name="Initial Time"
+                  dot={{ r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="optimized"
+                  stroke="#22c55e"
+                  name="Optimized Time"
+                  dot={{ r: 4 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className="mt-4">
-        <h3 className="text-xl font-bold mb-2">Raw Data</h3>
-        <pre className="bg-gray-100 p-4 rounded overflow-auto">
-          {JSON.stringify(optimizationData, null, 2)}
-        </pre>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        {optimizationData.map((data, index) => (
+          <div key={index} className="bg-white p-4 rounded-lg shadow-md">
+            <h4 className="text-sm font-medium text-gray-500">
+              Run {index + 1}: {new Date(data.createdAt).toLocaleDateString()}
+            </h4>
+            <div className="mt-2 space-y-1">
+              <p className="text-sm">
+                Utilization Improvement: {formatValue(data.utilization_improvement)}%
+              </p>
+              <p className="text-sm">
+                Time Improvement: {formatValue(data.time_improvement)} min
+              </p>
+              <p className="text-sm">
+                Percentage Improvement: {formatValue(data.percentage_improvement)}%
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Raw Data Section */}
+      <div className="mt-6">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-xl font-semibold">Raw Data</h3>
+        </div>
+        <div className="bg-gray-50 p-4 rounded-lg overflow-auto max-h-96">
+          <pre className="text-sm">
+            {JSON.stringify(optimizationData, null, 2)}
+          </pre>
+        </div>
       </div>
     </div>
   );
-};
-
-export default OptimizationResultsDashboard;
-
+}
