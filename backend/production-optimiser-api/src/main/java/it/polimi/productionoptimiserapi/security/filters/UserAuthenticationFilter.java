@@ -66,7 +66,11 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
-    userService.incrementLoginCount(user);
+    try {
+      userService.incrementLoginCount(user);
+    } catch (Exception e) {
+      log.error("Failed to increment login count for user {}", user.getId(), e);
+    }
 
     objectMapper.writeValue(response.getWriter(), responseDto);
   }

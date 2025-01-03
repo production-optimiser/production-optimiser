@@ -52,7 +52,7 @@ public class User extends BaseEntity implements UserDetails {
   @JsonManagedReference
   private Set<OptimizationResult> optimizationResults = new HashSet<>();
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
   @JsonBackReference
   private Set<UserStatistics> statistics = new HashSet<>();
 
