@@ -1,7 +1,12 @@
-
 import { useEffect, useState } from 'react';
 import { Button } from '@/Components/ui/button';
 import { Download } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import SidebarNav from '../Components/sidebar';
 import NewOptimizationForm from '../Components/NewOptimizationForm';
 import { authService } from '@/services/auth';
@@ -79,7 +84,7 @@ export default function DashboardLayout() {
   const [dynamicSections, setDynamicSections] = useState<TimeSection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-
+  const [comparisonData, setComparisonData] = useState<OptimizationResultDto | null>(null);
   // const fetchModels = async () => {
   //   try {
   //     const userId = localStorage.getItem('userId');
@@ -276,15 +281,15 @@ export default function DashboardLayout() {
     const data = [
       {
         name: 'Initial',
-        utilization: optimizationData.outputJSON.average_initial_total_machine_utilization
+        current: optimizationData.outputJSON.average_initial_total_machine_utilization,
+        comparison: comparisonData?.outputJSON?.average_initial_total_machine_utilization
       },
       {
         name: 'Optimized',
-        utilization: optimizationData.outputJSON.average_optimized_total_machine_utilization
+        current: optimizationData.outputJSON.average_optimized_total_machine_utilization,
+        comparison: comparisonData?.outputJSON?.average_optimized_total_machine_utilization
       }
     ];
-  
-    console.log('Machine Utilization Chart Data:', data);
   
     return (
       <ResponsiveContainer width="100%" height={300}>
@@ -292,9 +297,14 @@ export default function DashboardLayout() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis domain={[0, 100]} />
-          <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
+          <Tooltip 
+            formatter={(value, name) => [`${value.toFixed(2)}%`, name === 'current' ? 'Current' : 'Comparison']}
+          />
           <Legend />
-          <Bar dataKey="utilization" fill="#8884d8" name="Machine Utilization (%)" />
+          <Bar dataKey="current" fill="#8884d8" name="Current Utilization (%)" />
+          {comparisonData && (
+            <Bar dataKey="comparison" fill="#82ca9d" name="Comparison Utilization (%)" />
+          )}
         </BarChart>
       </ResponsiveContainer>
     );
@@ -309,15 +319,15 @@ export default function DashboardLayout() {
     const data = [
       {
         name: 'Initial',
-        productionTime: optimizationData.outputJSON.initial_total_production_time
+        current: optimizationData.outputJSON.initial_total_production_time,
+        comparison: comparisonData?.outputJSON?.initial_total_production_time
       },
       {
         name: 'Optimized',
-        productionTime: optimizationData.outputJSON.optimized_total_production_time
+        current: optimizationData.outputJSON.optimized_total_production_time,
+        comparison: comparisonData?.outputJSON?.optimized_total_production_time
       }
     ];
-  
-    console.log('Production Time Chart Data:', data);
   
     return (
       <ResponsiveContainer width="100%" height={300}>
@@ -325,18 +335,45 @@ export default function DashboardLayout() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
-          <Tooltip formatter={(value) => `${value.toFixed(2)} minutes`} />
+          <Tooltip 
+            formatter={(value, name) => [
+              `${value.toFixed(2)} minutes`, 
+              name === 'current' ? 'Current' : 'Comparison'
+            ]}
+          />
           <Legend />
           <Line
             type="monotone"
-            dataKey="productionTime"
-            stroke="#82ca9d"
-            name="Production Time (minutes)"
+            dataKey="current"
+            stroke="#8884d8"
+            name="Current Time"
             dot={{ r: 6 }}
           />
+          {comparisonData && (
+            <Line
+              type="monotone"
+              dataKey="comparison"
+              stroke="#82ca9d"
+              name="Comparison Time"
+              dot={{ r: 6 }}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     );
+  };
+
+  const handleComparisonSelect = async (id: string) => {
+    try {
+      const response = await axiosInstance.get(`/results/${id}`);
+      setComparisonData(response.data);
+    } catch (error) {
+      console.error('Error fetching comparison data:', error);
+    }
+  };
+
+  const clearComparison = () => {
+    setComparisonData(null);
   };
 
   if (loading && contentState.type === 'optimization-result') {
@@ -369,8 +406,36 @@ export default function DashboardLayout() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-semibold">Optimization Results</h1>
-              <div className="text-sm text-gray-500">
-                Created: {new Date(optimizationData.createdAt).toLocaleString()}
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-500">
+                  Created: {new Date(optimizationData.createdAt).toLocaleString()}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      {comparisonData ? 'Change Comparison' : 'Compare'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    {comparisonData && (
+                      <DropdownMenuItem onClick={clearComparison}>
+                        Clear Comparison
+                      </DropdownMenuItem>
+                    )}
+                    {dynamicSections.map(section => 
+                      section.items
+                        .filter(item => item.id !== optimizationData.id)
+                        .map(item => (
+                          <DropdownMenuItem
+                            key={item.id}
+                            onClick={() => handleComparisonSelect(item.id)}
+                          >
+                            {item.title}
+                          </DropdownMenuItem>
+                        ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             
@@ -385,7 +450,12 @@ export default function DashboardLayout() {
                 </div>
                 {renderMachineUtilizationChart()}
                 <div className="mt-4 text-sm text-gray-600">
-                  Improvement: {optimizationData.outputJSON?.utilization_improvement.toFixed(2)}%
+                  Current Improvement: {optimizationData.outputJSON?.utilization_improvement.toFixed(2)}%
+                  {comparisonData && (
+                    <div>
+                      Comparison Improvement: {comparisonData.outputJSON?.utilization_improvement.toFixed(2)}%
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -399,7 +469,12 @@ export default function DashboardLayout() {
                 </div>
                 {renderProductionTimeChart()}
                 <div className="mt-4 text-sm text-gray-600">
-                  Time saved: {optimizationData.outputJSON?.time_improvement.toFixed(2)} minutes
+                  Current Time saved: {optimizationData.outputJSON?.time_improvement.toFixed(2)} minutes
+                  {comparisonData && (
+                    <div>
+                      Comparison Time saved: {comparisonData.outputJSON?.time_improvement.toFixed(2)} minutes
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
