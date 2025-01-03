@@ -136,6 +136,13 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
   private void incrementInvocationCount(OptimizationModel model) {
     Set<ServiceStatistics> statistics = model.getStatistics();
+    if (statistics.isEmpty()) {
+      statistics = new HashSet<>();
+      ServiceStatistics s = new ServiceStatistics();
+      s.setType(ServiceStatisticsType.INVOCATION_COUNT);
+      s.setValue(0);
+      statistics.add(s);
+    }
 
     for (ServiceStatistics s : statistics) {
       if (s.getType() == ServiceStatisticsType.INVOCATION_COUNT) {

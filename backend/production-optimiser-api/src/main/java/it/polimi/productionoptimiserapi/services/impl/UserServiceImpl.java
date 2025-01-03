@@ -4,6 +4,7 @@ import it.polimi.productionoptimiserapi.config.Constants;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
+import it.polimi.productionoptimiserapi.entities.UserStatistics;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.enums.UserStatisticsType;
 import it.polimi.productionoptimiserapi.enums.UserStatus;
@@ -180,6 +181,15 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void incrementLoginCount(User user) {
+    // If not present create a new UserStatistics with LOGIN_COUNT
+    if (user.getStatistics().stream()
+        .noneMatch(stat -> stat.getType() == UserStatisticsType.LOGIN_COUNT)) {
+      UserStatistics us = new UserStatistics();
+      us.setType(UserStatisticsType.LOGIN_COUNT);
+      us.setValue(0);
+      user.getStatistics().add(us);
+    }
+
     user.getStatistics().stream()
         .filter(stat -> stat.getType() == UserStatisticsType.LOGIN_COUNT)
         .findFirst()
