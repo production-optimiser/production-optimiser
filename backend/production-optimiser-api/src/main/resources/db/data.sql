@@ -73,4 +73,19 @@ VALUES
     (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request1@mail.com', 'Please add me as a user.'),
     (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request2@mail.com', 'Please add me as a user.'),
     (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request3@mail.com', 'Please add me as a user.'),
-    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request4@mail.com', 'Please add me as a user.')
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'account.request4@mail.com', 'Please add me as a user.');
+
+INSERT INTO service_statistics(id, created_at, updated_at, service_id, type, value)
+VALUES
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440004', 'INVOCATION_COUNT', 10),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440005', 'INVOCATION_COUNT', 8),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440006', 'INVOCATION_COUNT', 6),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440007', 'INVOCATION_COUNT', 4),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440008', 'INVOCATION_COUNT', 2);
+
+INSERT INTO user_statistics(id, created_at, updated_at, user_id, type, value)
+VALUES
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440000', 'INVOCATION_COUNT', 24),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440000', 'LOGIN_COUNT', 100),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440001', 'INVOCATION_COUNT', 10),
+    (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '550e8400-e29b-41d4-a716-446655440001', 'LOGIN_COUNT', 20);
