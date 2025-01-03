@@ -38,4 +38,8 @@ public class OptimizationModel extends BaseEntity {
   @ManyToMany(mappedBy = "availableOptimizationModels")
   @JsonBackReference
   private Set<User> users = new HashSet<>();
+
+  @OneToMany(mappedBy = "service")
+  @JsonBackReference
+  private Set<ServiceStatistics> statistics = new HashSet<>();
 }
