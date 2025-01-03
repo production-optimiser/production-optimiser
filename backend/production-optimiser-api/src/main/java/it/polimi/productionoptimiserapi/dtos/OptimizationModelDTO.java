@@ -3,6 +3,7 @@ package it.polimi.productionoptimiserapi.dtos;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.enums.InputType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
@@ -18,7 +19,7 @@ public class OptimizationModelDTO {
   @URL(message = "apiUrl must be a valid URL")
   public String apiUrl;
 
-  @NotBlank(message = "inputType must be provided")
+  @NotNull(message = "inputType must be provided")
   public InputType inputType;
 
   public OptimizationModel toEntity() {

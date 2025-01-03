@@ -11,11 +11,11 @@ VALUES
 
 INSERT INTO optimization_models (id, name, created_at, updated_at, api_url, status, input_type)
 VALUES
-    ('550e8400-e29b-41d4-a716-446655440004', 'Model 1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:9082/optimize', 'ACTIVE', 'FILE'),
-    ('550e8400-e29b-41d4-a716-446655440005', 'Model 2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:9081/service', 'ACTIVE', 'FILE'),
-    ('550e8400-e29b-41d4-a716-446655440006', 'Model 3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:9082/optimize', 'ACTIVE', 'IMAGE'),
-    ('550e8400-e29b-41d4-a716-446655440007', 'Model 4', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:9082/optimize', 'ACTIVE', 'IMAGE'),
-    ('550e8400-e29b-41d4-a716-446655440008', 'Model 5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://localhost:9083/chatbot', 'ACTIVE', 'STRING');
+    ('550e8400-e29b-41d4-a716-446655440004', 'Model 1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://production-optimiser-service-tool:9082/optimize', 'ACTIVE', 'FILE'),
+    ('550e8400-e29b-41d4-a716-446655440005', 'Model 2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://production-optimiser-dummy-tool:9081/service', 'ACTIVE', 'FILE'),
+    ('550e8400-e29b-41d4-a716-446655440006', 'Model 3', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://production-optimiser-service-tool:9082/optimize', 'ACTIVE', 'IMAGE'),
+    ('550e8400-e29b-41d4-a716-446655440007', 'Model 4', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://production-optimiser-service-tool:9082/optimize', 'ACTIVE', 'IMAGE'),
+    ('550e8400-e29b-41d4-a716-446655440008', 'Model 5', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'http://production-optimiser-dummy-text-tool:9083/chatbot', 'ACTIVE', 'STRING');
 
 INSERT INTO optimization_results(
             id,
