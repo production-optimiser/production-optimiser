@@ -1,5 +1,6 @@
 package it.polimi.productionoptimiserapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import it.polimi.productionoptimiserapi.enums.UserRole;
@@ -50,6 +51,10 @@ public class User extends BaseEntity implements UserDetails {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @JsonManagedReference
   private Set<OptimizationResult> optimizationResults = new HashSet<>();
+
+  @OneToMany(mappedBy = "user")
+  @JsonBackReference
+  private Set<UserStatistics> statistics = new HashSet<>();
 
   @Column
   @NotNull
