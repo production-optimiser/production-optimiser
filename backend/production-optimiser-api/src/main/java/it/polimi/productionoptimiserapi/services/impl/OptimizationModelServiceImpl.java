@@ -6,6 +6,7 @@ import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.*;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.ServiceStatisticsType;
+import it.polimi.productionoptimiserapi.enums.UserStatisticsType;
 import it.polimi.productionoptimiserapi.mappers.MultipartFileResource;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
@@ -14,9 +15,10 @@ import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
+
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -42,21 +44,6 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     this.userRepository = userRepository;
     this.restTemplate = restTemplate;
     this.optimizationResultRepository = optimizationResultRepository;
-  }
-
-  private Set<User> mapUserIdsToUsers(Set<String> userIds) throws EntityNotFoundException {
-    if (userIds == null) {
-      return Set.of();
-    }
-
-    return userIds.stream()
-        .map(
-            userId ->
-                this.userRepository
-                    .findById(userId)
-                    .orElseThrow(
-                        () -> new EntityNotFoundException("User not found by id " + userId)))
-        .collect(Collectors.toSet());
   }
 
   public OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO)
@@ -99,6 +86,7 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     return this.optimizationModelRepository.save(model);
   }
 
+  @Transactional
   public OptimizationResult invokeOptimizationModel(
       OptimizationModel model, MultipartFile inputFile, User invoker) throws IOException {
     OptimizationResult or = new OptimizationResult();
@@ -126,7 +114,7 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     or.setOutputJSON(responseMap);
 
     // Update statistics
-    incrementInvocationCount(model);
+    incrementInvocationCount(model, invoker);
 
     or.setUser(invoker);
     optimizationResultRepository.save(or);
@@ -134,23 +122,42 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     return or;
   }
 
-  private void incrementInvocationCount(OptimizationModel model) {
-    Set<ServiceStatistics> statistics = model.getStatistics();
-    if (statistics.isEmpty()) {
-      statistics = new HashSet<>();
+  @Transactional
+  protected void incrementInvocationCount(OptimizationModel model, User invoker) {
+    Set<ServiceStatistics> ss = model.getStatistics();
+    if (ss.isEmpty()) {
+      ss = new HashSet<>();
       ServiceStatistics s = new ServiceStatistics();
       s.setType(ServiceStatisticsType.INVOCATION_COUNT);
       s.setValue(0);
-      statistics.add(s);
+      ss.add(s);
     }
 
-    for (ServiceStatistics s : statistics) {
+    for (ServiceStatistics s : ss) {
       if (s.getType() == ServiceStatisticsType.INVOCATION_COUNT) {
         s.setValue(s.getValue() + 1);
       }
     }
 
-    model.setStatistics(statistics);
+    model.setStatistics(ss);
     optimizationModelRepository.save(model);
+
+    Set<UserStatistics> us = invoker.getStatistics();
+    if (us.isEmpty()) {
+      us = new HashSet<>();
+      UserStatistics s = new UserStatistics();
+      s.setType(UserStatisticsType.INVOCATION_COUNT);
+      s.setValue(0);
+      us.add(s);
+    }
+
+    for (UserStatistics s : us) {
+      if (s.getType() == UserStatisticsType.INVOCATION_COUNT) {
+        s.setValue(s.getValue() + 1);
+      }
+    }
+
+    invoker.setStatistics(us);
+    userRepository.save(invoker);
   }
 }
