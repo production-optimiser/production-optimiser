@@ -5,6 +5,7 @@ import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.enums.UserStatisticsType;
 import it.polimi.productionoptimiserapi.enums.UserStatus;
 import it.polimi.productionoptimiserapi.mappers.UserMapper;
 import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
@@ -175,5 +176,15 @@ public class UserServiceImpl implements UserService {
       throw new EntityExistsException(
           "Account request with email address: " + email + " already exists.");
     }
+  }
+
+  @Override
+  public void incrementLoginCount(User user) {
+    user.getStatistics().stream()
+        .filter(stat -> stat.getType() == UserStatisticsType.LOGIN_COUNT)
+        .findFirst()
+        .ifPresent(stat -> stat.setValue(stat.getValue() + 1));
+
+    userRepository.save(user);
   }
 }
