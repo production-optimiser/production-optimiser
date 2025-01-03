@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.*;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
+import it.polimi.productionoptimiserapi.enums.ServiceStatisticsType;
 import it.polimi.productionoptimiserapi.mappers.MultipartFileResource;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
@@ -124,9 +125,25 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
     or.setOutputJSON(responseMap);
 
+    // Update statistics
+    incrementInvocationCount(model);
+
     or.setUser(invoker);
     optimizationResultRepository.save(or);
 
     return or;
+  }
+
+  private void incrementInvocationCount(OptimizationModel model) {
+    Set<ServiceStatistics> statistics = model.getStatistics();
+
+    for (ServiceStatistics s : statistics) {
+      if (s.getType() == ServiceStatisticsType.INVOCATION_COUNT) {
+        s.setValue(s.getValue() + 1);
+      }
+    }
+
+    model.setStatistics(statistics);
+    optimizationModelRepository.save(model);
   }
 }
