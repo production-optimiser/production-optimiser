@@ -8,17 +8,11 @@ from typing import Dict, Any
 import json
 # Variables for def machine_util
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-    "https://dsd.commanderkowalski.uk/"
-]
-
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
