@@ -48,12 +48,11 @@ interface SidebarModel {
 interface ManageModel {
   id: string;
   name: string;
-  apiUrl: string;  // Changed from url to apiUrl to match API
+  apiUrl: string;  
   inputType: string;
   createdAt: string;
 }
 
-// We can define a simpler type for the form
 interface EditModelForm {
   name: string;
   url: string;
@@ -149,11 +148,6 @@ const sections = [
 // ManageModels component
 // ---------------------------------
 
-/**
- * Renders a table of models, each with a 3-dot actions menu:
- *   - Edit Model
- *   - Retire Model
- */
 const ManageModels = ({
   models,
   onLinkModelDialog,
@@ -299,13 +293,6 @@ const AdminDashboard = () => {
   const fetchModels = async () => {
     try {
       const response = await axiosInstance.get<ManageModel[]>('/models');
-      // If your backend returns { apiUrl, ... }, you might map it:
-      // const data = response.data.map(item => ({
-      //   ...item,
-      //   url: item.apiUrl,
-      // }));
-      // setManageModels(data);
-
       setManageModels(response.data);
     } catch (error) {
       console.error('Error fetching models:', error);
@@ -467,7 +454,7 @@ const AdminDashboard = () => {
       }
     }
   
-    return <DashboardStats />; // Default view
+    return <DashboardStats />; 
   };
   // --------------------------------------------------------------------------------
   // Return the overall layout
@@ -480,7 +467,7 @@ const AdminDashboard = () => {
   modelName="Admin Panel"
   modelVersion="v1.0"
   sections={sections}
-  onItemClick={handleSectionClick}  // Use the new handler
+  onItemClick={handleSectionClick}  
   onNewChat={handleNewChat}
   availableModels={availableModels}
   selectedModel={selectedModelForPlayground}
