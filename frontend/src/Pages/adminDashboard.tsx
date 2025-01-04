@@ -48,7 +48,7 @@ interface SidebarModel {
 interface ManageModel {
   id: string;
   name: string;
-  url: string;
+  apiUrl: string;  // Changed from url to apiUrl to match API
   inputType: string;
   createdAt: string;
 }
@@ -181,7 +181,8 @@ const ManageModels = ({
                 <Checkbox />
               </TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Url</TableHead>
+              <TableHead>URL</TableHead>
+              <TableHead>Input Type</TableHead>
               <TableHead>Id</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -194,7 +195,8 @@ const ManageModels = ({
                   <Checkbox />
                 </TableCell>
                 <TableCell>{model.name}</TableCell>
-                <TableCell>{model.url}</TableCell>
+                <TableCell>{model.apiUrl}</TableCell>
+                <TableCell>{model.inputType}</TableCell>
                 <TableCell>{model.id}</TableCell>
                 <TableCell>{model.createdAt}</TableCell>
                 <TableCell className="text-right">
@@ -245,8 +247,11 @@ const ManageModels = ({
 
 const AdminDashboard = () => {
   const [currentSection, setCurrentSection] = useState('all-statistics');
-  const [contentState, setContentState] = useState<{ type: 'empty' | 'new-chat' }>({
-    type: 'empty',
+  const [contentState, setContentState] = useState<{
+    type: 'empty' | 'new-chat' | 'section';
+    section?: string;
+  }>({
+    type: 'empty'
   });
 
   const navigate = useNavigate();
@@ -311,20 +316,26 @@ const AdminDashboard = () => {
   // "Link model" actions
   // --------------------------------------------------------------------------------
 
-  const handleLinkModel = async ({ name, url, inputType }) => {
+  useEffect(() => {
+    fetchModels();
+  }, []);
+
+  const handleLinkModel = async (formData) => {
     try {
-      await axiosInstance.post('/models', {
-        name,
-        apiUrl: url,
-        inputType,
-        userIds: [],
+      console.log('Sending request with data:', formData); // For debugging
+      
+      const response = await axiosInstance.post('/models', {
+        name: formData.name,
+        apiUrl: formData.apiUrl,
+        inputType: formData.inputType
       });
-  
+      
       alert('Model linked successfully!');
       setIsLinkDialogOpen(false);
       fetchModels();
     } catch (error) {
-      console.error('Error linking model:', error);
+      console.error('Full error details:', error.response?.data || error);
+      alert(`Error linking model: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -397,6 +408,18 @@ const AdminDashboard = () => {
   // "New Chat" action from the sidebar
   // --------------------------------------------------------------------------------
 
+  const handleSectionClick = (id: string) => {
+    const item = sections
+      .flatMap((section) => section.items)
+      .find((item) => item.id === id);
+    if (item) {
+      setContentState({ 
+        type: 'section',
+        section: item.component || id 
+      });
+    }
+  };
+
   const handleNewChat = () => {
     setContentState({ type: 'new-chat' });
   };
@@ -414,35 +437,38 @@ const AdminDashboard = () => {
         />
       );
     }
-
-    switch (currentSection) {
-      case 'manage-users':
-        return <UserManagement />;
-      case 'manage-models':
-        return (
-          <ManageModels
-            models={manageModels}
-            onLinkModelDialog={() => setIsLinkDialogOpen(true)}
-            onEditModel={handleOpenEditModel}
-            onRetireModel={handleOpenRetireDialog}
-          />
-        );
-      case 'model-assignment':
-        return <ModelAssignment />;
-      case 'user-requests':
-        return <UserRequests />;
-      case 'all-statistics':
-      case 'python-model-1-stats':
-      case 'python-model-2-stats':
-      case 'all-users-stats':
-      case 'low-usage-stats':
-      case 'high-usage-stats':
-        return <DashboardStats />;
-      default:
-        return <DashboardStats />;
+  
+    if (contentState.type === 'section') {
+      switch (contentState.section) {
+        case 'manage-users':
+          return <UserManagement />;
+        case 'manage-models':
+          return (
+            <ManageModels
+              models={manageModels}
+              onLinkModelDialog={() => setIsLinkDialogOpen(true)}
+              onEditModel={handleOpenEditModel}
+              onRetireModel={handleOpenRetireDialog}
+            />
+          );
+        case 'model-assignment':
+          return <ModelAssignment />;
+        case 'user-requests':
+          return <UserRequests />;
+        case 'all-statistics':
+        case 'python-model-1-stats':
+        case 'python-model-2-stats':
+        case 'all-users-stats':
+        case 'low-usage-stats':
+        case 'high-usage-stats':
+          return <DashboardStats />;
+        default:
+          return <DashboardStats />;
+      }
     }
+  
+    return <DashboardStats />; // Default view
   };
-
   // --------------------------------------------------------------------------------
   // Return the overall layout
   // --------------------------------------------------------------------------------
@@ -450,23 +476,16 @@ const AdminDashboard = () => {
   return (
     <div className="flex">
       <div className="w-64">
-        <SidebarNav
-          modelName="Admin Panel"
-          modelVersion="v1.0"
-          sections={sections}
-          onItemClick={(id) => {
-            const item = sections
-              .flatMap((section) => section.items)
-              .find((item) => item.id === id);
-            if (item) {
-              setCurrentSection(item.component || id);
-            }
-          }}
-          onNewChat={handleNewChat}
-          availableModels={availableModels}
-          selectedModel={selectedModelForPlayground}
-          onModelSelect={setSelectedModelForPlayground}
-        />
+      <SidebarNav
+  modelName="Admin Panel"
+  modelVersion="v1.0"
+  sections={sections}
+  onItemClick={handleSectionClick}  // Use the new handler
+  onNewChat={handleNewChat}
+  availableModels={availableModels}
+  selectedModel={selectedModelForPlayground}
+  onModelSelect={setSelectedModelForPlayground}
+/>
       </div>
 
       <div className="flex-1 p-6">{renderContent()}</div>
