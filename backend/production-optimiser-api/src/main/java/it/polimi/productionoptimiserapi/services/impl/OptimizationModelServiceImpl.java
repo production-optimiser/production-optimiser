@@ -52,6 +52,7 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
       throws EntityNotFoundException {
     return this.optimizationModelRepository.save(optimizationModelDTO.toEntity());
   }
+
   private Set<User> mapUserIdsToUsers(Set<String> userIds) throws EntityNotFoundException {
     if (userIds == null) {
       return Set.of();
