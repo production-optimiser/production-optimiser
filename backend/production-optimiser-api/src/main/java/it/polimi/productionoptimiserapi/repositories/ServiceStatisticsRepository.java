@@ -11,4 +11,6 @@ public interface ServiceStatisticsRepository extends JpaRepository<ServiceStatis
 
   @Query("SELECT s FROM ServiceStatistics s WHERE s.type = :type ORDER BY s.value DESC LIMIT 3")
   List<ServiceStatistics> findTop3ByType(@NonNull ServiceStatisticsType type);
+
+  ServiceStatistics findServiceStatisticsByServiceId(@NonNull String serviceId);
 }

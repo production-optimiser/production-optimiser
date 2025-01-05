@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,6 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class StatisticsController {
 
   private final StatisticsService statisticsService;
+
+  @GetMapping("/services")
+  public ResponseEntity<ServiceStatistics> getServiceStatisticsByServiceId(
+      @RequestParam String serviceId) {
+    return ResponseEntity.ok(this.statisticsService.getServiceStatisticsByServiceId(serviceId));
+  }
+
+  @GetMapping("/users")
+  public ResponseEntity<List<UserStatistics>> getUserStatisticsByUserId(
+      @RequestParam String userId) {
+    return ResponseEntity.ok(this.statisticsService.getUserStatisticsByUserId(userId));
+  }
 
   @GetMapping("/services/top3")
   public ResponseEntity<List<ServiceStatistics>> getTop3MostInvokedServices() {

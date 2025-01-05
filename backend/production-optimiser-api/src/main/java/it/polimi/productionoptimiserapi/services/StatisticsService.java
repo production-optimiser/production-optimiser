@@ -9,4 +9,8 @@ public interface StatisticsService {
   List<ServiceStatistics> getTop3MostInvokedServices();
 
   List<UserStatistics> getTop3UsersByLoginCount();
+
+  ServiceStatistics getServiceStatisticsByServiceId(String serviceId);
+
+  List<UserStatistics> getUserStatisticsByUserId(String userId);
 }

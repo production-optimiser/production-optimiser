@@ -1,6 +1,8 @@
 package it.polimi.productionoptimiserapi.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.productionoptimiserapi.enums.UserStatisticsType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -28,4 +30,11 @@ public class UserStatistics extends BaseEntity {
   @JoinColumn(name = "user_id", nullable = false)
   @JsonBackReference
   private User user;
+
+  @Transient
+  @JsonInclude
+  @JsonProperty("username")
+  public String getUserName() {
+    return this.user != null ? this.user.getUsername() : null;
+  }
 }

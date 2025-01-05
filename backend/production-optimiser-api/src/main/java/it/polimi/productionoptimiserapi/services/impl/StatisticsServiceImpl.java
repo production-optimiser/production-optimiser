@@ -32,4 +32,14 @@ public class StatisticsServiceImpl implements StatisticsService {
   public List<UserStatistics> getTop3UsersByLoginCount() {
     return userStatisticsRepository.findTop3ByType(UserStatisticsType.LOGIN_COUNT);
   }
+
+  @Override
+  public ServiceStatistics getServiceStatisticsByServiceId(String serviceId) {
+    return serviceStatisticsRepository.findServiceStatisticsByServiceId(serviceId);
+  }
+
+  @Override
+  public List<UserStatistics> getUserStatisticsByUserId(String userId) {
+    return userStatisticsRepository.findUserStatisticsByUserId(userId);
+  }
 }

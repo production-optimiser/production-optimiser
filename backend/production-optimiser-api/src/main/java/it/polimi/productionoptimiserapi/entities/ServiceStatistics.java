@@ -1,6 +1,8 @@
 package it.polimi.productionoptimiserapi.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.productionoptimiserapi.enums.ServiceStatisticsType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -28,4 +30,11 @@ public class ServiceStatistics extends BaseEntity {
   @JoinColumn(name = "service_id", nullable = false)
   @JsonBackReference
   private OptimizationModel service;
+
+  @Transient
+  @JsonInclude
+  @JsonProperty("serviceName")
+  public String getServiceName() {
+    return this.service != null ? this.service.getName() : null;
+  }
 }
