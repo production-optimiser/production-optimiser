@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/api/models")
 @RequiredArgsConstructor
+@Slf4j
 public class OptimizationModelController {
 
   private final OptimizationModelService optimizationModelService;
@@ -31,6 +33,8 @@ public class OptimizationModelController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<OptimizationModel> create(
       @Valid @RequestBody OptimizationModelDTO optimizationModelDTO) {
+
+    log.info("Received POST request for creating optimization model");
     OptimizationModel om =
         this.optimizationModelService.saveOptimizationModel(optimizationModelDTO);
 
@@ -48,6 +52,8 @@ public class OptimizationModelController {
   @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
   public ResponseEntity<Iterable<OptimizationModel>> getAll(
       @AuthenticationPrincipal User loggedUser) {
+
+    log.info("Received GET request for fetching all optimization model");
     if (loggedUser.isAdmin()) {
       return ResponseEntity.ok(this.optimizationModelService.findAllOptimizationModels());
     }
@@ -63,12 +69,19 @@ public class OptimizationModelController {
     OptimizationModel om =
         this.optimizationModelService
             .findOptimizationModelById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "Model not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
     if (loggedUser.isCustomer()
         && om.getUsers().stream().noneMatch(u -> Objects.equals(u.getId(), loggedUser.getId()))) {
       // User is a customer and this optimization model does not belong to them
-      throw new ForbiddenException("This optimization model does not belong to you!");
+      String msg = "This optimization model does not belong to you!";
+      log.error(msg);
+      throw new ForbiddenException(msg);
     }
 
     return ResponseEntity.ok(om);
@@ -77,6 +90,7 @@ public class OptimizationModelController {
   @PatchMapping("/{id}/retire")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<OptimizationModel> retire(@PathVariable String id) {
+    log.info("Received PATCH request for retiring model id=" + id);
     OptimizationModel om = this.optimizationModelService.retireOptimizationModel(id);
     return ResponseEntity.ok(om);
   }
@@ -85,6 +99,8 @@ public class OptimizationModelController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<OptimizationModel> update(
       @PathVariable String id, @Valid @RequestBody OptimizationModelDTO optimizationModelDTO) {
+
+    log.info("Received PATCH request for updating model id=" + id);
     OptimizationModel om =
         this.optimizationModelService.updateOptimizationModel(id, optimizationModelDTO);
     return ResponseEntity.ok(om);
@@ -97,15 +113,24 @@ public class OptimizationModelController {
       @RequestParam("input") MultipartFile inputFile,
       @AuthenticationPrincipal User loggedUser)
       throws ForbiddenException, IOException {
+
+    log.info("Received POST request for invoking model id=" + id);
     OptimizationModel om =
         this.optimizationModelService
             .findOptimizationModelById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "Model not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
 
     if (loggedUser.isCustomer()
         && om.getUsers().stream().noneMatch(u -> Objects.equals(u.getId(), loggedUser.getId()))) {
       // User is a customer and this optimization model does not belong to them
-      throw new ForbiddenException("Can't invoke a model which does not belong to you.");
+      String msg = "Can't invoke a model(" + id + ") which does not belong to you.";
+      log.error(msg);
+      throw new ForbiddenException(msg);
     }
 
     OptimizationResult or =
