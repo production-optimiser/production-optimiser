@@ -1,5 +1,6 @@
 package it.polimi.productionoptimiserapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import it.polimi.productionoptimiserapi.enums.UserRole;
@@ -38,7 +39,8 @@ public class User extends BaseEntity implements UserDetails {
   private UserRole role = UserRole.CUSTOMER;
 
   @ManyToMany(
-      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+      fetch = FetchType.EAGER)
   @JoinTable(
       name = "users_optimization_models",
       joinColumns = @JoinColumn(name = "user_id"),
@@ -49,6 +51,10 @@ public class User extends BaseEntity implements UserDetails {
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @JsonManagedReference
   private Set<OptimizationResult> optimizationResults = new HashSet<>();
+
+  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+  @JsonBackReference
+  private Set<UserStatistics> statistics = new HashSet<>();
 
   @Column
   @NotNull
@@ -115,5 +121,9 @@ public class User extends BaseEntity implements UserDetails {
 
   public boolean isCustomer() {
     return role == UserRole.CUSTOMER;
+  }
+
+  public boolean isAdmin() {
+    return role == UserRole.ADMIN;
   }
 }

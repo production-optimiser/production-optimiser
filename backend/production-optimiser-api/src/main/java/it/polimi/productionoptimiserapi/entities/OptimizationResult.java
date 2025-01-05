@@ -18,8 +18,7 @@ import org.hibernate.type.SqlTypes;
 @Setter
 public class OptimizationResult extends BaseEntity {
 
-  @Column
-  @Lob
+  @Column(name = "input_file", columnDefinition = "bytea")
   @Basic(fetch = FetchType.EAGER)
   private byte[] inputFile;
 

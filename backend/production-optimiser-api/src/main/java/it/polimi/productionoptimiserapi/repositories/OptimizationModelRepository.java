@@ -1,6 +1,7 @@
 package it.polimi.productionoptimiserapi.repositories;
 
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
+import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +11,12 @@ public interface OptimizationModelRepository extends JpaRepository<OptimizationM
   @Override
   @Query("SELECT om from OptimizationModel om WHERE om.status <> 'RETIRED' and om.id = :id")
   Optional<OptimizationModel> findById(@NonNull String id);
+
+  @Override
+  @Query("SELECT om from OptimizationModel om WHERE om.status <> 'RETIRED'")
+  List<OptimizationModel> findAll();
+
+  @Query(
+      "SELECT om from OptimizationModel om JOIN om.users u WHERE u.id = :userId AND om.status <> 'RETIRED'")
+  List<OptimizationModel> findAllByUser(@NonNull String userId);
 }

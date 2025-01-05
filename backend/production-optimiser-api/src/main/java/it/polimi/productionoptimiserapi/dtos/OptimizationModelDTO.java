@@ -2,7 +2,6 @@ package it.polimi.productionoptimiserapi.dtos;
 
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import jakarta.validation.constraints.NotBlank;
-import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.URL;
@@ -17,8 +16,6 @@ public class OptimizationModelDTO {
   @NotBlank(message = "apiUrl must be provided")
   @URL(message = "apiUrl must be a valid URL")
   public String apiUrl;
-
-  public Set<String> userIds;
 
   public OptimizationModel toEntity() {
     OptimizationModel optimizationModel = new OptimizationModel();

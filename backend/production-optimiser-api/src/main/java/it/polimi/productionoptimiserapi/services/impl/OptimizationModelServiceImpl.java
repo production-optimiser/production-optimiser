@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.entities.*;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
+import it.polimi.productionoptimiserapi.enums.ServiceStatisticsType;
+import it.polimi.productionoptimiserapi.enums.UserStatisticsType;
 import it.polimi.productionoptimiserapi.mappers.MultipartFileResource;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.OptimizationResultRepository;
@@ -14,14 +16,17 @@ import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Slf4j
 public class OptimizationModelServiceImpl implements OptimizationModelService {
 
   private final OptimizationModelRepository optimizationModelRepository;
@@ -43,6 +48,11 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     this.optimizationResultRepository = optimizationResultRepository;
   }
 
+  public OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO)
+      throws EntityNotFoundException {
+    return this.optimizationModelRepository.save(optimizationModelDTO.toEntity());
+  }
+
   private Set<User> mapUserIdsToUsers(Set<String> userIds) throws EntityNotFoundException {
     if (userIds == null) {
       return Set.of();
@@ -54,18 +64,16 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
                 this.userRepository
                     .findById(userId)
                     .orElseThrow(
-                        () -> new EntityNotFoundException("User not found by id " + userId)))
+                        () -> {
+                          String msg = "User not found by id " + userId;
+                          log.warn(msg);
+                          return new EntityNotFoundException(msg);
+                        }))
         .collect(Collectors.toSet());
   }
 
-  public OptimizationModel saveOptimizationModel(OptimizationModelDTO optimizationModelDTO)
-      throws EntityNotFoundException {
-    OptimizationModel om = optimizationModelDTO.toEntity();
-    om.setUsers(this.mapUserIdsToUsers(optimizationModelDTO.getUserIds()));
-    return this.optimizationModelRepository.save(om);
-  }
-
   public Optional<OptimizationModel> findOptimizationModelById(String id) {
+    log.info("Finding optimization model with id= " + id);
     return this.optimizationModelRepository.findById(id);
   }
 
@@ -73,14 +81,26 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     OptimizationModel model =
         this.optimizationModelRepository
             .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "Model not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
+    log.info("Retiring model with id=" + id);
     model.setStatus(OptimizationModelStatus.RETIRED);
     return this.optimizationModelRepository.save(model);
   }
 
   @Override
   public List<OptimizationModel> findAllOptimizationModels() {
+    log.info("Fetching all models");
     return this.optimizationModelRepository.findAll();
+  }
+
+  @Override
+  public List<OptimizationModel> findAllOptimizationModelsByUser(User user) {
+    return this.optimizationModelRepository.findAllByUser(user.getId());
   }
 
   @Override
@@ -89,12 +109,20 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     OptimizationModel model =
         this.optimizationModelRepository
             .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "Model not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
+
+    log.info("Updating model with id=" + model.getId());
     model.setName(optimizationModelDTO.getName());
     model.setApiUrl(optimizationModelDTO.getApiUrl());
     return this.optimizationModelRepository.save(model);
   }
 
+  @Transactional
   public OptimizationResult invokeOptimizationModel(
       OptimizationModel model, MultipartFile inputFile, User invoker) throws IOException {
     OptimizationResult or = new OptimizationResult();
@@ -108,10 +136,13 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
     HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
+    log.info("Invoking model url=" + model.getApiUrl());
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(model.getApiUrl(), HttpMethod.POST, requestEntity, String.class);
 
     if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+      log.error(
+          "Error while invoking model url= " + model.getApiUrl() + "\nResponse: " + responseEntity);
       throw new RuntimeException("Error: " + responseEntity);
     }
 
@@ -121,9 +152,53 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
     or.setOutputJSON(responseMap);
 
+    // Update statistics
+    incrementInvocationCount(model, invoker);
+
     or.setUser(invoker);
+
+    log.info("Saving optimization result");
     optimizationResultRepository.save(or);
 
     return or;
+  }
+
+  @Transactional
+  protected void incrementInvocationCount(OptimizationModel model, User invoker) {
+    Set<ServiceStatistics> ss = model.getStatistics();
+    if (ss.isEmpty()) {
+      ss = new HashSet<>();
+      ServiceStatistics s = new ServiceStatistics();
+      s.setType(ServiceStatisticsType.INVOCATION_COUNT);
+      s.setValue(0);
+      ss.add(s);
+    }
+
+    for (ServiceStatistics s : ss) {
+      if (s.getType() == ServiceStatisticsType.INVOCATION_COUNT) {
+        s.setValue(s.getValue() + 1);
+      }
+    }
+
+    model.setStatistics(ss);
+    optimizationModelRepository.save(model);
+
+    Set<UserStatistics> us = invoker.getStatistics();
+    if (us.isEmpty()) {
+      us = new HashSet<>();
+      UserStatistics s = new UserStatistics();
+      s.setType(UserStatisticsType.INVOCATION_COUNT);
+      s.setValue(0);
+      us.add(s);
+    }
+
+    for (UserStatistics s : us) {
+      if (s.getType() == UserStatisticsType.INVOCATION_COUNT) {
+        s.setValue(s.getValue() + 1);
+      }
+    }
+
+    invoker.setStatistics(us);
+    userRepository.save(invoker);
   }
 }

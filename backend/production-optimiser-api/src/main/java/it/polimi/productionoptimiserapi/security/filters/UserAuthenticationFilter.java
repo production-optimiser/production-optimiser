@@ -5,6 +5,7 @@ import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.security.dtos.AuthenticationResponseDTO;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.security.utils.JwtUtil;
+import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,10 +28,13 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
   private final DaoAuthenticationProvider authenticationProvider;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  private final UserService userService;
+
   public UserAuthenticationFilter(
-      JwtUtil jwtUtil, DaoAuthenticationProvider authenticationProvider) {
+      JwtUtil jwtUtil, DaoAuthenticationProvider authenticationProvider, UserService userService) {
     this.jwtUtil = jwtUtil;
     this.authenticationProvider = authenticationProvider;
+    this.userService = userService;
   }
 
   @Override
@@ -61,6 +65,12 @@ public class UserAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     AuthenticationResponseDTO responseDto = new AuthenticationResponseDTO(user.getId(), token);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+
+    try {
+      userService.incrementLoginCount(user);
+    } catch (Exception e) {
+      log.error("Failed to increment login count for user {}", user.getId(), e);
+    }
 
     objectMapper.writeValue(response.getWriter(), responseDto);
   }
