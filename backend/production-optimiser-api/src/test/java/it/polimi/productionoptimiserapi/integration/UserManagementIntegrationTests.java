@@ -1,12 +1,13 @@
 package it.polimi.productionoptimiserapi.integration;
 
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.http.ContentType;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.enums.UserRole;
-import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
-import it.polimi.productionoptimiserapi.services.AccountRequestService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,9 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
@@ -36,10 +34,8 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
     registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
   }
 
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private UserService userService;
+  @Autowired private UserRepository userRepository;
+  @Autowired private UserService userService;
 
   String adminAccessToken;
   String customer1AccessToken;
@@ -128,7 +124,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
   @Test
   void testGetUsers() {
 
-//  admin access
+    //  admin access
     given()
         .header("Authorization", "Bearer " + adminAccessToken)
         .when()
@@ -137,11 +133,11 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .statusCode(200)
         .body("size()", is(2))
         .body("[0].email", is("admin@potest.it"))
-            .body("[0].role", is("ADMIN"))
+        .body("[0].role", is("ADMIN"))
         .body("[1].email", is("testing@testing.com"))
-            .body("[1].role", is("CUSTOMER"));
+        .body("[1].role", is("CUSTOMER"));
 
-//  customer access
+    //  customer access
     given()
         .header("Authorization", "Bearer " + customer1AccessToken)
         .when()
@@ -153,7 +149,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
   @Test
   void testGetUser() {
 
-//  admin access - 200
+    //  admin access - 200
     given()
         .header("Authorization", "Bearer " + adminAccessToken)
         .when()
@@ -162,7 +158,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .statusCode(200)
         .body("email", is("testing@testing.com"));
 
-//  customer access - accessing himself - 200
+    //  customer access - accessing himself - 200
     given()
         .header("Authorization", "Bearer " + customer1AccessToken)
         .when()
@@ -171,7 +167,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .statusCode(200)
         .body("email", is("testing@testing.com"));
 
-//  customer access - accessing another customer - 403
+    //  customer access - accessing another customer - 403
     given()
         .header("Authorization", "Bearer " + customer1AccessToken)
         .when()
@@ -182,13 +178,14 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
 
   @Test
   void testCreateUser() {
-    UserDTO userDTO = UserDTO.builder()
-        .email("created@created.com")
-        .password("password!")
-        .role(UserRole.CUSTOMER)
-        .build();
+    UserDTO userDTO =
+        UserDTO.builder()
+            .email("created@created.com")
+            .password("password!")
+            .role(UserRole.CUSTOMER)
+            .build();
 
-//  admin access - 202
+    //  admin access - 202
     given()
         .header("Authorization", "Bearer " + adminAccessToken)
         .contentType(ContentType.JSON)
@@ -200,7 +197,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .body("email", is("created@created.com"))
         .body("role", is("CUSTOMER"));
 
-//  customer access - 403
+    //  customer access - 403
     given()
         .header("Authorization", "Bearer " + customer1AccessToken)
         .contentType(ContentType.JSON)
@@ -214,7 +211,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
   @Test
   void testUpdateUser() {
 
-//    bad request - no parameters
+    //    bad request - no parameters
     given()
         .header("Authorization", "Bearer " + adminAccessToken)
         .when()
@@ -222,7 +219,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .then()
         .statusCode(400);
 
-//  customer access - accessing another customer - 403
+    //  customer access - accessing another customer - 403
     given()
         .header("Authorization", "Bearer " + customer1AccessToken)
         .param("email", "testing@fail.com")
@@ -231,7 +228,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .then()
         .statusCode(403);
 
-//    customer access - accessing himself - 200
+    //    customer access - accessing himself - 200
     given()
         .header("Authorization", "Bearer " + customer1AccessToken)
         .param("email", "testing@changed.com")
@@ -240,7 +237,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .then()
         .statusCode(200);
 
-//    admin access - 200
+    //    admin access - 200
     given()
         .header("Authorization", "Bearer " + adminAccessToken)
         .param("email", "testing@changed.com")
@@ -277,5 +274,4 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .then()
         .statusCode(404);
   }
-
 }
