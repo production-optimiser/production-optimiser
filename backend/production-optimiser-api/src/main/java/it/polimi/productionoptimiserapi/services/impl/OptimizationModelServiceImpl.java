@@ -95,6 +95,7 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
             .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
     model.setName(optimizationModelDTO.getName());
     model.setApiUrl(optimizationModelDTO.getApiUrl());
+    model.setInputType(optimizationModelDTO.getInputType());
     return this.optimizationModelRepository.save(model);
   }
 
