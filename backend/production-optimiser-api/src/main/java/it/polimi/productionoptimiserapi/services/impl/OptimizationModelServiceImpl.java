@@ -15,6 +15,8 @@ import it.polimi.productionoptimiserapi.services.OptimizationModelService;
 import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Slf4j
 public class OptimizationModelServiceImpl implements OptimizationModelService {
 
   private final OptimizationModelRepository optimizationModelRepository;
@@ -49,8 +52,29 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
       throws EntityNotFoundException {
     return this.optimizationModelRepository.save(optimizationModelDTO.toEntity());
   }
+  private Set<User> mapUserIdsToUsers(Set<String> userIds) throws EntityNotFoundException {
+    if (userIds == null) {
+      return Set.of();
+    }
+
+    return userIds.stream()
+        .map(
+            userId ->
+                this.userRepository
+                    .findById(userId)
+                    .orElseThrow(
+                        () -> {
+                          String msg = "User not found by id " + userId;
+                          log.warn(msg);
+                          return new EntityNotFoundException(msg);
+                        }))
+        .collect(Collectors.toSet());
+  }
+
+
 
   public Optional<OptimizationModel> findOptimizationModelById(String id) {
+    log.info("Finding optimization model with id= " + id);
     return this.optimizationModelRepository.findById(id);
   }
 
@@ -58,13 +82,20 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     OptimizationModel model =
         this.optimizationModelRepository
             .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "Model not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
+    log.info("Retiring model with id=" + id);
     model.setStatus(OptimizationModelStatus.RETIRED);
     return this.optimizationModelRepository.save(model);
   }
 
   @Override
   public List<OptimizationModel> findAllOptimizationModels() {
+    log.info("Fetching all models");
     return this.optimizationModelRepository.findAll();
   }
 
@@ -79,7 +110,14 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     OptimizationModel model =
         this.optimizationModelRepository
             .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Model not found by id " + id));
+            .orElseThrow(
+                () -> {
+                  String msg = "Model not found by id " + id;
+                  log.warn(msg);
+                  return new EntityNotFoundException(msg);
+                });
+
+    log.info("Updating model with id=" + model.getId());
     model.setName(optimizationModelDTO.getName());
     model.setApiUrl(optimizationModelDTO.getApiUrl());
     return this.optimizationModelRepository.save(model);
@@ -99,10 +137,13 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
     HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
+    log.info("Invoking model url=" + model.getApiUrl());
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(model.getApiUrl(), HttpMethod.POST, requestEntity, String.class);
 
     if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+      log.error(
+          "Error while invoking model url= " + model.getApiUrl() + "\nResponse: " + responseEntity);
       throw new RuntimeException("Error: " + responseEntity);
     }
 
@@ -116,6 +157,8 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     incrementInvocationCount(model, invoker);
 
     or.setUser(invoker);
+
+    log.info("Saving optimization result");
     optimizationResultRepository.save(or);
 
     return or;
