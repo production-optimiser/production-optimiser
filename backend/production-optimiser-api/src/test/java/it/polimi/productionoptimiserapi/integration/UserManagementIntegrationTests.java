@@ -131,7 +131,7 @@ public class UserManagementIntegrationTests extends BaseIntegrationTestSetup {
         .get("/api/users")
         .then()
         .statusCode(200)
-        .body("size()", is(2))
+        .body("size()", is(3))
         .body("[0].email", is("admin@potest.it"))
         .body("[0].role", is("ADMIN"))
         .body("[1].email", is("testing@testing.com"))
