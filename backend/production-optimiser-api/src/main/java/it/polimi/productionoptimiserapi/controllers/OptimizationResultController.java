@@ -6,8 +6,11 @@ import it.polimi.productionoptimiserapi.exceptions.ForbiddenException;
 import it.polimi.productionoptimiserapi.services.OptimizationResultService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+=======
+>>>>>>> efe5f1f79c0a8fcf3f4b8606ebab7677283e1a39
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,11 +35,11 @@ public class OptimizationResultController {
     if (loggedUser.isCustomer() && !loggedUser.getId().equals(userId)) {
       throw new ForbiddenException("You can only access your own results");
     }
+
     return resultService.getAllResults(userId);
   }
 
   @GetMapping("/{id}")
-<<<<<<< HEAD
   @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
   public OptimizationResultDto getResultById(
       @PathVariable String id, @AuthenticationPrincipal User loggedUser) throws ForbiddenException {

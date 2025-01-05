@@ -71,8 +71,6 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
         .collect(Collectors.toSet());
   }
 
-
-
   public Optional<OptimizationModel> findOptimizationModelById(String id) {
     log.info("Finding optimization model with id= " + id);
     return this.optimizationModelRepository.findById(id);
