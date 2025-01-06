@@ -22,6 +22,9 @@ public class OptimizationResult extends BaseEntity {
   @Basic(fetch = FetchType.EAGER)
   private byte[] inputFile;
 
+  @Column(name = "input_string")
+  private String inputString;
+
   @Column(name = "output_json", columnDefinition = "jsonb")
   @JdbcTypeCode(SqlTypes.JSON)
   private Map<String, Object> outputJSON;

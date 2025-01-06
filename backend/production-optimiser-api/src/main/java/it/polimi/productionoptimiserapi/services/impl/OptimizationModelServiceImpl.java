@@ -119,26 +119,50 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
     log.info("Updating model with id=" + model.getId());
     model.setName(optimizationModelDTO.getName());
     model.setApiUrl(optimizationModelDTO.getApiUrl());
+    model.setInputType(optimizationModelDTO.getInputType());
     return this.optimizationModelRepository.save(model);
   }
 
   @Transactional
   public OptimizationResult invokeOptimizationModel(
-      OptimizationModel model, MultipartFile inputFile, User invoker) throws IOException {
+      OptimizationModel model, MultipartFile inputFile, String inputString, User invoker)
+      throws IOException {
     OptimizationResult or = new OptimizationResult();
-    or.setInputFile(inputFile.getBytes());
+    if (inputFile == null && inputString == null) {
+      throw new IllegalArgumentException("Either inputFile or inputString must be provided");
+    }
+    if (inputFile != null && inputString != null) {
+      throw new IllegalArgumentException("Only one of inputFile or inputString must be provided");
+    }
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+    ResponseEntity<String> responseEntity = null;
 
-    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-    body.add("file", new MultipartFileResource(inputFile));
+    if (inputFile != null) {
+      or.setInputFile(inputFile.getBytes());
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-    HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+      MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+      body.add("file", new MultipartFileResource(inputFile));
 
-    log.info("Invoking model url=" + model.getApiUrl());
-    ResponseEntity<String> responseEntity =
-        restTemplate.exchange(model.getApiUrl(), HttpMethod.POST, requestEntity, String.class);
+      HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+      log.info("Invoking model url=" + model.getApiUrl());
+      responseEntity =
+          restTemplate.exchange(model.getApiUrl(), HttpMethod.POST, requestEntity, String.class);
+    } else {
+      or.setInputString(inputString);
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+
+      String jsonPayload = String.format("{\"input\": \"%s\"}", inputString);
+
+      HttpEntity<String> requestEntity = new HttpEntity<>(jsonPayload, headers);
+
+      responseEntity =
+          restTemplate.exchange(model.getApiUrl(), HttpMethod.POST, requestEntity, String.class);
+    }
 
     if (!responseEntity.getStatusCode().is2xxSuccessful()) {
       log.error(

@@ -26,7 +26,7 @@ public class RestControllerExceptionHandler {
 
   @ExceptionHandler({ForbiddenException.class, AuthorizationDeniedException.class})
   @ResponseStatus(HttpStatus.FORBIDDEN)
-  public ErrorDetails handleOAuthException(ForbiddenException ex) {
+  public ErrorDetails handleOAuthException(Exception ex) {
     return new ErrorDetails(ex);
   }
 

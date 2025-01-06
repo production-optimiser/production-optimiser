@@ -1,6 +1,7 @@
 package it.polimi.productionoptimiserapi.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import it.polimi.productionoptimiserapi.enums.InputType;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +30,11 @@ public class OptimizationModel extends BaseEntity {
   @NotNull
   @Size(min = 1, max = 100)
   private String apiUrl;
+
+  @Column
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private InputType inputType;
 
   @Column
   @NotNull

@@ -62,3 +62,14 @@ services:
     ports:
       - "9081:9081"
     restart: on-failure
+
+  production-optimiser-dummy-text-tool:
+    container_name: production-optimiser-dummy-text-tool
+    image: production-optimiser-dummy-text-tool:latest
+    pull_policy: build
+    build:
+      context: ../../model-services/dummy-text-service
+      dockerfile: Dockerfile
+    ports:
+      - "9083:9083"
+    restart: on-failure
