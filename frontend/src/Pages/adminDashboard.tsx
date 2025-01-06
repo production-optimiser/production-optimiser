@@ -215,12 +215,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   // Models available for the "Model playground" or "New Optimization" form
-  const [availableModels] = useState<SidebarModel[]>([
-    {
-      id: '1',
-      name: 'Python 1',
-      version: 'v3.4.2',
-    },
+  const [availableModels,setAvailableModels] = useState<SidebarModel[]>([
+    
   ]);
   const [selectedModelForPlayground, setSelectedModelForPlayground] = useState<SidebarModel | null>(
     availableModels[0] || null
@@ -258,6 +254,7 @@ const AdminDashboard = () => {
     try {
       const response = await axiosInstance.get<ManageModel[]>('/models');
       setManageModels(response.data);
+      setAvailableModels(response.data)
     } catch (error) {
       console.error('Error fetching models:', error);
     }
