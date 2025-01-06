@@ -88,37 +88,6 @@ const sections = [
         title: 'All statistics',
         component: 'all-statistics',
       },
-      {
-        id: 'python-model-1',
-        title: 'Python model 1',
-        component: 'python-model-1-stats',
-      },
-      {
-        id: 'python-model-2',
-        title: 'Python model 2',
-        component: 'python-model-2-stats',
-      },
-    ],
-  },
-  {
-    id: 'user-statistics',
-    title: 'User statistics',
-    items: [
-      {
-        id: 'all-users-stats',
-        title: 'All users',
-        component: 'all-users-stats',
-      },
-      {
-        id: 'low-usage-users',
-        title: 'Low usage users',
-        component: 'low-usage-stats',
-      },
-      {
-        id: 'high-usage-users',
-        title: 'High usage users',
-        component: 'high-usage-stats',
-      },
     ],
   },
   {
@@ -129,11 +98,6 @@ const sections = [
         id: 'current-models',
         title: 'Current models',
         component: 'manage-models',
-      },
-      {
-        id: 'model-playground',
-        title: 'Model playground',
-        component: 'model-playground',
       },
       {
         id: 'model-assignment',
