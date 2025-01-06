@@ -46,8 +46,6 @@ interface EditUserForm {
   email: string;
   role: 'ADMIN' | 'CUSTOMER';
   password?: string;
-  // If you need optimizationModelIds, you can add them here:
-  // optimizationModelIds?: string[];
 }
 
 interface AddUserRequest {
@@ -68,8 +66,12 @@ export const UserManagement = () => {
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  // For adding users
-  const [newUser, setNewUser] = useState({ email: '', password: '' });
+  // For adding users – now includes 'role'
+  const [newUser, setNewUser] = useState({
+    email: '',
+    password: '',
+    role: 'CUSTOMER' as 'ADMIN' | 'CUSTOMER',
+  });
 
   // For editing users
   const [editForm, setEditForm] = useState<EditUserForm>({
@@ -98,8 +100,13 @@ export const UserManagement = () => {
 
   // Add user
   const handleAddUser = async () => {
+    // Basic checks
     if (!newUser.email || !newUser.password) {
       alert('Email and password are required.');
+      return;
+    }
+    if (newUser.password.length < 8) {
+      alert('Password must be at least 8 characters.');
       return;
     }
 
@@ -108,16 +115,17 @@ export const UserManagement = () => {
         id: generateRandomId(),
         email: newUser.email,
         password: newUser.password,
-        role: 'CUSTOMER',
+        role: newUser.role, // use selected role
         status: 'ACTIVE',
-        optimizationModelIds: [], // or supply any needed IDs here
+        optimizationModelIds: [],
       };
 
       await axiosInstance.post('/users', request);
 
       alert('User added successfully!');
       setIsAddDialogOpen(false);
-      setNewUser({ email: '', password: '' });
+      // Reset new user form
+      setNewUser({ email: '', password: '', role: 'CUSTOMER' });
       await fetchUsers();
     } catch (error: any) {
       console.error('Error adding user:', error?.response?.data || error.message);
@@ -146,11 +154,6 @@ export const UserManagement = () => {
       if (editForm.password) {
         params.password = editForm.password;
       }
-
-      // If you need to handle optimizationModelIds, do something like:
-      // if (editForm.optimizationModelIds && editForm.optimizationModelIds.length) {
-      //   params.optimizationModelIds = editForm.optimizationModelIds;
-      // }
 
       if (!Object.keys(params).length) {
         alert('No changes made.');
@@ -192,7 +195,6 @@ export const UserManagement = () => {
       email: user.email,
       role: user.role,
       password: '',
-      // optimizationModelIds: user.optimizationModelIds ?? []
     });
     setIsEditDialogOpen(true);
   };
@@ -255,7 +257,6 @@ export const UserManagement = () => {
                       <DropdownMenuItem onClick={() => handleOpenEditDialog(user)}>
                         Edit User
                       </DropdownMenuItem>
-                      {/* "Block user" removed entirely */}
                       <DropdownMenuItem
                         className="text-red-600"
                         onClick={() => {
@@ -281,6 +282,8 @@ export const UserManagement = () => {
             <DialogTitle>Add user</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+
+            {/* Email Field */}
             <div className="grid gap-2">
               <label htmlFor="email">Email</label>
               <Input
@@ -292,26 +295,53 @@ export const UserManagement = () => {
                 }
               />
             </div>
+
+            {/* Password Field */}
             <div className="grid gap-2">
               <label htmlFor="password">Password</label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter password"
+                placeholder="Enter password (min 8 chars)"
                 value={newUser.password}
                 onChange={(e) =>
                   setNewUser({ ...newUser, password: e.target.value })
                 }
               />
             </div>
+
+            {/* Role Selector */}
+            <div className="grid gap-2">
+              <label>Role</label>
+              <Select
+                value={newUser.role}
+                onValueChange={(value: 'ADMIN' | 'CUSTOMER') =>
+                  setNewUser({ ...newUser, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                  <SelectItem value="CUSTOMER">CUSTOMER</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
             <Button
               onClick={handleAddUser}
-              disabled={!newUser.email || !newUser.password}
+              // Disable if email empty, or password < 8
+              disabled={
+                !newUser.email ||
+                !newUser.password ||
+                newUser.password.length < 8
+              }
             >
               Add
             </Button>
@@ -326,6 +356,8 @@ export const UserManagement = () => {
             <DialogTitle>Edit user</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+
+            {/* Edit Email */}
             <div className="grid gap-2">
               <label>Email</label>
               <Input
@@ -335,6 +367,8 @@ export const UserManagement = () => {
                 }
               />
             </div>
+
+            {/* Edit Role */}
             <div className="grid gap-2">
               <label>Role</label>
               <Select
@@ -352,6 +386,8 @@ export const UserManagement = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Edit Password */}
             <div className="grid gap-2">
               <label>Password</label>
               <Input
@@ -363,21 +399,7 @@ export const UserManagement = () => {
                 }
               />
             </div>
-            {/* If you want to expose optimizationModelIds in the UI, do it here */}
-            {/* <div className="grid gap-2">
-              <label>Optimization Model IDs (optional)</label>
-              <Input
-                type="text"
-                placeholder="Comma-separated IDs"
-                value={editForm.optimizationModelIds?.join(',') || ''}
-                onChange={(e) =>
-                  setEditForm({
-                    ...editForm,
-                    optimizationModelIds: e.target.value.split(','),
-                  })
-                }
-              />
-            </div> */}
+
           </div>
           <DialogFooter>
             <Button
