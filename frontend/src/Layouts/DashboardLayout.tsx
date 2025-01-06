@@ -249,6 +249,7 @@ export default function DashboardLayout() {
       if (response.id) {
         setContentState({ type: 'optimization-result', resultId: response.id });
         fetchOptimizationResultById(response.id);
+        fetchSections();
       }
     } catch (error) {
       console.error('Error handling optimization response:', error);
@@ -314,26 +315,25 @@ export default function DashboardLayout() {
 
     return sections.filter(section => section.items.length > 0);
   };
+  const fetchSections = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      console.log('Current userId:', userId);
+      const response = await axiosInstance.get('/results', {
+        params: { userId: userId }
+      });
+      console.log('Sections API Response:', response.data);
+      const results: OptimizationResultDto[] = response.data;
+      const formattedSections = groupResultsByDate(results);
+      setDynamicSections(formattedSections);
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSections = async () => {
-      try {
-        const userId = localStorage.getItem('userId');
-        console.log('Current userId:', userId);
-        const response = await axiosInstance.get('/results', {
-          params: { userId: userId }
-        });
-        console.log('Sections API Response:', response.data);
-        const results: OptimizationResultDto[] = response.data;
-        const formattedSections = groupResultsByDate(results);
-        setDynamicSections(formattedSections);
-      } catch (error) {
-        console.error('Error fetching sections:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  
     fetchSections();
   }, [currentUser]);
 
