@@ -130,7 +130,6 @@ export default function DashboardLayout() {
             return {
               id,
               name: modelResponse.data.name,
-              version: 'v3.4.2', // You might want to get this from the API as well
               inputType: modelResponse.data.inputType
             };
           } catch (error) {

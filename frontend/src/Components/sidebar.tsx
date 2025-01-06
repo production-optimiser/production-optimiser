@@ -19,6 +19,7 @@ interface Model {
  id: string;
  name: string;
  version: string;
+ inputType: string;
 }
 
 interface OptimizationItem {
@@ -127,8 +128,8 @@ const SidebarNav = ({
  };
 
  const displayModelName = selectedModel 
-   ? `${selectedModel.name} - ${selectedModel.version}`
-   : `${modelName} - ${modelVersion}`;
+   ? `${selectedModel.name} - ${selectedModel.inputType}`
+   : `${modelName}`
 
  return (
    <Card className="w-64 h-screen flex flex-col">
@@ -157,7 +158,7 @@ const SidebarNav = ({
                onClick={() => handleModelSelect(model)}
                className="cursor-pointer"
              >
-               <span>{model.name} - {model.version}</span>
+               <span>{model.name} - {model.inputType}</span>
              </DropdownMenuItem>
            ))}
          </DropdownMenuContent>
