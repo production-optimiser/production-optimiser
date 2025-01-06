@@ -183,23 +183,35 @@ export const ModelAssignment = () => {
   // Remove model from user
   const handleRemoveModel = async () => {
     if (!modelToRemove || !selectedUser) return;
-
+  
     try {
-      await axiosInstance.delete(
-        `/users/${selectedUser.id}/models/${modelToRemove.id}`
-      );
-      setUserModels(userModels.filter((m) => m.id !== modelToRemove.id));
-      alert(
-        `Model "${modelToRemove.name}" has been removed from ${selectedUser.email}`
-      );
+      const updatedModelList = userModels
+        .filter((m) => m.id !== modelToRemove.id);
+  
+      const updatedModelIds = updatedModelList.map((m) => m.id);
+  
+      const params = {
+        optimizationModelIds: updatedModelIds.join(','),
+      };
+      await axiosInstance.patch(`/users/${selectedUser.id}`, null, { params });
+  
+      setSelectedUser({
+        ...selectedUser,
+        optimizationModelIds: updatedModelIds,
+      });
+      setUserModels(updatedModelList);
+  
+      alert(`Model "${modelToRemove.name}" has been removed from ${selectedUser.email}`);
+      
       setIsRemoveDialogOpen(false);
       setModelToRemove(null);
+  
     } catch (error) {
       console.error('Error removing model:', error);
       alert('Failed to remove model from user');
     }
   };
-
+  
   const filteredModels = userModels.filter((model) =>
     model.name.toLowerCase().includes(filterModels.toLowerCase())
   );
