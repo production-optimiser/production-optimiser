@@ -146,7 +146,7 @@ export default function NewOptimizationForm({
 
   const renderInput = () => {
     if (!selectedModel) return null;
-
+  
     if (selectedModel.inputType === 'STRING') {
       return (
         <div>
@@ -164,7 +164,8 @@ export default function NewOptimizationForm({
         </div>
       );
     }
-
+    const hardcodedExtensions = ['.xlsx', '.xls', '.csv'];
+  
     return (
       <div>
         <Label htmlFor="file">
@@ -191,20 +192,21 @@ export default function NewOptimizationForm({
               }}
             />
           </label>
-          {allowedExtensions.length > 0 && selectedModel.inputType === 'FILE' && (
+          {selectedModel.inputType === 'FILE' && (
             <p className="mt-2 text-sm text-gray-500">
-              Allowed file types: {allowedExtensions.join(', ')}
+              Allowed file types: {hardcodedExtensions.join(', ')}
             </p>
           )}
           {selectedModel.inputType === 'IMAGE' && (
             <p className="mt-2 text-sm text-gray-500">
-              Please select an image file (JPG, PNG, GIF, etc.)
+              Please select an image file (JPG, PNG, etc.)
             </p>
           )}
         </div>
       </div>
     );
   };
+  
 
   return (
     <Card className="max-w-2xl mx-auto p-6">
@@ -224,7 +226,7 @@ export default function NewOptimizationForm({
               <div className="mt-1 p-3 bg-gray-50 rounded-md">
                 {selectedModel ? (
                   <p>
-                    {selectedModel.name} - {selectedModel.version}
+                    {selectedModel.name} - {selectedModel.inputType}
                   </p>
                 ) : (
                   <p className="text-gray-500">No model selected</p>
