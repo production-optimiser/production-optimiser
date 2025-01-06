@@ -28,6 +28,7 @@ export default function NewOptimizationForm({
   const [inputValue, setInputValue] = useState('');
   const [allowedExtensions, setAllowedExtensions] = useState<string[]>([]);
   const [modelDetails, setModelDetails] = useState<any>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchModelDetails = async () => {
@@ -36,7 +37,6 @@ export default function NewOptimizationForm({
           const response = await axiosInstance.get(`/models/${selectedModel.id}`);
           setModelDetails(response.data);
           
-          // Get allowed extensions from response header
           const extensionsHeader = response.headers['allowed-extensions'];
           if (extensionsHeader) {
             setAllowedExtensions(extensionsHeader.split(',').map(ext => ext.trim()));
@@ -49,6 +49,15 @@ export default function NewOptimizationForm({
 
     fetchModelDetails();
   }, [selectedModel]);
+
+  useEffect(() => {
+    // Cleanup preview URL when component unmounts or file changes
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,16 +78,10 @@ export default function NewOptimizationForm({
       const formData = new FormData();
       formData.append('name', optimizationName.trim());
 
-      // Use different parameter names based on input type
       if (selectedModel.inputType === 'STRING') {
         formData.append('inputString', inputValue);
       } else {
         formData.append('inputFile', file as File);
-      }
-
-      // Log FormData contents for debugging
-      for (let pair of formData.entries()) {
-        console.log('FormData content:', pair[0], pair[1]);
       }
 
       const response = await axiosInstance.post(
@@ -110,9 +113,11 @@ export default function NewOptimizationForm({
         if (status === 403) {
           alert('Access denied: You do not have permission to perform this action.');
         } else if (status === 500) {
-          alert(`Server error: ${data?.message || 'Internal Server Error'}`);
+          const errorMessage = typeof data === 'string' ? data : data?.message || data?.error || 'Internal Server Error';
+          alert(`Server error: ${errorMessage}`);
         } else {
-          alert(`Error: ${data?.message || 'An unknown error occurred.'}`);
+          const errorMessage = typeof data === 'string' ? data : data?.message || data?.error || 'An unknown error occurred.';
+          alert(`Error: ${errorMessage}`);
         }
       } else {
         alert('Network error: Unable to connect to the server.');
@@ -127,7 +132,7 @@ export default function NewOptimizationForm({
       case 'IMAGE':
         return 'image/*';
       case 'FILE':
-        return '.xlsx,.xls,.csv,.txt,application/json';
+        return '.xlsx,.xls,.csv';
       default:
         return undefined;
     }
@@ -136,12 +141,34 @@ export default function NewOptimizationForm({
   const validateFile = (file: File | null) => {
     if (!file || !selectedModel) return false;
     
-    if (selectedModel.inputType === 'IMAGE' && !file.type.startsWith('image/')) {
-      alert('Please select an image file');
-      return false;
+    if (selectedModel.inputType === 'IMAGE') {
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+      if (!validImageTypes.includes(file.type)) {
+        alert('Please select a valid image file (JPG, PNG, GIF, ETC.)');
+        return false;
+      }
+    } else if (selectedModel.inputType === 'FILE') {
+      const fileName = file.name.toLowerCase();
+      if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls') && !fileName.endsWith('.csv')) {
+        alert('Please select an Excel or CSV file');
+        return false;
+      }
     }
     
     return true;
+  };
+
+  const handleFileChange = (selectedFile: File | null) => {
+    if (selectedFile && validateFile(selectedFile)) {
+      setFile(selectedFile);
+      if (selectedModel?.inputType === 'IMAGE') {
+        const newPreviewUrl = URL.createObjectURL(selectedFile);
+        setPreviewUrl(newPreviewUrl);
+      }
+    } else {
+      setFile(null);
+      setPreviewUrl(null);
+    }
   };
 
   const renderInput = () => {
@@ -164,8 +191,7 @@ export default function NewOptimizationForm({
         </div>
       );
     }
-    const hardcodedExtensions = ['.xlsx', '.xls', '.csv'];
-  
+
     return (
       <div>
         <Label htmlFor="file">
@@ -184,29 +210,29 @@ export default function NewOptimizationForm({
               id="file"
               className="hidden"
               accept={getAcceptedFileTypes()}
-              onChange={(e) => {
-                const selectedFile = e.target.files?.[0] || null;
-                if (selectedFile && validateFile(selectedFile)) {
-                  setFile(selectedFile);
-                }
-              }}
+              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
             />
           </label>
-          {selectedModel.inputType === 'FILE' && (
-            <p className="mt-2 text-sm text-gray-500">
-              Allowed file types: {hardcodedExtensions.join(', ')}
-            </p>
+          {previewUrl && selectedModel.inputType === 'IMAGE' && (
+            <div className="mt-4">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="max-h-48 rounded-md mx-auto"
+              />
+            </div>
           )}
-          {selectedModel.inputType === 'IMAGE' && (
-            <p className="mt-2 text-sm text-gray-500">
-              Please select an image file (JPG, PNG, etc.)
-            </p>
-          )}
+          <p className="mt-2 text-sm text-gray-500">
+            Allowed file types: {
+              selectedModel.inputType === 'IMAGE' 
+                ? 'JPG, PNG, GIF'
+                : 'XLSX, XLS, CSV'
+            }
+          </p>
         </div>
       </div>
     );
   };
-  
 
   return (
     <Card className="max-w-2xl mx-auto p-6">

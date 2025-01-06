@@ -29,7 +29,7 @@ interface Model {
   inputType: 'STRING' | 'FILE' | 'IMAGE';
 }
 
-// Updated to match the API response structure
+
 interface OptimizationResultDto {
   id: string;
   createdAt: string;
@@ -85,33 +85,7 @@ export default function DashboardLayout() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [comparisonData, setComparisonData] = useState<OptimizationResultDto | null>(null);
-  // const fetchModels = async () => {
-  //   try {
-  //     const userId = localStorage.getItem('userId');
-  //     if (!userId) {
-  //       console.error('No user ID found');
-  //       return;
-  //     }
-      
-  //     const response = await axiosInstance.get(`/users/${userId}`);
-      
-  //     if (response.data?.optimizationModelIds) {
-  //       const models = response.data.optimizationModelIds.map((id: string) => ({
-  //         id,
-  //         name: 'Python 1',
-  //         version: 'v3.4.2',
-  //         inputType: 
-  //       }));
-  //       setAvailableModels(models);
-  //       if (models.length > 0) {
-  //         setSelectedModel(models[0]);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching user models:', error);
-  //     setAvailableModels([]);
-  //   }
-  // };
+  
   const fetchModels = async () => {
     try {
       const userId = localStorage.getItem('userId');
@@ -123,7 +97,7 @@ export default function DashboardLayout() {
       const userResponse = await axiosInstance.get(`/users/${userId}`);
       
       if (userResponse.data?.optimizationModelIds) {
-        // Fetch details for each model in parallel
+        
         const modelDetailsPromises = userResponse.data.optimizationModelIds.map(async (id: string) => {
           try {
             const modelResponse = await axiosInstance.get(`/models/${id}`);
@@ -402,90 +376,108 @@ export default function DashboardLayout() {
           />
         )}
         {contentState.type === 'optimization-result' && optimizationData && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-semibold">Optimization Results</h1>
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-500">
-                  Created: {new Date(optimizationData.createdAt).toLocaleString()}
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      {comparisonData ? 'Change Comparison' : 'Compare'}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                    {comparisonData && (
-                      <DropdownMenuItem onClick={clearComparison}>
-                        Clear Comparison
-                      </DropdownMenuItem>
-                    )}
-                    {dynamicSections.map(section => 
-                      section.items
-                        .filter(item => item.id !== optimizationData.id)
-                        .map(item => (
-                          <DropdownMenuItem
-                            key={item.id}
-                            onClick={() => handleComparisonSelect(item.id)}
-                          >
-                            {item.title}
-                          </DropdownMenuItem>
-                        ))
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h1 className="text-2xl font-semibold">Optimization Results</h1>
+      <div className="flex items-center gap-4">
+        <div className="text-sm text-gray-500">
+          Created: {new Date(optimizationData.createdAt).toLocaleString()}
+        </div>
+        {/* Only show comparison button if we have chart data */}
+        {optimizationData.outputJSON?.average_optimized_total_machine_utilization !== undefined && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                {comparisonData ? 'Change Comparison' : 'Compare'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              {comparisonData && (
+                <DropdownMenuItem onClick={clearComparison}>
+                  Clear Comparison
+                </DropdownMenuItem>
+              )}
+              {dynamicSections.map(section => 
+                section.items
+                  .filter(item => item.id !== optimizationData.id)
+                  .map(item => (
+                    <DropdownMenuItem
+                      key={item.id}
+                      onClick={() => handleComparisonSelect(item.id)}
+                    >
+                      {item.title}
+                    </DropdownMenuItem>
+                  ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+    </div>
+    
+    {/* Check if we have the required data for charts */}
+    {optimizationData.outputJSON?.average_optimized_total_machine_utilization !== undefined ? (
+      <>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="p-6 bg-white rounded-lg shadow">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-medium">Machine Utilization</h2>
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
             </div>
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div className="p-6 bg-white rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-medium">Machine Utilization</h2>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
+            {renderMachineUtilizationChart()}
+            <div className="mt-4 text-sm text-gray-600">
+              Current Improvement: {optimizationData.outputJSON?.utilization_improvement.toFixed(2)}%
+              {comparisonData && (
+                <div>
+                  Comparison Improvement: {comparisonData.outputJSON?.utilization_improvement.toFixed(2)}%
                 </div>
-                {renderMachineUtilizationChart()}
-                <div className="mt-4 text-sm text-gray-600">
-                  Current Improvement: {optimizationData.outputJSON?.utilization_improvement.toFixed(2)}%
-                  {comparisonData && (
-                    <div>
-                      Comparison Improvement: {comparisonData.outputJSON?.utilization_improvement.toFixed(2)}%
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-6 bg-white rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-medium">Production Time</h2>
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
-                {renderProductionTimeChart()}
-                <div className="mt-4 text-sm text-gray-600">
-                  Current Time saved: {optimizationData.outputJSON?.time_improvement.toFixed(2)} minutes
-                  {comparisonData && (
-                    <div>
-                      Comparison Time saved: {comparisonData.outputJSON?.time_improvement.toFixed(2)} minutes
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-white rounded-lg shadow">
-              <h2 className="text-lg font-medium mb-4">Raw Data</h2>
-              <pre className="bg-gray-50 p-4 rounded overflow-auto max-h-96">
-                {JSON.stringify(optimizationData, null, 2)}
-              </pre>
+              )}
             </div>
           </div>
-        )}
+
+          <div className="p-6 bg-white rounded-lg shadow">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-medium">Production Time</h2>
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+            {renderProductionTimeChart()}
+            <div className="mt-4 text-sm text-gray-600">
+              Current Time saved: {optimizationData.outputJSON?.time_improvement.toFixed(2)} minutes
+              {comparisonData && (
+                <div>
+                  Comparison Time saved: {comparisonData.outputJSON?.time_improvement.toFixed(2)} minutes
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 bg-white rounded-lg shadow">
+          <h2 className="text-lg font-medium mb-4">Raw Data</h2>
+          <pre className="bg-gray-50 p-4 rounded overflow-auto max-h-96">
+            {JSON.stringify(optimizationData, null, 2)}
+          </pre>
+        </div>
+      </>
+    ) : (
+      // For results without chart data (STRING or IMAGE type outputs, or FILE without chart data)
+      <div className="p-6 bg-white rounded-lg shadow">
+        <h2 className="text-lg font-medium mb-4">
+          {selectedModel?.inputType === 'IMAGE' ? 'Image Analysis Results' : 'Optimization Results'}
+        </h2>
+        <pre className="bg-gray-50 p-4 rounded overflow-auto max-h-[calc(100vh-300px)]">
+          {JSON.stringify(optimizationData, null, 2)}
+        </pre>
+      </div>
+    )}
+  </div>
+)}
       </main>
     </div>
   );
