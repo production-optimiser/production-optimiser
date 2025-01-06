@@ -46,6 +46,8 @@ interface EditUserForm {
   email: string;
   role: 'ADMIN' | 'CUSTOMER';
   password?: string;
+  // If you need optimizationModelIds, you can add them here:
+  // optimizationModelIds?: string[];
 }
 
 interface AddUserRequest {
@@ -63,7 +65,7 @@ export const UserManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
+
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // For adding users
@@ -82,7 +84,6 @@ export const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      // If your Swagger doc uses /api/, do the same here:
       const response = await axiosInstance.get<User[]>('/users');
       setUsers(response.data);
       console.log('Fetched Users:', response.data);
@@ -109,10 +110,9 @@ export const UserManagement = () => {
         password: newUser.password,
         role: 'CUSTOMER',
         status: 'ACTIVE',
-        optimizationModelIds: [],
+        optimizationModelIds: [], // or supply any needed IDs here
       };
 
-      // POST /api/users
       await axiosInstance.post('/users', request);
 
       alert('User added successfully!');
@@ -129,20 +129,35 @@ export const UserManagement = () => {
     if (!selectedUser) return;
 
     try {
-      // Build up query params based on the Swagger doc
-      const params: Record<string, string> = {
-        email: editForm.email,
-        requestedRole: editForm.role,
-      };
-      // Only include password if the user actually typed something
+      // Only pass changed fields as query params
+      const params: Record<string, any> = {};
+
+      // If email changed
+      if (editForm.email && editForm.email !== selectedUser.email) {
+        params.email = editForm.email;
+      }
+
+      // If role changed
+      if (editForm.role && editForm.role !== selectedUser.role) {
+        params.requestedRole = editForm.role;
+      }
+
+      // If password is non-empty
       if (editForm.password) {
         params.password = editForm.password;
       }
 
-      // PATCH /api/users/{id} with query parameters
-      await axiosInstance.patch(`/users/${selectedUser.id}`, null, {
-        params,
-      });
+      // If you need to handle optimizationModelIds, do something like:
+      // if (editForm.optimizationModelIds && editForm.optimizationModelIds.length) {
+      //   params.optimizationModelIds = editForm.optimizationModelIds;
+      // }
+
+      if (!Object.keys(params).length) {
+        alert('No changes made.');
+        return;
+      }
+
+      await axiosInstance.patch(`/users/${selectedUser.id}`, null, { params });
 
       setIsEditDialogOpen(false);
       setSelectedUser(null);
@@ -151,23 +166,6 @@ export const UserManagement = () => {
       await fetchUsers();
     } catch (error) {
       console.error('Error editing user:', error);
-    }
-  };
-
-  // Block user
-  const handleBlockUser = async () => {
-    if (!selectedUser) return;
-    try {
-      // For blocking, just PATCH with status=DELETED (assuming that’s correct)
-      await axiosInstance.patch(`/users/${selectedUser.id}`, null, {
-        params: { status: 'DELETED' },
-      });
-
-      setIsBlockDialogOpen(false);
-      setSelectedUser(null);
-      await fetchUsers();
-    } catch (error) {
-      console.error('Error blocking user:', error);
     }
   };
 
@@ -194,6 +192,7 @@ export const UserManagement = () => {
       email: user.email,
       role: user.role,
       password: '',
+      // optimizationModelIds: user.optimizationModelIds ?? []
     });
     setIsEditDialogOpen(true);
   };
@@ -256,14 +255,7 @@ export const UserManagement = () => {
                       <DropdownMenuItem onClick={() => handleOpenEditDialog(user)}>
                         Edit User
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setIsBlockDialogOpen(true);
-                        }}
-                      >
-                        Block User
-                      </DropdownMenuItem>
+                      {/* "Block user" removed entirely */}
                       <DropdownMenuItem
                         className="text-red-600"
                         onClick={() => {
@@ -360,7 +352,6 @@ export const UserManagement = () => {
                 </SelectContent>
               </Select>
             </div>
-            {/* Single password field here */}
             <div className="grid gap-2">
               <label>Password</label>
               <Input
@@ -372,6 +363,21 @@ export const UserManagement = () => {
                 }
               />
             </div>
+            {/* If you want to expose optimizationModelIds in the UI, do it here */}
+            {/* <div className="grid gap-2">
+              <label>Optimization Model IDs (optional)</label>
+              <Input
+                type="text"
+                placeholder="Comma-separated IDs"
+                value={editForm.optimizationModelIds?.join(',') || ''}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    optimizationModelIds: e.target.value.split(','),
+                  })
+                }
+              />
+            </div> */}
           </div>
           <DialogFooter>
             <Button
@@ -388,23 +394,6 @@ export const UserManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Block User Dialog */}
-      <Dialog open={isBlockDialogOpen} onOpenChange={setIsBlockDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Block user ({selectedUser?.email})?</DialogTitle>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsBlockDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleBlockUser}>
-              Block
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
@@ -416,10 +405,7 @@ export const UserManagement = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteUser}>
@@ -433,4 +419,3 @@ export const UserManagement = () => {
 };
 
 export default UserManagement;
-
