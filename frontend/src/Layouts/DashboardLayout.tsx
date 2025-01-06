@@ -2,19 +2,12 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/Components/ui/button';
 import { Download } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import SidebarNav from '../Components/sidebar';
-import NewOptimizationForm from '../Components/NewOptimizationForm';
-import { authService } from '@/services/auth';
-import axiosInstance from '../utils/axios';
-import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, BarChart, Bar, Legend
 } from 'recharts';
+import SidebarNav from '../Components/sidebar';
+import NewOptimizationForm from '../Components/NewOptimizationForm';
+import axiosInstance from '../utils/axios';
 import { User } from '@/types/auth';
 
 interface ContentState {
@@ -29,35 +22,33 @@ interface Model {
   inputType: 'STRING' | 'FILE' | 'IMAGE';
 }
 
-
 interface OptimizationResultDto {
   id: string;
   createdAt: string;
   updatedAt: string;
   userId: string;
   inputFile: string;
-  outputJSON: {
-    average_initial_total_machine_utilization: number;
-    average_optimized_total_machine_utilization: number;
-    best_sequence_of_products: string;
-    graphs: {
-      machine_utilization: string;
-      occupancy_graph: string;
-      product_flow: string;
+  outputJSON?: {
+    average_initial_total_machine_utilization?: number;
+    average_optimized_total_machine_utilization?: number;
+    best_sequence_of_products?: string;
+    graphs?: {
+      [key: string]: string;  // base64 encoded images
     };
-    initial_total_production_time: number;
-    optimized_total_production_time: number;
-    maximum_pallets_used: {
+    initial_total_production_time?: number;
+    optimized_total_production_time?: number;
+    maximum_pallets_used?: {
       [key: string]: number;
     };
-    pallets_defined_in_Excel: {
+    pallets_defined_in_Excel?: {
       [key: string]: number;
     };
-    percentage_improvement: number;
-    time_improvement: number;
-    total_time_with_excel_pallets: number;
-    total_time_with_optimized_pallets: number;
-    utilization_improvement: number;
+    percentage_improvement?: number;
+    time_improvement?: number;
+    total_time_with_excel_pallets?: number;
+    total_time_with_optimized_pallets?: number;
+    utilization_improvement?: number;
+    [key: string]: any;  // For any other dynamic fields
   };
 }
 
@@ -74,6 +65,110 @@ interface TimeSection {
   items: OptimizationItem[];
 }
 
+const downloadBase64File = (base64Data: string, fileName: string) => {
+  const linkSource = `data:image/png;base64,${base64Data}`;
+  const downloadLink = document.createElement('a');
+  downloadLink.href = linkSource;
+  downloadLink.download = fileName;
+  downloadLink.click();
+};
+
+const renderMachineUtilizationChart = (optimizationData: OptimizationResultDto | null) => {
+  if (!optimizationData?.outputJSON) {
+    console.log('No optimization data available');
+    return null;
+  }
+
+  const data = [
+    {
+      name: 'Initial',
+      utilization: optimizationData.outputJSON.average_initial_total_machine_utilization
+    },
+    {
+      name: 'Optimized',
+      utilization: optimizationData.outputJSON.average_optimized_total_machine_utilization
+    }
+  ];
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis domain={[0, 100]} />
+        <Tooltip formatter={(value) => [`${value.toFixed(2)}%`, 'Utilization']} />
+        <Legend />
+        <Bar dataKey="utilization" fill="#8884d8" name="Machine Utilization (%)" />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+const renderProductionTimeChart = (optimizationData: OptimizationResultDto | null) => {
+  if (!optimizationData?.outputJSON) {
+    console.log('No optimization data available');
+    return null;
+  }
+
+  const data = [
+    {
+      name: 'Initial',
+      time: optimizationData.outputJSON.initial_total_production_time
+    },
+    {
+      name: 'Optimized',
+      time: optimizationData.outputJSON.optimized_total_production_time
+    }
+  ];
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip formatter={(value) => [`${value.toFixed(2)} minutes`, 'Production Time']} />
+        <Legend />
+        <Line
+          type="monotone"
+          dataKey="time"
+          stroke="#8884d8"
+          name="Production Time"
+          dot={{ r: 6 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+};
+
+const renderGraphs = (outputJSON: any) => {
+  if (!outputJSON?.graphs) return null;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {Object.entries(outputJSON.graphs).map(([key, value]) => (
+        <div key={key} className="p-6 bg-white rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-medium capitalize">{key.replace(/_/g, ' ')}</h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => downloadBase64File(value as string, `${key}.png`)}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
+          <img 
+            src={`data:image/png;base64,${value}`} 
+            alt={key} 
+            className="w-full h-auto"
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
 export default function DashboardLayout() {
   const [selectedOptimization, setSelectedOptimization] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,8 +179,7 @@ export default function DashboardLayout() {
   const [dynamicSections, setDynamicSections] = useState<TimeSection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [comparisonData, setComparisonData] = useState<OptimizationResultDto | null>(null);
-  
+
   const fetchModels = async () => {
     try {
       const userId = localStorage.getItem('userId');
@@ -97,7 +191,6 @@ export default function DashboardLayout() {
       const userResponse = await axiosInstance.get(`/users/${userId}`);
       
       if (userResponse.data?.optimizationModelIds) {
-        
         const modelDetailsPromises = userResponse.data.optimizationModelIds.map(async (id: string) => {
           try {
             const modelResponse = await axiosInstance.get(`/models/${id}`);
@@ -115,7 +208,6 @@ export default function DashboardLayout() {
         const modelResults = await Promise.all(modelDetailsPromises);
         const models = modelResults.filter((model): model is Model => model !== null);
         
-  
         setAvailableModels(models);
         if (models.length > 0) {
           setSelectedModel(models[0]);
@@ -169,7 +261,7 @@ export default function DashboardLayout() {
 
   const generateOptimizationTitle = (result: OptimizationResultDto): string => {
     const improvementPercentage = result.outputJSON?.percentage_improvement 
-      ? result.outputJSON.percentage_improvement.toFixed(2) 
+      ? Number(result.outputJSON.percentage_improvement).toFixed(2) 
       : 'N/A'; 
     const date = new Date(result.createdAt).toLocaleDateString();
     return `Optimization (${improvementPercentage}% improvement) - ${date}`;
@@ -245,110 +337,6 @@ export default function DashboardLayout() {
     fetchSections();
   }, [currentUser]);
 
-  const renderMachineUtilizationChart = () => {
-    if (!optimizationData?.outputJSON) {
-      console.log('No optimization data available');
-      return null;
-    }
-  
-    const data = [
-      {
-        name: 'Initial',
-        current: optimizationData.outputJSON.average_initial_total_machine_utilization,
-        comparison: comparisonData?.outputJSON?.average_initial_total_machine_utilization
-      },
-      {
-        name: 'Optimized',
-        current: optimizationData.outputJSON.average_optimized_total_machine_utilization,
-        comparison: comparisonData?.outputJSON?.average_optimized_total_machine_utilization
-      }
-    ];
-  
-    return (
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip 
-            formatter={(value, name) => [`${value.toFixed(2)}%`, name === 'current' ? 'Current' : 'Comparison']}
-          />
-          <Legend />
-          <Bar dataKey="current" fill="#8884d8" name="Current Utilization (%)" />
-          {comparisonData && (
-            <Bar dataKey="comparison" fill="#82ca9d" name="Comparison Utilization (%)" />
-          )}
-        </BarChart>
-      </ResponsiveContainer>
-    );
-  };
-
-  const renderProductionTimeChart = () => {
-    if (!optimizationData?.outputJSON) {
-      console.log('No optimization data available');
-      return null;
-    }
-  
-    const data = [
-      {
-        name: 'Initial',
-        current: optimizationData.outputJSON.initial_total_production_time,
-        comparison: comparisonData?.outputJSON?.initial_total_production_time
-      },
-      {
-        name: 'Optimized',
-        current: optimizationData.outputJSON.optimized_total_production_time,
-        comparison: comparisonData?.outputJSON?.optimized_total_production_time
-      }
-    ];
-  
-    return (
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip 
-            formatter={(value, name) => [
-              `${value.toFixed(2)} minutes`, 
-              name === 'current' ? 'Current' : 'Comparison'
-            ]}
-          />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey="current"
-            stroke="#8884d8"
-            name="Current Time"
-            dot={{ r: 6 }}
-          />
-          {comparisonData && (
-            <Line
-              type="monotone"
-              dataKey="comparison"
-              stroke="#82ca9d"
-              name="Comparison Time"
-              dot={{ r: 6 }}
-            />
-          )}
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  };
-
-  const handleComparisonSelect = async (id: string) => {
-    try {
-      const response = await axiosInstance.get(`/results/${id}`);
-      setComparisonData(response.data);
-    } catch (error) {
-      console.error('Error fetching comparison data:', error);
-    }
-  };
-
-  const clearComparison = () => {
-    setComparisonData(null);
-  };
-
   if (loading && contentState.type === 'optimization-result') {
     return <div className="flex items-center justify-center h-screen">Loading optimization results...</div>;
   }
@@ -376,108 +364,108 @@ export default function DashboardLayout() {
           />
         )}
         {contentState.type === 'optimization-result' && optimizationData && (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-semibold">Optimization Results</h1>
-      <div className="flex items-center gap-4">
-        <div className="text-sm text-gray-500">
-          Created: {new Date(optimizationData.createdAt).toLocaleString()}
-        </div>
-        {/* Only show comparison button if we have chart data */}
-        {optimizationData.outputJSON?.average_optimized_total_machine_utilization !== undefined && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                {comparisonData ? 'Change Comparison' : 'Compare'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              {comparisonData && (
-                <DropdownMenuItem onClick={clearComparison}>
-                  Clear Comparison
-                </DropdownMenuItem>
-              )}
-              {dynamicSections.map(section => 
-                section.items
-                  .filter(item => item.id !== optimizationData.id)
-                  .map(item => (
-                    <DropdownMenuItem
-                      key={item.id}
-                      onClick={() => handleComparisonSelect(item.id)}
-                    >
-                      {item.title}
-                    </DropdownMenuItem>
-                  ))
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-semibold">Optimization Results</h1>
+              <div className="text-sm text-gray-500">
+                Created: {new Date(optimizationData.createdAt).toLocaleString()}
+              </div>
+            </div>
+
+            {/* Input File Download Section */}
+            {optimizationData.inputFile && (
+              <div className="p-6 bg-white rounded-lg shadow">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-medium">Input File</h2>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => downloadBase64File(optimizationData.inputFile, 'input-file.xlsx')}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Input File
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Base64 Graphs Section */}
+            {renderGraphs(optimizationData.outputJSON)}
+
+            {/* Interactive Charts Section */}
+            {optimizationData.outputJSON?.average_optimized_total_machine_utilization !== undefined && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 bg-white rounded-lg shadow">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-medium">Machine Utilization</h2>
+                  </div>
+                  {renderMachineUtilizationChart(optimizationData)}
+                  <div className="mt-4 text-sm text-gray-600">
+                    Utilization Improvement: {optimizationData.outputJSON?.utilization_improvement?.toFixed(2)}%
+                  </div>
+                </div>
+
+                <div className="p-6 bg-white rounded-lg shadow">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-medium">Production Time</h2>
+                  </div>
+                  {renderProductionTimeChart(optimizationData)}
+                  <div className="mt-4 text-sm text-gray-600">
+                    Time saved: {optimizationData.outputJSON?.time_improvement?.toFixed(2)} minutes
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Other Results Section */}
+            <div className="p-6 bg-white rounded-lg shadow">
+              <h2 className="text-lg font-medium mb-4">Results</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(optimizationData.outputJSON || {}).map(([key, value]) => {
+                  if (key === 'graphs') return null; // Skip graphs as they're handled separately
+                  return (
+                    <div key={key} className="p-4 bg-gray-50 rounded">
+                      <p className="font-medium capitalize">{key.replace(/_/g, ' ')}</p>
+                      <p className="text-gray-600">
+                        {typeof value === 'object' 
+                          ? JSON.stringify(value, null, 2) 
+                          : typeof value === 'number' 
+                            ? value.toFixed(2) 
+                            : value
+                        }
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Raw Data Section */}
+            <div className="p-6 bg-white rounded-lg shadow">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium">Raw Data</h2>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    const element = document.createElement("a");
+                    const file = new Blob([JSON.stringify(optimizationData, null, 2)], {type: 'application/json'});
+                    element.href = URL.createObjectURL(file);
+                    element.download = "raw-data.json";
+                    document.body.appendChild(element);
+                    element.click();
+                  }}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download JSON
+                </Button>
+              </div>
+              <pre className="bg-gray-50 p-4 rounded overflow-auto max-h-96">
+                {JSON.stringify(optimizationData, null, 2)}
+              </pre>
+            </div>
+          </div>
         )}
-      </div>
-    </div>
-    
-    {/* Check if we have the required data for charts */}
-    {optimizationData.outputJSON?.average_optimized_total_machine_utilization !== undefined ? (
-      <>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="p-6 bg-white rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Machine Utilization</h2>
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-            </div>
-            {renderMachineUtilizationChart()}
-            <div className="mt-4 text-sm text-gray-600">
-              Current Improvement: {optimizationData.outputJSON?.utilization_improvement.toFixed(2)}%
-              {comparisonData && (
-                <div>
-                  Comparison Improvement: {comparisonData.outputJSON?.utilization_improvement.toFixed(2)}%
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="p-6 bg-white rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Production Time</h2>
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-            </div>
-            {renderProductionTimeChart()}
-            <div className="mt-4 text-sm text-gray-600">
-              Current Time saved: {optimizationData.outputJSON?.time_improvement.toFixed(2)} minutes
-              {comparisonData && (
-                <div>
-                  Comparison Time saved: {comparisonData.outputJSON?.time_improvement.toFixed(2)} minutes
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-medium mb-4">Raw Data</h2>
-          <pre className="bg-gray-50 p-4 rounded overflow-auto max-h-96">
-            {JSON.stringify(optimizationData, null, 2)}
-          </pre>
-        </div>
-      </>
-    ) : (
-      // For results without chart data (STRING or IMAGE type outputs, or FILE without chart data)
-      <div className="p-6 bg-white rounded-lg shadow">
-        <h2 className="text-lg font-medium mb-4">
-          {selectedModel?.inputType === 'IMAGE' ? 'Image Analysis Results' : 'Optimization Results'}
-        </h2>
-        <pre className="bg-gray-50 p-4 rounded overflow-auto max-h-[calc(100vh-300px)]">
-          {JSON.stringify(optimizationData, null, 2)}
-        </pre>
-      </div>
-    )}
-  </div>
-)}
       </main>
     </div>
   );
