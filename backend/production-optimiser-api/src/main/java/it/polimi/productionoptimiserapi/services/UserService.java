@@ -2,6 +2,7 @@ package it.polimi.productionoptimiserapi.services;
 
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
+import it.polimi.productionoptimiserapi.entities.User;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +26,6 @@ public interface UserService {
   UserDTO addModelToUser(String userId, OptimizationModel model);
 
   void validateExistingEmail(String email);
+
+  void incrementLoginCount(User user);
 }

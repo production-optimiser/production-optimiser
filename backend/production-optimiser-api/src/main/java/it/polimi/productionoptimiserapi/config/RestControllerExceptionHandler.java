@@ -30,7 +30,11 @@ public class RestControllerExceptionHandler {
     return new ErrorDetails(ex);
   }
 
-  @ExceptionHandler({ValidationException.class, IllegalArgumentException.class})
+  @ExceptionHandler({
+    ValidationException.class,
+    IllegalArgumentException.class,
+    BadRequestException.class
+  })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorDetails handleValidationException(Exception ex) {
     return new ErrorDetails(ex);
@@ -39,12 +43,6 @@ public class RestControllerExceptionHandler {
   @ExceptionHandler(EntityNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorDetails handleEntityNotFoundException(EntityNotFoundException ex) {
-    return new ErrorDetails(ex);
-  }
-
-  @ExceptionHandler(BadRequestException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorDetails handleOAuthException(BadRequestException ex) {
     return new ErrorDetails(ex);
   }
 

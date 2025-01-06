@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
   private final UserService userService;
@@ -29,6 +31,7 @@ public class UserController {
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public List<UserDTO> getUsers() {
+    log.info("Received GET request for fetching all users");
     return userService.getUsers();
   }
 
@@ -37,12 +40,18 @@ public class UserController {
   public UserDTO getUser(@PathVariable String id) {
     return userService
         .getUser(id)
-        .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
+        .orElseThrow(
+            () -> {
+              String msg = "User with id " + id + " not found";
+              log.warn(msg);
+              return new EntityNotFoundException(msg);
+            });
   }
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public UserDTO createUser(@Valid @RequestBody UserDTO userDTO) {
+    log.info("Received POST request for creating new user");
     return userService.createUser(userDTO);
   }
 
@@ -54,11 +63,15 @@ public class UserController {
       @RequestParam(required = false) String password,
       @RequestParam(required = false) UserRole requestedRole,
       @RequestParam(required = false) Set<String> optimizationModelIds) {
+
+    log.info("Received PATCH for updating user with id=" + id);
     if (email == null
         && password == null
         && requestedRole == null
         && (optimizationModelIds == null || optimizationModelIds.isEmpty())) {
-      throw new IllegalArgumentException("At least one parameter must be provided");
+      String msg = "At least one parameter must be provided";
+      log.warn(msg);
+      throw new IllegalArgumentException(msg);
     }
 
     return userService.updateUser(id, email, password, requestedRole, optimizationModelIds);
@@ -67,6 +80,7 @@ public class UserController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public UserDTO deleteUser(@PathVariable String id) {
+    log.info("Received DELETE request for deleting user with id=" + id);
     return userService.deleteUser(id);
   }
 }

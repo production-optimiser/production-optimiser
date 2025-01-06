@@ -3,6 +3,7 @@ package it.polimi.productionoptimiserapi.security.config;
 import it.polimi.productionoptimiserapi.security.filters.JwtTokenFilter;
 import it.polimi.productionoptimiserapi.security.filters.UserAuthenticationFilter;
 import it.polimi.productionoptimiserapi.security.utils.JwtUtil;
+import it.polimi.productionoptimiserapi.services.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,7 @@ public class SecurityConfig {
   private final JwtUtil jwtUtil;
   private final UserDetailsService userDetailsService;
   private final JwtTokenFilter jwtTokenFilter;
+  private final UserService userService;
 
   @Bean
   public BCryptPasswordEncoder passwordEncoder() {
@@ -74,7 +76,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     UserAuthenticationFilter userAuthenticationFilter =
-        new UserAuthenticationFilter(jwtUtil, authenticationProvider());
+        new UserAuthenticationFilter(jwtUtil, authenticationProvider(), userService);
     userAuthenticationFilter.setFilterProcessesUrl(UrlConstants.LOGIN_URL);
 
     http.cors(Customizer.withDefaults())
