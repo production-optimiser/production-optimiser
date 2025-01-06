@@ -10,6 +10,7 @@ import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
 import it.polimi.productionoptimiserapi.entities.User;
+import it.polimi.productionoptimiserapi.enums.InputType;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
@@ -132,6 +133,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
+            .inputType(InputType.FILE)
             .build();
 
     given()
@@ -151,6 +153,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
@@ -170,6 +173,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
@@ -188,6 +192,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
@@ -222,6 +227,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://127.0.0.1:5000/optimize")
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
@@ -251,6 +257,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
             OptimizationModelDTO.builder()
                 .name("Test Model Admin")
                 .apiUrl("http://127.0.0.1:5000/optimize")
+                .inputType(InputType.FILE)
                 .build());
 
     OptimizationModel omCustomer =
@@ -258,6 +265,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
             OptimizationModelDTO.builder()
                 .name("Test Model Customer")
                 .apiUrl("http://127.0.0.1:5000/optimize")
+                .inputType(InputType.FILE)
                 .build());
 
     admin.setAvailableOptimizationModels(Set.of(omAdmin));
