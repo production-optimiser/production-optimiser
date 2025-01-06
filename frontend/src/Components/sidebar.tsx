@@ -87,7 +87,7 @@ const defaultSections: TimeSection[] = [
 ];
 
 const SidebarNav = ({
- modelName = 'Python 1',
+ modelName = 'Request Model Access From Admin',
  modelVersion = 'v3.4.2',
  sections = defaultSections,
  onItemClick,
@@ -144,9 +144,16 @@ const SidebarNav = ({
                <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
                  <Copy className="w-4 h-4" aria-hidden="true" />
                </div>
-               <span className="text-sm font-medium">
+               {displayModelName==='Request Model Access From Admin' ? <span className="text-sm font-medium whitespace-normal break-words block max-w-[100px] overflow-hidden" style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3, // Up to 2 lines
+                    WebkitBoxOrient: 'vertical',
+                  }}>
                  {displayModelName}
-               </span>
+               </span> : <span className="text-sm font-medium">
+                 {displayModelName}
+               </span>}
+               
              </div>
              <ChevronDown className="w-4 h-4" aria-hidden="true" />
            </Button>
