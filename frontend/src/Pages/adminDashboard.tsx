@@ -56,6 +56,7 @@ interface ManageModel {
 interface EditModelForm {
   name: string;
   url: string;
+  inputType: 'STRING' | 'FILE' | 'IMAGE';
 }
 
 // ---------------------------------
@@ -268,24 +269,23 @@ const AdminDashboard = () => {
     fetchModels();
   }, []);
 
-  const handleLinkModel = async (formData) => {
+  
+
+  const handleLinkModel = async (formData: ModelPayload) => {
     try {
-      console.log('Sending request with data:', formData); // For debugging
+      const response = await axiosInstance.post('/models', formData);
       
-      const response = await axiosInstance.post('/models', {
-        name: formData.name,
-        apiUrl: formData.apiUrl,
-        inputType: formData.inputType
-      });
+      // Update the state immediately
+      setManageModels(prevModels => [...prevModels, response.data]);
+      setAvailableModels(prevModels => [...prevModels, response.data]);
       
-      alert('Model linked successfully!');
       setIsLinkDialogOpen(false);
-      fetchModels();
     } catch (error) {
       console.error('Full error details:', error.response?.data || error);
-      alert(`Error linking model: ${error.response?.data?.message || error.message}`);
+      throw error; // Throw the error so the dialog can handle it
     }
   };
+ 
 
   // --------------------------------------------------------------------------------
   // "Edit model" actions
@@ -294,28 +294,33 @@ const AdminDashboard = () => {
   /** Called from the 3-dot menu of a specific row */
   const handleOpenEditModel = (model: ManageModel) => {
     setSelectedModel(model);
-    setEditForm({ name: model.name, url: model.url });
+    setEditForm({ 
+      name: model.name, 
+      url: model.apiUrl,
+      inputType: model.inputType as 'STRING' | 'FILE' | 'IMAGE'
+    });
     setIsEditDialogOpen(true);
   };
 
   /** When user clicks "Save" in the Edit Model dialog */
   const handlePatchModel = async () => {
     if (!selectedModel) return;
-
+  
     try {
       await axiosInstance.patch(`/models/${selectedModel.id}`, {
         name: editForm.name,
         apiUrl: editForm.url,
-        userIds:[]
+        inputType: editForm.inputType,
+        userIds: []
       });
-
+  
       alert('Model updated successfully!');
       setIsEditDialogOpen(false);
-
+  
       // Reset
       setSelectedModel(null);
-      setEditForm({ name: '', url: '' });
-
+      setEditForm({ name: '', url: '', inputType: 'STRING' }); // Add default inputType
+  
       // Refresh
       fetchModels();
     } catch (error) {
@@ -450,37 +455,65 @@ const AdminDashboard = () => {
       {/*
         Edit Model Dialog
       */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Model</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <label>Name</label>
-              <Input
-                value={editForm.name}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, name: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <label>URL</label>
-              <Input
-                value={editForm.url}
-                onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handlePatchModel}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Edit Model Dialog */}
+<Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Edit Model</DialogTitle>
+    </DialogHeader>
+    <div className="grid gap-4 py-4">
+      <div className="grid gap-2">
+        <label>Name</label>
+        <Input
+          value={editForm.name}
+          onChange={(e) =>
+            setEditForm({ ...editForm, name: e.target.value })
+          }
+        />
+      </div>
+      <div className="grid gap-2">
+        <label>URL</label>
+        <Input
+          value={editForm.url}
+          onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
+        />
+      </div>
+      <div className="grid gap-2">
+        <label>Input Type</label>
+        <select
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2"
+          value={editForm.inputType}
+          onChange={(e) => 
+            setEditForm({ 
+              ...editForm, 
+              inputType: e.target.value as 'STRING' | 'FILE' | 'IMAGE' 
+            })
+          }
+        >
+          <option value="STRING">STRING</option>
+          <option value="FILE">FILE</option>
+          <option value="IMAGE">IMAGE</option>
+        </select>
+      </div>
+    </div>
+    <DialogFooter>
+      <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+        Cancel
+      </Button>
+      <Button 
+        onClick={handlePatchModel}
+        disabled={
+          !selectedModel ||
+          (selectedModel.name === editForm.name && 
+           selectedModel.apiUrl === editForm.url &&
+           selectedModel.inputType === editForm.inputType)
+        }
+      >
+        Save
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
       {/*
         Retire Model Confirmation Dialog

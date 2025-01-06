@@ -37,6 +37,66 @@ const INPUT_TYPE_MAPPING: Record<string, string> = {
 };
 
 
+// const LinkModelDialog: React.FC<LinkModelDialogProps> = ({ 
+//   isOpen, 
+//   onClose, 
+//   onSubmit 
+// }) => {
+//   const [modelName, setModelName] = useState('');
+//   const [modelUrl, setModelUrl] = useState('');
+//   const [inputType, setInputType] = useState('');
+//   const [isLoading, setIsLoading] = useState(false);
+
+//   const resetForm = () => {
+//     setModelName('');
+//     setModelUrl('');
+//     setInputType('');
+//   };
+
+//   const handleDialogClose = () => {
+//     if (!isLoading) {
+//       resetForm();
+//       onClose();
+//     }
+//   };
+
+//   const handleSubmit = async () => {
+//     if (!modelName || !modelUrl || !inputType) {
+//       toast.error('Please fill in all fields');
+//       return;
+//     }
+  
+//     try {
+//       setIsLoading(true);
+  
+//       // Check for duplicate names
+//       const existingModels = await axiosInstance.get('/models');
+//       const isDuplicate = existingModels.data.some(
+//         (model: ModelPayload) => model.name === modelName.trim()
+//       );
+  
+//       if (isDuplicate) {
+//         toast.error('Model name already exists. Please choose a different name.');
+//         return;
+//       }
+  
+//       // Submit model
+//       const payload = {
+//         name: modelName.trim(),
+//         apiUrl: modelUrl.startsWith('http') ? modelUrl.trim() : `https://${modelUrl.trim()}`,
+//         inputType: INPUT_TYPE_MAPPING[inputType],
+//       };
+//       await axiosInstance.post('/models', payload);
+//       toast.success('Model linked successfully!');
+//       resetForm();
+//       onClose();
+//     } catch (error) {
+//       console.error('Error:', error.response?.data || error);
+//       toast.error('Failed to add model. Please try again.');
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
 const LinkModelDialog: React.FC<LinkModelDialogProps> = ({ 
   isOpen, 
   onClose, 
@@ -80,13 +140,16 @@ const LinkModelDialog: React.FC<LinkModelDialogProps> = ({
         return;
       }
   
-      // Submit model
+      // Create payload
       const payload = {
         name: modelName.trim(),
         apiUrl: modelUrl.startsWith('http') ? modelUrl.trim() : `https://${modelUrl.trim()}`,
         inputType: INPUT_TYPE_MAPPING[inputType],
       };
-      await axiosInstance.post('/models', payload);
+
+      // Use the onSubmit prop instead of making the API call here
+      await onSubmit(payload);
+      
       toast.success('Model linked successfully!');
       resetForm();
       onClose();
