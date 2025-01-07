@@ -93,16 +93,16 @@ const sections = [
   },
   {
     id: 'model-management',
-    title: 'Model management',
+    title: 'Service Tool Management',
     items: [
       {
         id: 'current-models',
-        title: 'Current models',
+        title: 'Current Service Tools',
         component: 'manage-models',
       },
       {
         id: 'model-assignment',
-        title: 'Model Assignment',
+        title: 'Service Tool Assignment',
         component: 'model-assignment'
       },
     ],
@@ -167,13 +167,13 @@ const ManageModels = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onEditModel(model)}>
-                        Edit Model
+                        Edit Service Tool
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-red-600"
                         onClick={() => onRetireModel(model)}
                       >
-                        Retire Model
+                        Retire Service Tool
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

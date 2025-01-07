@@ -197,7 +197,7 @@ const ModelSearch = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Search Model Statistics</CardTitle>
+        <CardTitle>Search Service Tool Statistics</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 mb-4">

@@ -223,7 +223,7 @@ export const ModelAssignment = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Model Assignment</h1>
+      <h1 className="text-2xl font-bold mb-6">Service Tool Assignment</h1>
 
       {/* Search user by email */}
       <div className="flex gap-4 mb-6">
@@ -293,7 +293,7 @@ export const ModelAssignment = () => {
                             setIsRemoveDialogOpen(true);
                           }}
                         >
-                          Remove Model
+                          Remove Service Tool
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -310,7 +310,7 @@ export const ModelAssignment = () => {
                 onClick={() => setIsAssignDialogOpen(true)}
                 className="bg-amber-600 hover:bg-amber-700"
               >
-                Assign Model
+                Assign Service Tool 
               </Button>
             </div>
           )}
@@ -321,11 +321,11 @@ export const ModelAssignment = () => {
       <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>Assign Model to User</DialogTitle>
+            <DialogTitle>Assign Service Tool to User</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Input
-              placeholder="Search models..."
+              placeholder="Search Service Tools..."
               onChange={(e) => setDialogFilterModels(e.target.value)}
               value={dialogFilterModels}
             />

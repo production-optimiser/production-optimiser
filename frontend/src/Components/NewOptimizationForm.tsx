@@ -238,37 +238,37 @@ export default function NewOptimizationForm({
     <Card className="max-w-2xl mx-auto p-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold mb-6">New Optimization</h2>
+          <h2 className="text-2xl font-bold mb-6">New Service Execution</h2>
           <p className="text-gray-500 mb-4">
             {selectedModel?.inputType === 'STRING' 
-              ? 'Enter your input value to invoke the selected optimization model.'
+              ? 'Enter your input value to invoke the selected service tool.'
               : selectedModel?.inputType === 'IMAGE'
-              ? 'Upload your image file to invoke the selected optimization model.'
-              : 'Upload your file to invoke the selected optimization model.'}
+              ? 'Upload your image file to invoke the selected service tool.'
+              : 'Upload your file to invoke the selected service service tool.'}
           </p>
           <div className="space-y-4">
             <div>
-              <Label>Model</Label>
+              <Label>Service Tool</Label>
               <div className="mt-1 p-3 bg-gray-50 rounded-md">
                 {selectedModel ? (
                   <p>
                     {selectedModel.name} - {selectedModel.inputType}
                   </p>
                 ) : (
-                  <p className="text-gray-500">No model selected</p>
+                  <p className="text-gray-500">No Service Tool Selected</p>
                 )}
               </div>
             </div>
 
             <div>
-              <Label htmlFor="optimization-name">Optimization Name</Label>
+              <Label htmlFor="optimization-name">Service Execution Name</Label>
               <div className="mt-1">
                 <Input
                   id="optimization-name"
                   type="text"
                   value={optimizationName}
                   onChange={(e) => setOptimizationName(e.target.value)}
-                  placeholder="Enter optimization name"
+                  placeholder="Enter Service Execution Name"
                   required
                 />
               </div>
