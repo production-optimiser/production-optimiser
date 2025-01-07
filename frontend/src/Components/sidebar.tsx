@@ -214,7 +214,9 @@ const SidebarNav = ({
        <UserProfile 
          name={currentUser?.email?.split('@')[0] || 'User'} 
          email={currentUser?.email || ''} 
+         role={currentUser?.roles?.[0] ?? 'customer'}
          onLogout={handleLogout}
+         
        />
      </div>
    </Card>
