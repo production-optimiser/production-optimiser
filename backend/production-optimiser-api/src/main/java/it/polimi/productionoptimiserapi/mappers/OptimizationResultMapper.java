@@ -5,13 +5,14 @@ import it.polimi.productionoptimiserapi.entities.*;
 
 public class OptimizationResultMapper {
   public static OptimizationResult dtoToResult(
-      byte[] inputFile, String inputString, OptimizationResultDto dto, User user) {
-    return new OptimizationResult(inputFile, inputString, dto.getOutputJSON(), user);
+      String name, byte[] inputFile, String inputString, OptimizationResultDto dto, User user) {
+    return new OptimizationResult(name, inputFile, inputString, dto.getOutputJSON(), user);
   }
 
   public static OptimizationResultDto resultToDto(OptimizationResult result) {
     return new OptimizationResultDto(
         result.getId(),
+        result.getName(),
         result.getCreatedAt(),
         result.getUpdatedAt(),
         result.getOutputJSON(),

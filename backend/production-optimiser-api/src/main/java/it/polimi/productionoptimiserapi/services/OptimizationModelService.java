@@ -25,6 +25,10 @@ public interface OptimizationModelService {
   OptimizationModel updateOptimizationModel(String id, OptimizationModelDTO optimizationModelDTO);
 
   OptimizationResult invokeOptimizationModel(
-      OptimizationModel model, MultipartFile inputFile, String inputString, User invoker)
+      OptimizationModel model,
+      String name,
+      MultipartFile inputFile,
+      String inputString,
+      User invoker)
       throws EntityNotFoundException, IOException;
 }
