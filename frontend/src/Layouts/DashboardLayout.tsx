@@ -366,7 +366,8 @@ export default function DashboardLayout() {
         {contentState.type === 'optimization-result' && optimizationData && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-semibold">Optimization Results</h1>
+              <h1 className="text-2xl font-semibold font-sans">Service Execution Results: <span className="text-2xl font-semibold font-sans">{optimizationData.name}</span></h1>
+          
               <div className="text-sm text-gray-500">
                 Created: {new Date(optimizationData.createdAt).toLocaleString()}
               </div>
