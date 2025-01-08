@@ -26,6 +26,7 @@ interface OptimizationResultDto {
   id: string;
   createdAt: string;
   updatedAt: string;
+  name: string;
   userId: string;
   inputFile: string;
   outputJSON?: {
@@ -261,12 +262,11 @@ export default function DashboardLayout() {
   }, []);
 
   const generateOptimizationTitle = (result: OptimizationResultDto): string => {
-    const improvementPercentage = result.outputJSON?.percentage_improvement 
-      ? Number(result.outputJSON.percentage_improvement).toFixed(2) 
-      : 'N/A'; 
     const date = new Date(result.createdAt).toLocaleDateString();
-    return `Optimization (${improvementPercentage}% improvement) - ${date}`;
+    return `${result.name} - ${date}` ;
   };
+
+ 
 
   const groupResultsByDate = (results: OptimizationResultDto[]): TimeSection[] => {
     const now = new Date();
