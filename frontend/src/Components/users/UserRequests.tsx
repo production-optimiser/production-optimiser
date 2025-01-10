@@ -36,6 +36,7 @@ export const UserRequests = () => {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isDenyDialogOpen, setIsDenyDialogOpen] = useState(false);
+  const [password, setPassword] = useState('');
   const defaultStatus = 'pending';
 
   useEffect(() => {
@@ -55,26 +56,23 @@ export const UserRequests = () => {
   const handleStatusChange = async (requestId: string, newStatus: 'approved' | 'rejected') => {
     try {
       if (newStatus === 'rejected') {
-        // Call the deny API
         await axiosInstance.post(`/account-requests/deny`, {
           key: requestId,
           value: "Request denied by admin",
         });
         
-        // Remove the denied request from the state
         setRequests((prevRequests) => 
           prevRequests.filter((request) => request.id !== requestId)
         );
       } else {
-        // Handle approval
         await axiosInstance.post(`/account-requests/approve`, {
           key: requestId,
-          value: "temporaryPassword123",
+          value: password,
         });
         await fetchRequests();
       }
 
-      // Close all dialogs
+      setPassword('');
       setIsApproveDialogOpen(false);
       setIsDenyDialogOpen(false);
       setIsDetailsDialogOpen(false);
@@ -220,19 +218,32 @@ export const UserRequests = () => {
       <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Approve Request</DialogTitle>
+            <DialogTitle>Approve user {selectedRequest?.email}</DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to approve the request from {selectedRequest?.name || 'N/A'}?</p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Password</label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsApproveDialogOpen(false)}
+              onClick={() => {
+                setPassword('');
+                setIsApproveDialogOpen(false);
+              }}
             >
               Cancel
             </Button>
             <Button
               onClick={() => selectedRequest && handleStatusChange(selectedRequest.id, 'approved')}
-              className="bg-green-100 hover:bg-green-200 text-green-800"
+              className="bg-amber-500 hover:bg-amber-600 text-white"
             >
               Approve
             </Button>
@@ -244,9 +255,8 @@ export const UserRequests = () => {
       <Dialog open={isDenyDialogOpen} onOpenChange={setIsDenyDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Deny Request</DialogTitle>
+            <DialogTitle>Deny user {selectedRequest?.email}</DialogTitle>
           </DialogHeader>
-          <p>Are you sure you want to deny the request from {selectedRequest?.name || 'N/A'}?</p>
           <DialogFooter>
             <Button
               variant="outline"
@@ -256,7 +266,7 @@ export const UserRequests = () => {
             </Button>
             <Button
               onClick={() => selectedRequest && handleStatusChange(selectedRequest.id, 'rejected')}
-              className="bg-red-100 hover:bg-red-200 text-red-800"
+              className="bg-amber-500 hover:bg-amber-600 text-white"
             >
               Deny
             </Button>

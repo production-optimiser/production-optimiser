@@ -91,3 +91,5 @@ const LoginPage: React.FC<LoginPageProps> = ({ onContactClick }) => {
 };
 
 export default LoginPage;
+
+

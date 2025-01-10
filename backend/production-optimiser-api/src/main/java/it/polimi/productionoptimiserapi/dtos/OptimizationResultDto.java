@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class OptimizationResultDto {
   private String id;
+  private String name;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private Map<String, Object> outputJSON;

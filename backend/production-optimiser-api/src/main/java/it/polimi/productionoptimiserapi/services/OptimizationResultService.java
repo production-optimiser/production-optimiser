@@ -10,7 +10,7 @@ public interface OptimizationResultService {
   OptimizationResultDto getResultById(String resultId);
 
   String saveOptimizationResult(
-      byte[] inputFile, String inputString, OptimizationResultDto dto, User user);
+      String name, byte[] inputFile, String inputString, OptimizationResultDto dto, User user);
 
   void deleteAll();
 }

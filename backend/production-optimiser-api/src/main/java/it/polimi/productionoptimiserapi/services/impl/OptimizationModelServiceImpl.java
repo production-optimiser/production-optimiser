@@ -125,9 +125,14 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
 
   @Transactional
   public OptimizationResult invokeOptimizationModel(
-      OptimizationModel model, MultipartFile inputFile, String inputString, User invoker)
+      OptimizationModel model,
+      String name,
+      MultipartFile inputFile,
+      String inputString,
+      User invoker)
       throws IOException {
     OptimizationResult or = new OptimizationResult();
+    or.setName(name);
     if (inputFile == null && inputString == null) {
       throw new IllegalArgumentException("Either inputFile or inputString must be provided");
     }

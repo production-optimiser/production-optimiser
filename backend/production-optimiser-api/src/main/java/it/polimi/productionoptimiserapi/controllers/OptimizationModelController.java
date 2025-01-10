@@ -127,6 +127,7 @@ public class OptimizationModelController {
       @PathVariable String id,
       @RequestParam(value = "inputFile", required = false) MultipartFile inputFile,
       @RequestParam(value = "inputString", required = false) String inputString,
+      @RequestParam(value = "name") String name,
       @AuthenticationPrincipal User loggedUser)
       throws ForbiddenException, IOException {
 
@@ -153,7 +154,7 @@ public class OptimizationModelController {
 
     OptimizationResult or =
         this.optimizationModelService.invokeOptimizationModel(
-            om, inputFile, inputString, loggedUser);
+            om, name, inputFile, inputString, loggedUser);
     return ResponseEntity.ok(or);
   }
 
