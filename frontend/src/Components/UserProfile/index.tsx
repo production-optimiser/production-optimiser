@@ -1,80 +1,278 @@
-import React from 'react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/Components/ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "@/Components/ui/avatar";
+import React, { useState } from 'react';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from "@/components/ui/dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Clock, LogOut, ChevronDown } from 'lucide-react';
 import { router } from '@/router/routes';
+import axiosInstance from '../../utils/axios';
+import { authService } from '@/services/auth';
+import axios from 'axios';
 
 export interface UserProfileProps {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   role?: string;
   onLogout?: () => void;
   onAccountClick?: () => void;
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({ 
-  name, 
-  email,
-  role = 'customer', 
-  onLogout,
-  onAccountClick = () => {} 
-}) => {
-  const initials = name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .toUpperCase();
+interface temp{
+  password?: string
+}
 
-    const handleLogout = () => {
-      // Perform any logout logic (e.g., clearing tokens, session storage, etc.)
-      if (onLogout) onLogout();
+export const UserProfile: React.FC<UserProfileProps> = ({
+  name = '',
+  email = '',
+  role = 'customer',
+  onLogout,
+  onAccountClick = () => {}
+}) => {
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const initials = React.useMemo(() => {
+    if (!name || typeof name !== 'string') return '?';
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .filter(char => char)
+      .join('')
+      .toUpperCase() || '?';
+  }, [name]);
+
+  const handleLogout = () => {
+    if (onLogout) onLogout();
+    router.navigate('/login');
+  };
+
+  const handleAccountClick = async () => {
+    setIsAccountDialogOpen(true);
+  };
+
+  const handleEmailChange = async () => {
+    if (newEmail !== confirmEmail) {
+      setError('Emails do not match');
+      return;
+    }
+    const currentUser = authService.getCurrentUser();
+
+    try {
+      const params = {
+        email: newEmail,
+      };
+      const response = await axiosInstance.patch(`/users/${currentUser?.id}`, null, { params });
+
+      if (response.status === 200) {
+        setIsEmailDialogOpen(false);
+        router.navigate('/login');
+      } else {
+        setError('Failed to update email');
+      }
+    } catch (err) {
+      setError('An error occurred');
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
   
-      // Redirect to the login page
-      router.navigate('/login');
-    };
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser) {
+      setError('User session not found');
+      return;
+    }
   
+    try {
+      // Verify current password using authService
+      try {
+        // Only attempt the login/verification - don't store the result
+        await authService.login(currentUser.email, currentPassword);
+        
+        // Clear any existing error since verification passed
+        setError('');
+        
+        // Proceed with password update
+        const params = {
+          password: newPassword,
+        };
+        
+        const response = await axiosInstance.patch(`/users/${currentUser.id}`, null, { params });
+  
+        if (response.status === 200) {
+          setIsPasswordDialogOpen(false);
+          router.navigate('/login');
+        } else {
+          setError('Failed to update password');
+        }
+  
+      } catch (loginErr) {
+        // Handle login verification failure without breaking
+        setError('Current password is incorrect');
+        return;
+      }
+    } catch (err) {
+      // Handle any other errors that might occur
+      setError('An error occurred while updating password');
+    }
+  };
 
   return (
-    <div className="px-2 py-3">
-      <DropdownMenu>
-        <DropdownMenuTrigger className="w-full outline-none">
-          <div className="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/api/placeholder/32/32" alt={name} />
-                <AvatarFallback>{initials}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col items-start">
-                <span className="text-sm font-medium">{email}</span>
-                <span className="text-xs text-gray-500">{role}</span>
-              </div>
-            </div>
-            <ChevronDown className="h-4 w-4 text-gray-500" />
+    <>
+     <DropdownMenu>
+  <DropdownMenuTrigger className="w-full outline-none">
+    <div className="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
+      <div className="flex items-center gap-3">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col items-start">
+          <span className="text-sm font-medium">{email}</span>
+          <span className="text-xs text-gray-500">{role}</span>
+        </div>
+      </div>
+      <ChevronDown className="h-4 w-4 text-gray-500" />
+    </div>
+  </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <div className="px-2 py-1.5">
+            <p className="text-sm font-medium">{email}</p>
+            <p className="text-xs text-muted-foreground">{role}</p>
           </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-48" align="end">
-          <DropdownMenuItem 
-            onClick={onAccountClick}
-            className="flex items-center cursor-pointer"
-          >
-            <Clock className="mr-2 h-4 w-4" />
-            <span>Account</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={handleLogout}
-            className="flex items-center cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950"
-          >
+          <DropdownMenuItem onClick={handleAccountClick}>Account</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
+            Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
+
+      {/* Account Options Dialog */}
+      <Dialog open={isAccountDialogOpen} onOpenChange={setIsAccountDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Account Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Button 
+              className="w-full" 
+              onClick={() => {
+                setIsAccountDialogOpen(false);
+                setIsEmailDialogOpen(true);
+              }}
+            >
+              Change Email
+            </Button>
+            <Button 
+              className="w-full"
+              onClick={() => {
+                setIsAccountDialogOpen(false);
+                setIsPasswordDialogOpen(true);
+              }}
+            >
+              Change Password
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Change Dialog */}
+      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Email</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Current Email</Label>
+              <Input value={email} disabled />
+            </div>
+            <div>
+              <Label>New Email</Label>
+              <Input
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                type="email"
+              />
+            </div>
+            <div>
+              <Label>Confirm New Email</Label>
+              <Input
+                value={confirmEmail}
+                onChange={(e) => setConfirmEmail(e.target.value)}
+                type="email"
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleEmailChange}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Change Dialog */}
+      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Current Password</Label>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>New Password</Label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Confirm New Password</Label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+          <DialogFooter>
+            <Button onClick={handlePasswordChange}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
