@@ -107,35 +107,21 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     }
   
     try {
-      // Verify current password using authService
-      try {
-        // Only attempt the login/verification - don't store the result
-        await authService.login(currentUser.email, currentPassword);
-        
-        // Clear any existing error since verification passed
-        setError('');
-        
-        // Proceed with password update
-        const params = {
-          password: newPassword,
-        };
-        
-        const response = await axiosInstance.patch(`/users/${currentUser.id}`, null, { params });
-  
-        if (response.status === 200) {
-          setIsPasswordDialogOpen(false);
-          router.navigate('/login');
-        } else {
-          setError('Failed to update password');
-        }
-  
-      } catch (loginErr) {
-        // Handle login verification failure without breaking
-        setError('Current password is incorrect');
-        return;
+      const params = {
+        password: newPassword,
+      };
+      
+      const response = await axiosInstance.patch(`/users/${currentUser.id}`, null, { params });
+
+      if (response.status === 200) {
+        setIsPasswordDialogOpen(false);
+        router.navigate('/login');
+      } else {
+        setError('Failed to update password');
       }
+     
     } catch (err) {
-      // Handle any other errors that might occur
+     
       setError('An error occurred while updating password');
     }
   };
@@ -241,14 +227,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             <DialogTitle>Change Password</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>Current Password</Label>
-              <Input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-              />
-            </div>
+    
             <div>
               <Label>New Password</Label>
               <Input
