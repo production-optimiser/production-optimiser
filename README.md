@@ -29,7 +29,7 @@ Frontend is not dockerised and can be run using npm.
 
 ```bash
 cd backend/production-optimiser-api
-docker compose up -d
+docker compose -f docker-compose.integration.yml up -d
 ```
 
 ```bash
