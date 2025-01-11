@@ -4,16 +4,16 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/Components/ui/select';
 import axiosInstance, { handleApiError } from '../../utils/axios';
 import { toast } from 'react-hot-toast';
  

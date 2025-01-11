@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/Components/ui/button';
+import { Label } from '@/Components/ui/label';
+import { Card } from '@/Components/ui/card';
+import { Input } from '@/Components/ui/input';
 import { Upload } from 'lucide-react';
 import axiosInstance from '@/utils/axios';
 

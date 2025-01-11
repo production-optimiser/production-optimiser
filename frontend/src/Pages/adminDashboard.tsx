@@ -8,9 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
 import {
   Table,
   TableBody,
@@ -18,15 +18,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
+} from '@/Components/ui/table';
+import { Checkbox } from '@/Components/ui/checkbox';
 import { MoreHorizontal } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+} from '@/Components/ui/dropdown-menu';
 
 import SidebarNav from '../Components/sidebar';
 import { UserManagement } from '../Components/users/UserManagement';

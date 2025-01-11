@@ -3,7 +3,7 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/Components/ui/button';
 import { Download } from 'lucide-react';
 import { authService } from '../services/auth';
 import axiosInstance from '../utils/axios';
