@@ -1,6 +1,7 @@
 version: '3.9'
 
-# docker-compose -f docker-compose.service-tool.yml up -d
+# cd production-optimiser/backend/production-optimiser-api
+# docker compose -f docker-compose.integration.yml up -d
 
 services:
   postgres:
@@ -45,8 +46,30 @@ services:
     image: production-optimiser-service-tool:latest
     pull_policy: build
     build:
-      context: ../../model-services
+      context: ../../model-services/production-optimizer
       dockerfile: Dockerfile
     ports:
-      - "9080:9080"
+      - "9082:9082"
+    restart: on-failure
+
+  production-optimiser-dummy-tool:
+    container_name: production-optimiser-dummy-tool
+    image: production-optimiser-dummy-tool:latest
+    pull_policy: build
+    build:
+      context: ../../model-services/dummy-service
+      dockerfile: Dockerfile
+    ports:
+      - "9081:9081"
+    restart: on-failure
+
+  production-optimiser-dummy-text-tool:
+    container_name: production-optimiser-dummy-text-tool
+    image: production-optimiser-dummy-text-tool:latest
+    pull_policy: build
+    build:
+      context: ../../model-services/dummy-text-service
+      dockerfile: Dockerfile
+    ports:
+      - "9083:9083"
     restart: on-failure

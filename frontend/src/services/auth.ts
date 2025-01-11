@@ -5,7 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 
 interface AuthenticationResponseDTO {
   token: string;
-  userId: string;  // Added userId to match new response
+  userId: string;  
 }
 
 interface LoginRequest {
@@ -45,7 +45,7 @@ export const authService = {
         console.log('Decoded roles:', roles);
   
         return {
-          id: userId,  // Use userId instead of email
+          id: userId,  
           email: email,
           roles,
         };
@@ -61,7 +61,7 @@ export const authService = {
   
   logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('userId');  // Also remove userId
+    localStorage.removeItem('userId');  
     localStorage.removeItem('userEmail');
   },
 
@@ -81,7 +81,7 @@ export const authService = {
     return localStorage.getItem('token');
   },
 
-  getUserId(): string | null {  // Add method to get userId
+  getUserId(): string | null {  
     return localStorage.getItem('userId');
   },
 
@@ -92,7 +92,7 @@ export const authService = {
     try {
       const decoded = jwtDecode<DecodedToken>(token);
       return {
-        id: userId,  // Use stored userId instead of decoded.sub
+        id: userId,  
         email: decoded.sub,
         roles: decoded.roles.map(role => role.replace('ROLE_', '') as Role),
       };

@@ -1,6 +1,4 @@
-// router/routes.tsx
-// routes.tsx
-import { createBrowserRouter, Navigate } from 'react-router-dom'; // Add Navigate import
+import { createBrowserRouter, Navigate } from 'react-router-dom'; 
 import LoginPage from '../Pages/loginPage';
 import ContactForm from '../Pages/contactUs';
 import Layout from '../Layouts/DashboardLayout';
@@ -46,7 +44,6 @@ export const router = createBrowserRouter([
     ),
   },
   
-  // Catch-all route at the end
   {
     path: '*',
     element: <Navigate to="/login" replace />

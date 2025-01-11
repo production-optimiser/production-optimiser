@@ -1,6 +1,7 @@
 package it.polimi.productionoptimiserapi.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import it.polimi.productionoptimiserapi.enums.InputType;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -33,9 +34,18 @@ public class OptimizationModel extends BaseEntity {
   @Column
   @NotNull
   @Enumerated(EnumType.STRING)
+  private InputType inputType;
+
+  @Column
+  @NotNull
+  @Enumerated(EnumType.STRING)
   private OptimizationModelStatus status = OptimizationModelStatus.ACTIVE;
 
   @ManyToMany(mappedBy = "availableOptimizationModels")
   @JsonBackReference
   private Set<User> users = new HashSet<>();
+
+  @OneToMany(mappedBy = "service")
+  @JsonBackReference
+  private Set<ServiceStatistics> statistics = new HashSet<>();
 }

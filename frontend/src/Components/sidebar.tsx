@@ -13,11 +13,13 @@ import {
  DropdownMenuItem,
  DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
+import axiosInstance from "../utils/axios"
 
 interface Model {
  id: string;
  name: string;
  version: string;
+ inputType: string;
 }
 
 interface OptimizationItem {
@@ -85,7 +87,7 @@ const defaultSections: TimeSection[] = [
 ];
 
 const SidebarNav = ({
- modelName = 'Python 1',
+ modelName = 'Request Model Access From Admin',
  modelVersion = 'v3.4.2',
  sections = defaultSections,
  onItemClick,
@@ -97,6 +99,8 @@ const SidebarNav = ({
  const [currentUser, setCurrentUser] = useState<User | null>(null);
  const [selectedItem, setSelectedItem] = useState<string | null>(null);
  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+ 
+ 
  const navigate = useNavigate();
 
  useEffect(() => {
@@ -105,6 +109,8 @@ const SidebarNav = ({
      setCurrentUser(user);
    }
  }, []);
+
+
 
  const handleItemClick = (id: string) => {
    setSelectedItem(id);
@@ -122,8 +128,8 @@ const SidebarNav = ({
  };
 
  const displayModelName = selectedModel 
-   ? `${selectedModel.name} - ${selectedModel.version}`
-   : `${modelName} - ${modelVersion}`;
+   ? `${selectedModel.name} - ${selectedModel.inputType}`
+   : `${modelName}`
 
  return (
    <Card className="w-64 h-screen flex flex-col">
@@ -138,9 +144,16 @@ const SidebarNav = ({
                <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
                  <Copy className="w-4 h-4" aria-hidden="true" />
                </div>
-               <span className="text-sm font-medium">
+               {displayModelName==='Request Model Access From Admin' ? <span className="text-sm font-medium whitespace-normal break-words block max-w-[100px] overflow-hidden" style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3, // Up to 2 lines
+                    WebkitBoxOrient: 'vertical',
+                  }}>
                  {displayModelName}
-               </span>
+               </span> : <span className="text-sm font-medium">
+                 {displayModelName}
+               </span>}
+               
              </div>
              <ChevronDown className="w-4 h-4" aria-hidden="true" />
            </Button>
@@ -152,7 +165,7 @@ const SidebarNav = ({
                onClick={() => handleModelSelect(model)}
                className="cursor-pointer"
              >
-               <span>{model.name} - {model.version}</span>
+               <span>{model.name} - {model.inputType}</span>
              </DropdownMenuItem>
            ))}
          </DropdownMenuContent>
@@ -181,7 +194,7 @@ const SidebarNav = ({
                    <Button
                      key={item.id}
                      variant="ghost"
-                     className={`w-full justify-start text-sm ${
+                     className={`w-full justify-start text-sm whitespace-normal text-left h-auto py-2 ${
                        selectedItem === item.id ? 'bg-gray-100' : ''
                      } ${item.isDisabled ? 'text-gray-500' : ''}`}
                      disabled={item.isDisabled}
@@ -201,7 +214,9 @@ const SidebarNav = ({
        <UserProfile 
          name={currentUser?.email?.split('@')[0] || 'User'} 
          email={currentUser?.email || ''} 
+         role={currentUser?.roles?.[0] ?? 'customer'}
          onLogout={handleLogout}
+         
        />
      </div>
    </Card>

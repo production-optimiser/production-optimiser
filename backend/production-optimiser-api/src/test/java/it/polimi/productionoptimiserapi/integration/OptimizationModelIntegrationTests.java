@@ -9,12 +9,17 @@ import io.restassured.http.ContentType;
 import it.polimi.productionoptimiserapi.dtos.OptimizationModelDTO;
 import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.entities.OptimizationModel;
+import it.polimi.productionoptimiserapi.entities.User;
+import it.polimi.productionoptimiserapi.enums.InputType;
 import it.polimi.productionoptimiserapi.enums.OptimizationModelStatus;
 import it.polimi.productionoptimiserapi.enums.UserRole;
+import it.polimi.productionoptimiserapi.repositories.OptimizationModelRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.security.dtos.UserLoginDTO;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
+import it.polimi.productionoptimiserapi.services.OptimizationResultService;
 import it.polimi.productionoptimiserapi.services.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -48,7 +53,10 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private UserRepository userRepository;
 
-  String accessToken;
+  @Autowired private OptimizationModelRepository optimizationModelRepository;
+
+  User admin, customer;
+  String adminAccessToken, customerAccessToken;
 
   @BeforeAll
   static void beforeAll() {
@@ -58,6 +66,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
   @BeforeEach
   void beforeEach() {
     userRepository.deleteAll();
+    optimizationModelRepository.deleteAll();
 
     userService.createUser(
         UserDTO.builder()
@@ -66,13 +75,41 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
             .role(UserRole.ADMIN)
             .build());
 
-    UserLoginDTO userLoginDTO =
-        UserLoginDTO.builder().email("admin@potest.it").password("password!").build();
+    userService.createUser(
+        UserDTO.builder()
+            .email("customer@potest.it")
+            .password("password!")
+            .role(UserRole.CUSTOMER)
+            .build());
 
-    accessToken =
+    admin =
+        userRepository
+            .findByEmail("admin@potest.it")
+            .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
+
+    customer =
+        userRepository
+            .findByEmail("customer@potest.it")
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found"));
+
+    UserLoginDTO adminLoginDTO =
+        UserLoginDTO.builder().email("admin@potest.it").password("password!").build();
+    UserLoginDTO customerLoginDTO =
+        UserLoginDTO.builder().email("customer@potest.it").password("password!").build();
+
+    adminAccessToken =
         given()
             .contentType(ContentType.JSON)
-            .body(userLoginDTO)
+            .body(adminLoginDTO)
+            .when()
+            .post("/api/auth/login")
+            .jsonPath()
+            .getString("token");
+
+    customerAccessToken =
+        given()
+            .contentType(ContentType.JSON)
+            .body(customerLoginDTO)
             .when()
             .post("/api/auth/login")
             .jsonPath()
@@ -88,26 +125,20 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
 
   @Autowired private OptimizationModelService optimizationModelService;
 
-  // @Test
-  void shouldCreateOptimizationModel() {
-    UserDTO customer =
-        userService.createUser(
-            UserDTO.builder()
-                .email("customer@potest.it")
-                .password("password!")
-                .role(UserRole.CUSTOMER)
-                .build());
+  @Autowired private OptimizationResultService optimizationResultService;
 
+  @Test
+  void shouldCreateOptimizationModel() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
-            .userIds(Set.of(customer.getId()))
+            .inputType(InputType.FILE)
             .build();
 
     given()
         .contentType(ContentType.JSON)
-        .headers("Authorization", "Bearer " + accessToken)
+        .headers("Authorization", "Bearer " + adminAccessToken)
         .body(optimizationModelDTO)
         .when()
         .post("/api/models")
@@ -122,13 +153,13 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
-            .userIds(Set.of())
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
 
     given()
-        .headers("Authorization", "Bearer " + accessToken)
+        .headers("Authorization", "Bearer " + adminAccessToken)
         .when()
         .get("/api/models/" + om.getId())
         .then()
@@ -136,35 +167,16 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .body("name", equalTo(optimizationModelDTO.getName()));
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_customerShouldGetForbidden() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
-            .userIds(Set.of())
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
-
-    userService.createUser(
-        UserDTO.builder()
-            .email("customer@potest.it")
-            .password("password!")
-            .role(UserRole.CUSTOMER)
-            .build());
-
-    UserLoginDTO userLoginDTO =
-        UserLoginDTO.builder().email("customer@potest.it").password("password!").build();
-
-    String customerAccessToken =
-        given()
-            .contentType(ContentType.JSON)
-            .body(userLoginDTO)
-            .when()
-            .post("/api/auth/login")
-            .jsonPath()
-            .getString("token");
 
     given()
         .headers("Authorization", "Bearer " + customerAccessToken)
@@ -174,33 +186,39 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         .statusCode(HttpStatus.FORBIDDEN.value());
   }
 
-  // @Test
+  @Test
   void givenCreatedModel_shouldRetire() {
     OptimizationModelDTO optimizationModelDTO =
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://localhost:5000/optimizer-tool")
-            .userIds(Set.of())
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
-    assertEquals(om.getStatus(), OptimizationModelStatus.ACTIVE);
+    assertEquals(OptimizationModelStatus.ACTIVE, om.getStatus());
 
     om = optimizationModelService.retireOptimizationModel(om.getId());
-    assertEquals(om.getStatus(), OptimizationModelStatus.RETIRED);
+    assertEquals(OptimizationModelStatus.RETIRED, om.getStatus());
 
     Optional<OptimizationModel> oom =
         optimizationModelService.findOptimizationModelById(om.getId());
     assertTrue(oom.isEmpty());
 
-    System.out.println(accessToken);
-
     given()
-        .headers("Authorization", "Bearer " + accessToken)
+        .headers("Authorization", "Bearer " + adminAccessToken)
         .when()
         .get("/api/models/" + om.getId())
         .then()
         .statusCode(HttpStatus.NOT_FOUND.value());
+
+    given()
+        .headers("Authorization", "Bearer " + adminAccessToken)
+        .when()
+        .get("/api/models")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body("size()", equalTo(0));
   }
 
   // @Test
@@ -209,7 +227,7 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
         OptimizationModelDTO.builder()
             .name("Test Model")
             .apiUrl("http://127.0.0.1:5000/optimize")
-            .userIds(Set.of())
+            .inputType(InputType.FILE)
             .build();
 
     OptimizationModel om = optimizationModelService.saveOptimizationModel(optimizationModelDTO);
@@ -217,11 +235,59 @@ public class OptimizationModelIntegrationTests extends BaseIntegrationTestSetup 
     File testInputFile = new ClassPathResource("test_input.xlsx").getFile();
 
     given()
-        .headers("Authorization", "Bearer " + accessToken)
+        .headers("Authorization", "Bearer " + adminAccessToken)
         .multiPart("input", testInputFile)
         .when()
         .post("/api/models/" + om.getId() + "/invoke")
         .then()
         .statusCode(HttpStatus.OK.value());
+
+    given()
+        .headers("Authorization", "Bearer " + adminAccessToken)
+        .when()
+        .get("/api/results?userId=" + admin.getId())
+        .then()
+        .statusCode(HttpStatus.OK.value());
+  }
+
+  @Test
+  void givenCreatedModels_customersOnlySeeTheirModels() {
+    OptimizationModel omAdmin =
+        optimizationModelService.saveOptimizationModel(
+            OptimizationModelDTO.builder()
+                .name("Test Model Admin")
+                .apiUrl("http://127.0.0.1:5000/optimize")
+                .inputType(InputType.FILE)
+                .build());
+
+    OptimizationModel omCustomer =
+        optimizationModelService.saveOptimizationModel(
+            OptimizationModelDTO.builder()
+                .name("Test Model Customer")
+                .apiUrl("http://127.0.0.1:5000/optimize")
+                .inputType(InputType.FILE)
+                .build());
+
+    admin.setAvailableOptimizationModels(Set.of(omAdmin));
+    userRepository.save(admin);
+
+    customer.setAvailableOptimizationModels(Set.of(omCustomer));
+    userRepository.save(customer);
+
+    given()
+        .headers("Authorization", "Bearer " + adminAccessToken)
+        .when()
+        .get("/api/models")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body("size()", equalTo(2));
+
+    given()
+        .headers("Authorization", "Bearer " + customerAccessToken)
+        .when()
+        .get("/api/models")
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .body("size()", equalTo(1));
   }
 }

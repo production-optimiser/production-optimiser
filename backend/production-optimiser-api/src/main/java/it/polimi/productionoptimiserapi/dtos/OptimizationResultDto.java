@@ -1,8 +1,7 @@
 package it.polimi.productionoptimiserapi.dtos;
 
-import it.polimi.productionoptimiserapi.enums.GraphType;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,19 +11,11 @@ import lombok.NoArgsConstructor;
 @Data
 public class OptimizationResultDto {
   private String id;
+  private String name;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
-  private Double initialTotalProductionTime;
-  private Double optimizedTotalProductionTime;
-  private Double timeImprovement;
-  private Double percentageImprovement;
-  private Double averageInitialTotalMachineUtilization;
-  private Double averageOptimizedTotalMachineUtilization;
-  private Double utilizationImprovement;
-  private HashMap<String, Integer> maximumPalletsUsed;
-  private HashMap<String, Integer> palletsDefinedInExcel;
-  private Double totalTimeWithOptimizedPallets;
-  private Double totalTimeWithExcelPallets;
-  private String bestSequenceOfProducts;
-  private HashMap<GraphType, String> graphs;
+  private Map<String, Object> outputJSON;
+  private String userId;
+  private byte[] inputFile;
+  private String inputString;
 }
