@@ -29,7 +29,9 @@ interface OptimizationResultDto {
   name: string;
   userId: string;
   inputFile: string;
+  
   outputJSON?: {
+    filename: string;
     average_initial_total_machine_utilization?: number;
     average_optimized_total_machine_utilization?: number;
     best_sequence_of_products?: string;
@@ -67,12 +69,43 @@ interface TimeSection {
 }
 
 const downloadBase64File = (base64Data: string, fileName: string) => {
-  const linkSource = `data:image/png;base64,${base64Data}`;
+  const fileExtension = fileName.split('.').pop()?.toLowerCase();
+  let mimeType = 'application/octet-stream'; // Default MIME type
+
+  // Determine the correct MIME type based on file extension
+  switch (fileExtension) {
+    case 'xlsx':
+      mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      break;
+    case 'csv':
+      mimeType = 'text/csv';
+      break;
+    case 'json':
+      mimeType = 'application/json';
+      break;
+    case 'txt':
+      mimeType = 'text/plain';
+      break;
+    case 'png':
+      mimeType = 'image/png';
+      break;
+    case 'jpg':
+    case 'jpeg':
+      mimeType = 'image/jpeg';
+      break;
+    case 'pdf':
+      mimeType = 'application/pdf';
+      break;
+    // Add more cases as needed
+  }
+
+  const linkSource = `data:${mimeType};base64,${base64Data}`;
   const downloadLink = document.createElement('a');
   downloadLink.href = linkSource;
   downloadLink.download = fileName;
   downloadLink.click();
 };
+
 
 const renderMachineUtilizationChart = (optimizationData: OptimizationResultDto | null) => {
   if (!optimizationData?.outputJSON) {
@@ -226,6 +259,7 @@ export default function DashboardLayout() {
       const response = await axiosInstance.get(`/results/${id}`);
       console.log('Fetched optimization result:', response.data);
       setOptimizationData(response.data);
+      console.log("Optimization data is :" , optimizationData)
     } catch (error) {
       console.error('Error fetching optimization result:', error);
       setOptimizationData(null);
@@ -373,15 +407,24 @@ export default function DashboardLayout() {
               </div>
             </div>
 
-            {/* Input File Download Section */}
-            {optimizationData.inputFile && (
+        
+                        {optimizationData.inputFile && (
               <div className="p-6 bg-white rounded-lg shadow">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-medium">Input File</h2>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
-                    onClick={() => downloadBase64File(optimizationData.inputFile, 'input-file.xlsx')}
+                    onClick={() => {
+                      const fileName = optimizationData.outputJSON?.filename;
+                      if (fileName) {
+                        const fileExtension = fileName.split('.').pop(); // Extract file extension
+                        const downloadName = `input-file.${fileExtension}`;
+                        downloadBase64File(optimizationData.inputFile, downloadName);
+                      } else {
+                        downloadBase64File(optimizationData.inputFile, 'input-file.xlsx');
+                      }
+                    }}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download Input File
@@ -389,6 +432,8 @@ export default function DashboardLayout() {
                 </div>
               </div>
             )}
+
+
 
             {/* Base64 Graphs Section */}
             {renderGraphs(optimizationData.outputJSON)}

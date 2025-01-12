@@ -50,6 +50,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const initials = React.useMemo(() => {
     if (!name || typeof name !== 'string') return '?';
@@ -71,6 +72,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   };
 
   const handleEmailChange = async () => {
+    setError('');
+    setSuccessMessage('');
     if (newEmail !== confirmEmail) {
       setError('Emails do not match');
       return;
@@ -84,8 +87,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       const response = await axiosInstance.patch(`/users/${currentUser?.id}`, null, { params });
 
       if (response.status === 200) {
-        setIsEmailDialogOpen(false);
-        router.navigate('/login');
+        setSuccessMessage('Email updated successfully. Please log in with your new email.');
+        setTimeout(() => {
+          setIsEmailDialogOpen(false);
+          handleLogout(); 
+        }, 2000);
       } else {
         setError('Failed to update email');
       }
@@ -114,8 +120,12 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       const response = await axiosInstance.patch(`/users/${currentUser.id}`, null, { params });
 
       if (response.status === 200) {
-        setIsPasswordDialogOpen(false);
-        router.navigate('/login');
+        setSuccessMessage('Password updated successfully');
+        setTimeout(() => {
+          setIsPasswordDialogOpen(false);
+          setNewPassword('');
+          setConfirmPassword('');
+        }, 2000);
       } else {
         setError('Failed to update password');
       }
@@ -126,6 +136,33 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     }
   };
 
+  const handleEmailDialogChange = (open: boolean) => {
+    if (!open) {
+      setNewEmail('');
+      setConfirmEmail('');
+      setError('');
+      setSuccessMessage('');
+    }
+    setIsEmailDialogOpen(open);
+  };
+
+  const handlePasswordDialogChange = (open: boolean) => {
+    if (!open) {
+      setNewPassword('');
+      setConfirmPassword('');
+      setError('');
+      setSuccessMessage('');
+    }
+    setIsPasswordDialogOpen(open);
+  };
+
+  const handleAccountDialogChange = (open: boolean) => {
+    setIsAccountDialogOpen(open);
+    if (!open) {
+      setError('');
+      setSuccessMessage('');
+    }
+  };
   return (
     <>
      <DropdownMenu>
@@ -157,7 +194,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       </DropdownMenu>
 
       {/* Account Options Dialog */}
-      <Dialog open={isAccountDialogOpen} onOpenChange={setIsAccountDialogOpen}>
+      <Dialog open={isAccountDialogOpen} onOpenChange={handleAccountDialogChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Account Settings</DialogTitle>
@@ -166,8 +203,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             <Button 
               className="w-full" 
               onClick={() => {
-                setIsAccountDialogOpen(false);
-                setIsEmailDialogOpen(true);
+                handleAccountDialogChange(false);
+                handleEmailDialogChange(true);
               }}
             >
               Change Email
@@ -175,8 +212,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({
             <Button 
               className="w-full"
               onClick={() => {
-                setIsAccountDialogOpen(false);
-                setIsPasswordDialogOpen(true);
+                handleAccountDialogChange(false);
+                handlePasswordDialogChange(true);
               }}
             >
               Change Password
@@ -186,7 +223,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       </Dialog>
 
       {/* Email Change Dialog */}
-      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+      <Dialog open={isEmailDialogOpen} onOpenChange={handleEmailDialogChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Email</DialogTitle>
@@ -213,6 +250,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
               />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
+            {successMessage && <p className="text-green-500 text-sm">{successMessage}</p>}
           </div>
           <DialogFooter>
             <Button onClick={handleEmailChange}>Save Changes</Button>
@@ -221,7 +259,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       </Dialog>
 
       {/* Password Change Dialog */}
-      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+      <Dialog open={isPasswordDialogOpen} onOpenChange={handlePasswordDialogChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
@@ -245,6 +283,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
               />
             </div>
             {error && <p className="text-red-500 text-sm">{error}</p>}
+            {successMessage && <p className="text-green-500 text-sm">{successMessage}</p>}
           </div>
           <DialogFooter>
             <Button onClick={handlePasswordChange}>Save Changes</Button>

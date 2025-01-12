@@ -140,8 +140,8 @@ const SidebarNav = ({
              variant="ghost"
              className="w-full justify-between"
            >
-             <div className="flex items-center gap-2">
-               <div className="w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
+             <div className="flex items-center gap-2 min-w-0">
+               <div className="flex-shrink-0 w-8 h-8 bg-orange-200 rounded flex items-center justify-center">
                  <Copy className="w-4 h-4" aria-hidden="true" />
                </div>
                {displayModelName==='Request Model Access From Admin' ? <span className="text-sm font-medium whitespace-normal break-words block max-w-[100px] overflow-hidden" style={{
@@ -150,12 +150,12 @@ const SidebarNav = ({
                     WebkitBoxOrient: 'vertical',
                   }}>
                  {displayModelName}
-               </span> : <span className="text-sm font-medium">
+               </span> : <span className="text-sm font-medium truncate overflow-hidden">
                  {displayModelName}
                </span>}
                
              </div>
-             <ChevronDown className="w-4 h-4" aria-hidden="true" />
+             <ChevronDown className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
            </Button>
          </DropdownMenuTrigger>
          <DropdownMenuContent className="w-56">
@@ -179,7 +179,7 @@ const SidebarNav = ({
          onClick={onNewChat}
        >
          <Plus className="w-4 h-4" />
-         <span>New Chat</span>
+         <span>New Execution</span>
        </Button>
      </div>
 

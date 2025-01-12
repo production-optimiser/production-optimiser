@@ -27,7 +27,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onContactClick }) => {
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
     setError('');
-
     try {
       const userData = await authService.login(email, password);
       login(userData);
@@ -39,50 +38,61 @@ const LoginPage: React.FC<LoginPageProps> = ({ onContactClick }) => {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">
-            Welcome to Production Optimiser
+      <Card className="w-full max-w-md bg-white shadow-lg">
+        <CardHeader className="space-y-1 pb-6">
+          <CardTitle className="text-2xl font-bold tracking-tight pb-2">
+            Welcome to Service Execution Platform
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Sign in using credentials created by admin.
+          <p className="text-sm text-gray-500 leading-relaxed">
+            Your integrated hub for executing MITC advanced AI service models with support for 
+            multiple input and output types.
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+        <CardContent className="space-y-6">
+          {error && (
+            <div className="bg-red-50 text-red-900 px-4 py-2 rounded-md text-sm">
+              {error}
+            </div>
+          )}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-sm font-medium">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="m@example.com"
+              className="h-10"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-sm font-medium">
+              Password
+            </Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="h-10"
             />
           </div>
           <Button
             onClick={handleSubmit}
-            className="w-full bg-amber-600 hover:bg-amber-700"
+            className="w-full bg-amber-600 hover:bg-amber-700 h-10 font-medium"
           >
-            Login
+            Sign In
           </Button>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-col items-center pb-6 pt-2">
           <Button
             variant="link"
-            className="text-sm text-muted-foreground"
+            className="text-sm text-gray-500 hover:text-gray-700"
             onClick={onContactClick}
           >
-            Contact us
+            Need access? Contact us
           </Button>
         </CardFooter>
       </Card>
@@ -91,5 +101,3 @@ const LoginPage: React.FC<LoginPageProps> = ({ onContactClick }) => {
 };
 
 export default LoginPage;
-
-

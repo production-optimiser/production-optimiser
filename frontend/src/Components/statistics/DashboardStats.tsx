@@ -206,7 +206,7 @@ const ModelSearch = () => {
             value={selectedFramework}
             onChange={(e) => setSelectedFramework(e.target.value)}
           >
-            <option value="">Select framework...</option>
+            <option value="">Select service tool...</option>
             {frameworks.length > 0 ? (
               frameworks.map(framework => (
                 <option key={framework.id} value={framework.id}>
