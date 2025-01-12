@@ -179,7 +179,7 @@ const SidebarNav = ({
          onClick={onNewChat}
        >
          <Plus className="w-4 h-4" />
-         <span>New Chat</span>
+         <span>New Execution</span>
        </Button>
      </div>
 

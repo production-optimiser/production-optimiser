@@ -103,7 +103,7 @@ export default function NewOptimizationForm({
 
       console.log('Response:', response.data);
       onSubmit(response.data);
-      alert('Optimization started successfully!');
+      alert('Done!');
     } catch (error: any) {
       console.error('Error starting optimization:', error);
 
