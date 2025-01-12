@@ -37,6 +37,12 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/production_optimiser
       - SPRING_DATASOURCE_USERNAME=production_optimiser
       - SPRING_DATASOURCE_PASSWORD=production_optimiser
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     ports:
       - "8080:8080"
     restart: on-failure
