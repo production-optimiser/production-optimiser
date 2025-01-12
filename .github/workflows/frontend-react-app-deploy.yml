@@ -44,7 +44,9 @@ jobs:
         run:
           npm i
       - name: Build
-        run: CI=false npm run build
+        run: |
+          echo "Building with VITE_API_URL=$VITE_API_URL"
+          VITE_API_URL=$VITE_API_URL CI=false npm run build
       - name: Check folder
         run: ls -la
       - name: Setup Pages
