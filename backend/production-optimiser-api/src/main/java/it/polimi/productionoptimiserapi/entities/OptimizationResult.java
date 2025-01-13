@@ -36,4 +36,8 @@ public class OptimizationResult extends BaseEntity {
   @JoinColumn(name = "user_id", nullable = false)
   @JsonBackReference
   private User user;
+
+  @ManyToOne
+  @JoinColumn(name = "optimization_model_id")
+  private OptimizationModel optimizationModel;
 }
