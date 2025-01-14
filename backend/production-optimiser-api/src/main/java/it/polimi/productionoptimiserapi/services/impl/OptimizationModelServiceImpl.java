@@ -133,6 +133,7 @@ public class OptimizationModelServiceImpl implements OptimizationModelService {
       throws IOException {
     OptimizationResult or = new OptimizationResult();
     or.setName(name);
+    or.setOptimizationModel(model);
     if (inputFile == null && inputString == null) {
       throw new IllegalArgumentException("Either inputFile or inputString must be provided");
     }
