@@ -80,7 +80,7 @@ public class UserController {
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
   public UserDTO deleteUser(@PathVariable String id) {
     log.info("Received DELETE request for deleting user with id=" + id);
     return userService.deleteUser(id);
