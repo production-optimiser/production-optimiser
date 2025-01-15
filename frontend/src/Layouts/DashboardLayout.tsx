@@ -29,7 +29,7 @@ interface OptimizationResultDto {
   name: string;
   userId: string;
   inputFile: string;
-  
+  modelName: string
   outputJSON?: {
     filename: string;
     average_initial_total_machine_utilization?: number;
@@ -297,7 +297,7 @@ export default function DashboardLayout() {
 
   const generateOptimizationTitle = (result: OptimizationResultDto): string => {
     const date = new Date(result.createdAt).toLocaleDateString();
-    return `${result.name} - ${date}` ;
+    return `${result.name} - ${date}: ${result.modelName}` ;
   };
 
  
