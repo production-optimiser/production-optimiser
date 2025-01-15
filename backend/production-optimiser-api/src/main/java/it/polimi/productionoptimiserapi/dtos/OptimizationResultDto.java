@@ -19,4 +19,5 @@ public class OptimizationResultDto {
   private byte[] inputFile;
   private String inputString;
   private String modelId;
+  private String modelName;
 }

@@ -25,6 +25,7 @@ public class OptimizationResultMapper {
         result.getUser().getId(),
         result.getInputFile(),
         result.getInputString(),
-        result.getOptimizationModel().getId());
+        result.getOptimizationModel().getId(),
+        result.getOptimizationModel().getName());
   }
 }
