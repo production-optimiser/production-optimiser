@@ -9,4 +9,3 @@ COPY package.json /app
 RUN npm i
 
 COPY . /app
-
