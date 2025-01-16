@@ -26,6 +26,8 @@ import {
 import { MoreHorizontal } from 'lucide-react';
 import axiosInstance from '../../utils/axios';
 
+import Select from 'react-select'; // Using React Select
+
 interface User {
   id: string;
   email: string;
@@ -53,20 +55,54 @@ export const ModelAssignment = () => {
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [modelToRemove, setModelToRemove] = useState<Model | null>(null);
 
-  // Effect to fetch models when assign dialog opens
-  useEffect(() => {
-    if (isAssignDialogOpen) {
-      fetchAllModels();
-    }
-  }, [isAssignDialogOpen]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
 
-  // Fetch user by email
+  // NEW: Track whether the user has actually clicked "Search"
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // Load all users once on component mount
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
+
+  const fetchAllUsers = async () => {
+    try {
+      const response = await axiosInstance.get<User[]>('/users');
+      setAllUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching all users:', error);
+    }
+  };
+
+  // React Select options
+  const userOptions = allUsers.map((user) => ({
+    value: user.id,
+    label: user.email,
+  }));
+
+  // If user picks a different user from the dropdown, reset hasSearched to false
+  const handleUserChange = (
+    selectedOption: { value: string; label: string } | null
+  ) => {
+    if (!selectedOption) {
+      setSelectedUser(null);
+      setSearchUser('');
+      setHasSearched(false); // reset
+      return;
+    }
+
+    const matchedUser = allUsers.find((u) => u.id === selectedOption.value) || null;
+    setSelectedUser(matchedUser);
+    setSearchUser(selectedOption.label);
+    setHasSearched(false); // user has changed the selection, so they haven't "Searched" yet
+  };
+
+  // CHANGED: The search button not only fetches the user, but also sets hasSearched to true
   const searchUsers = async () => {
     try {
       const response = await axiosInstance.get<User[]>('/users');
       const users = response.data;
 
-      // Find by case-insensitive match on email
       const user = users.find(
         (u) => u.email.toLowerCase() === searchUser.toLowerCase()
       );
@@ -77,10 +113,8 @@ export const ModelAssignment = () => {
         );
         setSelectedUser(userDetailsResponse.data);
 
-        // If user has assigned models, fetch them; filter out those that no longer exist
         if (userDetailsResponse.data?.optimizationModelIds) {
           const deletedModelIds: string[] = [];
-
           const models = await Promise.all(
             userDetailsResponse.data.optimizationModelIds.map(
               async (modelId: string) => {
@@ -96,9 +130,8 @@ export const ModelAssignment = () => {
               }
             )
           );
-
           const validModels = models.filter(
-            (model): model is Model => model !== null && model !== undefined
+            (m): m is Model => m !== null && m !== undefined
           );
           setUserModels(validModels);
 
@@ -121,9 +154,17 @@ export const ModelAssignment = () => {
       setSelectedUser(null);
       setUserModels([]);
     }
+
+    setHasSearched(true); // We clicked Search
   };
 
-  // Fetch all models for assignment
+  // When assign dialog opens, fetch all models
+  useEffect(() => {
+    if (isAssignDialogOpen) {
+      fetchAllModels();
+    }
+  }, [isAssignDialogOpen]);
+
   const fetchAllModels = async () => {
     try {
       const modelsResponse = await axiosInstance.get('/models');
@@ -138,13 +179,9 @@ export const ModelAssignment = () => {
   // Filter out models user already has — except if the user is an admin
   const getModelsForAssignment = (): Model[] => {
     if (!selectedUser) return [];
-
-    // If user is admin, show all
     if (selectedUser.role === 'ADMIN') {
       return availableModels;
     }
-
-    // Otherwise, exclude models the user already has
     return availableModels.filter(
       (model) => !selectedUser.optimizationModelIds.includes(model.id)
     );
@@ -225,29 +262,35 @@ export const ModelAssignment = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Service Tool Assignment</h1>
 
-      {/* Search user by email */}
       <div className="flex gap-4 mb-6">
-        <Input
-          placeholder="Search User"
-          value={searchUser}
-          onChange={(e) => setSearchUser(e.target.value)}
-          className="max-w-sm"
-        />
+        {/* React Select dropdown */}
+        <div className="w-72">
+          <Select
+            placeholder="Search user..."
+            options={userOptions}
+            isSearchable
+            value={
+              selectedUser
+                ? { value: selectedUser.id, label: selectedUser.email }
+                : null
+            }
+            onChange={handleUserChange}
+          />
+        </div>
+
+        {/* Search button triggers the final user fetch & sets hasSearched=true */}
         <Button onClick={searchUsers}>Search</Button>
       </div>
 
-      {/* Display selected user info */}
-      {selectedUser && (
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <h2 className="text-lg font-medium">{selectedUser.email}</h2>
-          <p className="text-sm text-gray-500">{selectedUser.id}</p>
-          <p className="text-sm text-gray-500">Role: {selectedUser.role}</p>
-        </div>
-      )}
-
-      {/* Models assigned to the user */}
-      {selectedUser && (
+      {/* Show user details + assigned models table ONLY if user is selected AND hasSearched is true */}
+      {selectedUser && hasSearched && (
         <>
+          <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <h2 className="text-lg font-medium">{selectedUser.email}</h2>
+            <p className="text-sm text-gray-500">{selectedUser.id}</p>
+            <p className="text-sm text-gray-500">Role: {selectedUser.role}</p>
+          </div>
+
           <Input
             placeholder="Filter names..."
             value={filterModels}
@@ -303,14 +346,13 @@ export const ModelAssignment = () => {
             </TableBody>
           </Table>
 
-          {/* Hide the "Assign Model" button if user is Admin */}
           {selectedUser.role !== 'ADMIN' && (
             <div className="mt-4">
               <Button
                 onClick={() => setIsAssignDialogOpen(true)}
                 className="bg-amber-600 hover:bg-amber-700"
               >
-                Assign Service Tool 
+                Assign Service Tool
               </Button>
             </div>
           )}

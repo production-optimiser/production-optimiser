@@ -13,9 +13,12 @@ import it.polimi.productionoptimiserapi.repositories.AccountRequestRepository;
 import it.polimi.productionoptimiserapi.repositories.UserRepository;
 import it.polimi.productionoptimiserapi.services.EmailService;
 import it.polimi.productionoptimiserapi.services.OptimizationModelService;
+import it.polimi.productionoptimiserapi.services.UserAuditService;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +38,7 @@ public class UserServiceImpl implements UserService {
 
   private final OptimizationModelService optimizationModelService;
   private final EmailService emailService;
+  private final UserAuditService userAuditService;
 
   private Set<OptimizationModel> mapModelIdsToModels(Set<String> modelIds)
       throws EntityNotFoundException {
@@ -242,5 +246,14 @@ public class UserServiceImpl implements UserService {
         .ifPresent(stat -> stat.setValue(stat.getValue() + 1));
 
     userRepository.save(user);
+  }
+
+  @Override
+  public void getUserAudit(String userId, HttpServletResponse response) throws IOException {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found by id " + userId));
+    userAuditService.exportAuditToExcel(response, user.getOptimizationResults());
   }
 }

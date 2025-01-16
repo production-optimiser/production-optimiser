@@ -4,7 +4,9 @@ import it.polimi.productionoptimiserapi.dtos.UserDTO;
 import it.polimi.productionoptimiserapi.enums.UserRole;
 import it.polimi.productionoptimiserapi.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -78,9 +80,16 @@ public class UserController {
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
   public UserDTO deleteUser(@PathVariable String id) {
     log.info("Received DELETE request for deleting user with id=" + id);
     return userService.deleteUser(id);
+  }
+
+  @GetMapping("/{id}/audit")
+  @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+  public void getUserAudit(@PathVariable String id, HttpServletResponse response)
+      throws IOException {
+    userService.getUserAudit(id, response);
   }
 }

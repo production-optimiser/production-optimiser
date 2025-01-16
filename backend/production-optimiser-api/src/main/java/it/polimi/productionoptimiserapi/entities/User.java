@@ -48,11 +48,19 @@ public class User extends BaseEntity implements UserDetails {
   @JsonManagedReference
   private Set<OptimizationModel> availableOptimizationModels = new HashSet<>();
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
   @JsonManagedReference
   private Set<OptimizationResult> optimizationResults = new HashSet<>();
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+  @OneToMany(
+      mappedBy = "user",
+      fetch = FetchType.EAGER,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
   @JsonBackReference
   private Set<UserStatistics> statistics = new HashSet<>();
 

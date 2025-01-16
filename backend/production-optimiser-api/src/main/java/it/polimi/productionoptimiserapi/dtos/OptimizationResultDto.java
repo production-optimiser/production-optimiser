@@ -18,4 +18,6 @@ public class OptimizationResultDto {
   private String userId;
   private byte[] inputFile;
   private String inputString;
+  private String modelId;
+  private String modelName;
 }
