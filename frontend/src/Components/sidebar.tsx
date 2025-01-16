@@ -326,7 +326,7 @@ const SidebarNav = ({
                 </div>
                 <div className="min-w-0">
                   <span className="text-sm font-medium truncate">{displayModelName}</span>
-                  <span className="text-xs text-gray-500 block mt-1">Version: {modelVersion}</span>
+                  
                 </div>
               </div>
               <ChevronDown className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
