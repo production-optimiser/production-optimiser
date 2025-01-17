@@ -23,6 +23,8 @@ Services - Python, FastAPI, Docker
 
 ## Installation
 
+Detailed document ```Installation and deployment.pdf``` is available in the ```/documentation``` folder.
+
 All backend services are dockerised and can be run using docker-compose. To run specific service check separate docker-compose files under /backend
 
 Frontend is not dockerised and can be run using npm.
