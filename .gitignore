@@ -41,3 +41,5 @@ Lib
 pyvenv.cfg
 *pycache*
 Scripts
+
+model-services/production-optimizer
