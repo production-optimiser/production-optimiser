@@ -1,11 +1,11 @@
--- Password for all users is 'password123' (pre-hashed with BCrypt)
+-- Password for all users is same as email (pre-hashed with BCrypt)
 INSERT INTO users (id, email, password, role, created_at, updated_at, status)
 VALUES
     -- Admin users (pass same as email)
     ('550e8400-e29b-41d4-a716-446655440000', 'admin1', '$2a$12$CSwy1e7bK1sJYWItyYy.2.tQbFzjdZbwqC7tXM8.l1NQIwauoSK96', 'ADMIN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE'),
     ('550e8400-e29b-41d4-a716-446655440001', 'admin2', '$2a$12$KbzVok/dEndwZDChEoQHdeoxpl8/GvMFw8gOW.E0Fk5jAcI.XYXBu', 'ADMIN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE'),
     
-    -- Customer users
+    -- Customer users (pass same as email)
     ('550e8400-e29b-41d4-a716-446655440002', 'customer1', '$2a$12$Y.GEuz92Mx5jxpJT3bukaOHqYUkStapCybkxG2DfNh5f39iRhGo2O', 'CUSTOMER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ACTIVE'),
     ('550e8400-e29b-41d4-a716-446655440003', 'customer2', '$2a$12$.H7XfyXtuCWZfay5bLAqROLh.kb1Coio2pRoQLtI4ZvEp5LL11XE.', 'CUSTOMER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'DELETED');
 
